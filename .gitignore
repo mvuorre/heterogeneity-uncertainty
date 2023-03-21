@@ -3,5 +3,8 @@
 .RData
 .Ruserdata
 *.pdf
+*.docx
 /ms_cache/
 /ms_files/
+/data/
+/models/
