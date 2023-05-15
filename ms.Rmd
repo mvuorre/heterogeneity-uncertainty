@@ -1,0 +1,668 @@
+---
+title: 'Bayesian assessment of heterogeneity in psychological phenomena'
+shorttitle: Heterogeneity in psychology
+leftheader: Heterogeneity in psychology
+author: 
+  - name: Matti Vuorre
+    affiliation: 1
+    corresponding: yes
+    address: Department of Social Psychology, Tilburg University
+    email: m.j.vuorre@tilburguniversity.edu
+  - name: Niall Bolger
+    affiliation: 2
+    address: Department of Psychology, Columbia University
+    email: nb2229@columbia.edu
+affiliation:
+  - id: 1
+    institution: Department of Social Psychology, Tilburg University
+  - id: 1
+    institution: Department of Psychology, Columbia University
+abstract: |
+  Advances in statistics and data collection methods have brought variability in psychological phenomena to the forefront of theoretical development. Yet, established methods and practices for calculating and reporting heterogeneity are lacking in their treatment of uncertainty regarding estimates that describe the magnitude of heterogeneity in the phenomenon under study. There is then a need for more complete treatments of heterogeneity in psychological phenomena, which we aim to deliver in the current work.
+  We provide a walkthrough of probabilistic methods for i. estimating, ii. summarising, and iii. reporting heterogeneity using bayesian hierarchical models. These methods are especially suitable for investigating heterogeneity because they naturally describe uncertainty in all model parameters.
+  We hope that the proposed methods help researchers to move from reporting point estimates to drawing inferences about magnitudes and differences in heterogeneity in psychological phenomena across different populations.
+keywords: variation, heterogeneity, hierarchical models, mixed models, methodology
+authornote: |
+  \noindent \textbf{Working paper. Proceed with caution.}
+wordcount: "`r wordcountaddin:::word_count(filename = 'ms.Rmd')`"
+bibliography: references.bib
+floatsintext: yes
+numbersections: false
+linenumbers: no
+draft: no
+mask: no
+figurelist: no
+tablelist: no
+footnotelist: no
+documentclass: apa7
+classoption: jou
+header-includes:
+  - |
+    \usepackage{float}
+    \setlength{\parskip}{4pt}
+output: 
+  papaja::apa6_pdf:
+    number_sections: true
+    keep_tex: false
+    highlight: kate
+  papaja::apa6_docx: 
+    number_sections: true
+    keep_tex: false
+---
+
+```{r setup, include = FALSE}
+# Packages
+library(papaja)
+library(janitor)
+library(scales)
+library(ellipse)
+library(knitr)
+library(lme4)
+library(patchwork)
+library(latex2exp)
+library(ggpp)
+library(distributional)
+library(ggstance)
+library(tidybayes)
+library(parameters)
+library(brms)
+library(tidyverse)
+
+# Output options
+opts_chunk$set(
+  eval = TRUE,
+  cache = TRUE,
+  warning = FALSE,
+  error = TRUE,
+  message = FALSE
+)
+
+# Plotting options
+theme_set(
+  theme_linedraw(base_size = 12) +
+    theme(
+      strip.background = element_rect(fill = "gray90", color = "gray90"),
+      strip.text = element_text(color = "black", hjust = 0),
+      panel.grid = element_blank()
+    )
+)
+
+# Model estimation options
+dir.create("models", FALSE)
+options(mc.cores = 4)
+```
+
+```{r data, include = FALSE}
+# Load, save, & clean example data from Bolger et al. (2019)
+dir.create("data", FALSE)
+path <- "data/bolger-etal.zip"
+if (!file.exists(path)) {
+  download.file(
+    "https://github.com/kzee/heterogeneityproject/archive/refs/heads/master.zip",
+    destfile = path
+  )
+  unzip(path, exdir = dirname(path), junkpaths = TRUE)
+}
+
+# Save variables as numerical & factor (might need for more complex contrast/eff/etc codes)
+dat <- read_csv("data/heterogeneity_dataset1_traitvalence.csv") %>% 
+  # Cleaning as in Bolger et al 2019
+  filter(
+    response.keys == "up",
+    scale(rt) < 3,
+    !(id %in% c(250, 257, 272))
+  ) %>% 
+  # Some more cleaning
+  mutate(
+    person = fct_anon(factor(id)),
+    valence = factor(valenceE, levels = c(-0.5, 0.5), labels = c("Negative", "Positive")),
+    rt = logrt,
+    .keep = "none"
+  ) %>% 
+  select(person, valence, rt) %>% 
+  arrange(person)
+```
+
+```{r contrast-coding, include = FALSE}
+contrasts(dat$valence) <- c(-0.5, 0.5)
+contrasts(dat$valence)
+```
+
+# Introduction
+
+When building and testing theories of psychological phenomena, psychologists have long focused on asking whether an effect exists or not. Yet, establishing that an independent variable affects a dependent variable on average may not be a sufficient description of the phenomenon at hand if the treatment effect is highly variable from one individual to another.
+
+## Current work
+
+Our aim is to outline methods for studying and communicating heterogeneity in a manner that fully takes uncertainty into account. In the first section, we introduce the example data used throughout the manuscript and review established procedures for estimating and communicating the expected heterogeneity in causal effects in the population.
+
+We then turn to our proposed method of interrogating and communicating causal effect heterogeneity using probabilistic methods: We briefly review key principles of probabilistic inference and how they affect inferences about heterogeneity. We then return to the data example and examine effect heterogeneity from different angles using probabilistic inference.
+
+We further extend the practice and consequent benefits of probabilistic inference for causal effect heterogeneity to comparing heterogeneity between populations and across timepoints in further example analyses.
+
+We conclude by discussing additional benefits of probabilistic inference in psychology in general, and for multilevel models specifically. We emphasize that these benefits come with little or no cost to applied practitioners. We also discuss our findings regarding causal effect heterogeneity in light of this new perspective.
+
+# Review of expected heterogeneity in hierarchical models
+
+To begin our exposition, we reproduce the analyses presented in @bolgerCausalProcessesPsychology2019. In their study, which replicated findings first presented in @scholerInflatingDeflatingSelf2014, 62 participants saw twenty positively and twenty negatively valenced words, and judged whether each word was self-descriptive or not. Because most people are typically motivated to view themselves positively, @bolgerCausalProcessesPsychology2019 predicted that response times to positively valenced words would be shorter than to negatively valenced words [@scholerInflatingDeflatingSelf2014]. 
+
+```{r}
+#| label: tab-dat1
+dat %>% 
+  head() %>% 
+  apa_table(
+    span_text_columns = FALSE, 
+    caption = "First six rows of example dataset 1.", 
+    note = "rt is log-transformed."
+  )
+```
+
+In this section, we replicate @bolgerCausalProcessesPsychology2019's analysis, using their openly available data (https://github.com/kzee/heterogeneityproject). We first cleaned the data as in @bolgerCausalProcessesPsychology2019, leaving `r nrow(dat)` trials from 59 participants that were endorsed as self-relevant (see Table \@ref(tab:tab-dat1)). Then, we estimated the same statistical model with these data:
+
+\begin{equation}
+\text{RT}_{ij} \sim \operatorname{Normal}(\eta_{ij}, \sigma^2).
+\end{equation}
+
+In words, we model the (log) reaction time of subject $j$ on trial $i$ as a random draw from a normal distribution with mean $\eta$ (*eta*, which can differ between trials $i$ and individuals $j$) and standard deviation $\sigma$ (*sigma*). The lack of subscripts on $\sigma$ indicates that we assume it to be invariant across trials and subjects, but note that this assumption is straightforward to relax. Then, we specify a model of the mean $\eta_{ij}$ such that the regression coefficients capture our substantive questions: 
+
+\begin{equation}
+\eta_{ij} = \beta_0 + \gamma_{0j} + (\beta_1 + \gamma_{1j})\text{V}_{ij}.
+\end{equation}
+
+This equation includes two kinds of parameters: $\beta_0$ (*beta*), the intercept, and $\beta_1$, the slope or effect of valence (V), do not have subscripts. That means that they are not further modelled, and therefore sometimes called "fixed". We contrast coded valence such that negative stimuli are coded as -0.5, and positive stimuli as 0.5. This coding results in an intercept that corresponds to the average reaction time across negative and positive stimuli, and a slope coefficient that reflects the magnitude of the difference in log(rt) between negative and positive words (see Appendix). The second set of parameters, $\gamma_{0j}$ (*gamma*) and $\gamma_{1j}$ are subject-specific deviations from the average intercept and slope, respectively. That is, $\beta_0 + \gamma_{01}$ is the average reaction time for subject $j=1$. The $\gamma$ coefficients have subscripts, which in this context indicates that they themselves are further modelled, and therefore sometimes called "random" [@gelmanDataAnalysisUsing2007]. As is standard in multilevel modelling, we model $\gamma_0$ and $\gamma_1$ as multivariate normal distributed:
+
+\begin{equation}
+\begin{bmatrix} 
+\gamma_{0} \\ \gamma_{1}
+\end{bmatrix} \sim 
+\operatorname{MVN}(
+\begin{bmatrix} 0 \\ 0 \end{bmatrix}, 
+\begin{bmatrix} 
+\tau_{\gamma_{0}} &\rho_{\beta_0\beta_1} \\ 
+\rho_{\beta_0\beta_1} &\tau_{\gamma_{1}} 
+\end{bmatrix}
+).
+\end{equation}
+
+In these equations, we assume that the subject-specific deviations are have means of zero, standard deviations $\tau$ (*tau*), and a correlation $\rho$ (*rho*). Note that the $\gamma$s are zero-centered because the means are added to them in the above linear mixed-effects equation for $\eta_{ij}$. What these equations mean substantively is that the extent to which the effect of valence varies around the distribution's mean $\beta_1$ is estimated by the standard deviation $\tau_{\gamma_1}$, and $\rho$ indicates the extent to which individuals who have greater slopes also have greater or smaller average reaction times. With data described in Table \@ref(tab:tab-dat1) loaded to R, we can estimate this model using standard maximum likelihood methods as implemented in the R package lme4 [@batesFittingLinearMixedEffects2015; @rcoreteamLanguageEnvironmentStatistical2022] (see the Appendix for code details.)
+
+```{r fit1-lmer}
+fit1_lmer <- lmer(
+  rt ~ 1 + valence + (1 + valence | person),
+  data = dat
+)
+```
+
+```{r}
+# Create a table of coefficients
+tab1_lmer <- model_parameters(fit1_lmer, effects = "all") %>% 
+  tibble() %>% 
+  select(Parameter, Coefficient, starts_with("CI_"))
+
+# Bootstrap CIs for variance parameters
+tab1_lmer[3:6,3:4] <- confint(fit1_lmer, method = "boot", nsim = 100)[c(1,3,2,4),1:2]
+```
+
+```{r fit1-brms}
+fit1 <- brm(
+  rt ~ 1 + valence + (1 + valence | person),
+  data = dat,
+  file = "models/brm-fit-1"
+)
+```
+
+```{r}
+#| label: tbl-fit-1-brms
+#| cache: false
+
+tab1_brms <- parameters(fit1, centrality = "mean", effects = "all") %>% 
+  tibble() %>% 
+  select(Parameter, Mean, starts_with("CI_"))
+```
+
+```{r}
+#| label: tbl-fit-1
+#| cache: false
+
+m1_parnames <- c(
+  "$\\beta_0$", "$\\beta_1$", 
+  "$\\tau_0$", "$\\tau_1$", 
+  "$\\rho$", "$\\sigma$"
+)
+
+bind_cols(
+  tab1_lmer %>% 
+    mutate(
+      across(where(is.numeric), ~number(., .01)),
+      MLE = str_glue("{Coefficient} [{CI_low}, {CI_high}]"),
+    ) %>% 
+    select(Parameter, MLE),
+  tab1_brms %>% 
+    mutate(
+      across(where(is.numeric), ~number(., .01)),
+      Bayes = str_glue("{Mean} [{CI_low}, {CI_high}]"),
+    ) %>% 
+    select(Bayes)
+) %>% 
+  mutate(
+    Parameter = m1_parnames
+  ) %>% 
+  apa_table(
+    span_text_columns = FALSE,
+    caption = "Parameter estimates from Model 1.",
+    note = "MLE: Maximum Likelihood Estimate. Numbers in brackets are 95\\% Confidence (MLE) or Credibility (Bayes) Intervals (CIs). CIs for MLE (co)variance parameters are calculated with 100 bootstrap iterations.",
+    escape = FALSE
+  )
+```
+
+We show a traditional summary of the estimated parameters from this model in the MLE column of Table \@ref(tab:tbl-fit-1). The expected effect of positive valence on RT for the average person is approximately `r number(tab1_lmer[2,2,T], .01)` log seconds. Moreover, the expected standard deviation describing this effect's degree of variability in the population is approximately `r number(tab1_lmer[4,2,T], .01)`. These point estimates together define the expected normal distribution of valence effects in the population (see Figure \@ref(fig:hdist-1)). 
+
+```{r}
+#| label: hdist-1
+#| fig.height: 5
+#| fig.cap: \textbf{Top}. Expected heterogeneity distribution of valence effects from Example 1. The interval displays the 90\% heterogeneity interval ($HI_{90}$), which captures the central 90\% of values in the distribution. \textbf{Bottom}. Model-estimated person-specific valence effects ($\gamma_1$; dark points) and corresponding coefficients from linear regression models estimated separately for each person (light points).
+
+fit1_coef_lm <- tibble(fit1$data) %>% 
+  mutate(person = factor(as.numeric(person))) %>% 
+  group_by(person) %>% 
+  group_modify(~as_tibble(coef(lm(rt ~ valence, data = .))[2])) %>% 
+  ungroup() %>% 
+  select(person, Coefficient = value) %>% 
+  mutate(model = "lm")
+fit1_coef_lmer <- tibble(coef(fit1_lmer)$person)[,2] %>% 
+  rownames_to_column("person") %>% 
+  select(person, Coefficient = valence1) %>% 
+  mutate(model = "lmer")
+fit1_coef_brms <- as_tibble(coef(fit1)$person[,,"valence1"]) %>% 
+  rownames_to_column("person") %>% 
+  select(person, Coefficient = Estimate) %>% 
+  mutate(model = "brms")
+
+coefs <- bind_rows(
+  fit1_coef_lm,
+  fit1_coef_lmer,
+  fit1_coef_brms
+) %>% 
+  pivot_wider(names_from = model, values_from = Coefficient) %>% 
+  arrange(lm) %>% 
+  mutate(i = 1:n())
+
+(ggplot() +
+    coord_cartesian(xlim = c(-0.7, 0.4)) +
+    stat_halfeye(
+      aes(
+        xdist = dist_normal(tab1_brms$Mean[2], tab1_brms$Mean[4]),
+      ), 
+      .width = c(.90), 
+      p_limits = c(.0001, .9999), 
+      slab_fill = "grey70",
+      slab_color = "grey10",
+      slab_linewidth = .4,
+      size = 2, justification = .01
+    ) +
+    stat_halfeye(
+      aes(
+        xdist = dist_normal(
+          mean(fit1_coef_lm$Coefficient), 
+          sd(fit1_coef_lm$Coefficient)
+        )
+      ),
+      p_limits = c(.0001, .9999), 
+      point_interval = NULL,
+      slab_fill = NA,
+      slab_color = "black",
+      slab_linewidth = .4
+    ) +
+    scale_y_continuous(
+      expand = expansion(c(0.0025, 0.05))
+    ) +
+    labs(
+      y = "Probability",
+      x = "Valence effect"
+    ) +
+    theme(
+      axis.text = element_blank(),
+      axis.ticks = element_blank(),
+      axis.title.x = element_blank(),
+      plot.margin = unit(c(8,8,0,8), "pt")
+    )) /
+  (coefs %>% 
+     ggplot(aes(brms, i)) +
+     coord_cartesian(xlim = c(-0.7, 0.4)) +
+     scale_y_continuous(
+       "Person",
+       expand = expansion(0.025)
+     ) +
+     scale_x_continuous(
+       "Valence effect"
+     ) +
+     geom_segment(
+       aes(x = lm, xend = brms, y = i, yend = i),
+       linewidth = .1
+     ) +
+     geom_point(aes(lm), shape = 21, fill = "white") +
+     geom_point(shape = 21, fill = "grey70") +
+     theme(
+       plot.margin = unit(c(0,8,8,8), "pt"),
+       axis.text.y = element_blank(),
+       axis.ticks.y = element_blank(),
+     )
+  ) +
+  plot_layout(heights = c(3.5, 6.5))
+```
+
+```{r hi90, include = FALSE}
+hi90_num <- tab1_lmer[2,2,T] + qnorm(c(0.05, .95))*tab1_lmer[4,2,T]
+hi90 <- paste(
+  number(hi90_num, .01), 
+  collapse = ", "
+)
+hi90_low <- paste(
+  number(tab1_lmer[2,3,T] + qnorm(c(0.05, .95))*tab1_lmer[4,3,T], .01), 
+  collapse = ", "
+)
+```
+
+We can use the numbers in Table \@ref(tab:tbl-fit-1) to communicate the degree of heterogeneity in the effect of valence in the population: The standard deviation $\tau_1=$ `r number(tab1_lmer[4,2,T], .01)`. However, that quantity alone is unable to properly characterize the heterogeneity in actionable terms. We were therefore motivated to find alternative concise summaries of the degree of heterogeneity of slopes in the population. To begin with, following @bolgerCausalProcessesPsychology2019, we used the point estimates in Table \@ref(tab:tbl-fit-1) to construct an expected *heterogeneity interval* that describes a range within which a certain percentage of the population's slopes are expected to fall (interval in bottom of Figure \@ref(fig:hdist-1)). Later on, we describe alternative summaries of heterogeneity that address different questions about variability, and afford different ways of communicating and visualizing heterogeneity.
+
+By convention, @bolgerCausalProcessesPsychology2019 and others have focused on the 95% heterogeneity interval ($HI_{95}$), but because there are already confusingly many quantities using the five percent cutoff, in this manuscript we focus on the 90% heterogeneity interval, and reserve 95% to describing uncertainties in estimated quantities. This heterogeneity interval can be calculated by first specifying the desired probability limits. For a 90% interval, we use the .05 and .95 percentiles. Then, we pass those percentiles to the normal quantile function ($q$) using the estimated mean and standard deviation to obtain the interval: $HI_{90} = q([.05, .95], \hat\beta_1, \hat\tau_1)$. Therefore (see Table \@ref(tab:tbl-fit-1)), $HI_{90} =$ $q([.05, .95],$ `r number(tab1_lmer[2,2,T], .01)`, `r number(tab1_lmer[4,2,T], .01)`) = [`r hi90`]. In words, this equation calculates the 0.05 and 0.95 quantiles of the normal distribution defined by the mean's ($\beta_1$) and standard deviation's ($\tau_1$) point estimates, indicated with hats in the equation: We expect 90% of the effects in the population to fall within this interval.
+
+Critically, while valid, this calculation ignores the uncertainty inherent in the estimated parameters. That is, the uncertainty with which we have estimated the population parameters, indicated by e.g. the confidence intervals in Table \@ref(tab:tbl-fit-1), is not carried forward in calculating $HI_{90}$: We have only presented the expected heterogeneity interval, but not the range of credible values that it might take. For instance, if we re-calculate $HI_{90}$ based on the lowest CI bounds in Table \@ref(tab:tbl-fit-1), the result is a heterogeneity interval that indicates 90% of the population's slopes falling in the [`r hi90_low`] interval. In contrast to the first interval, this interval implies much less heterogeneity and that 90% of the population's slopes are expected to fall below zero.
+
+We have now arrived at the crux of the current work: How should we estimate and communicate causal effect heterogeneity such that the fundamental uncertainty in the estimated quantities (the mean and standard deviation of the distribution of slopes in the population) is retained?
+
+# Interlude on probabilistic estimation in practice {-}
+
+<!-- todo introduce citations and topics as we go; delete this section -->
+
+We propose that probabilistic methods are uniquely applicable to the problem presented above. In what follows, we describe practical calculations and visualizations that make use of bayesian methods in estimating and communicating causal effect heterogeneity. Frequentist methods, such as maximum likelihood above, aim at estimating optimum values of estimated quantities, typically called point estimates. In contrast, probabilistic methods aim at describing distributions of plausible values that could underlie hypothetical data generating processes. In this section, we briefly describe bayesian estimation such that we can meaningfully use it in the remainder of our proposition. For more complete treatments, we refer readers to excellent existing literature on the topic [@gelmanBayesianDataAnalysis2013; @kruschkeBayesianDataAnalysis2017; @kruschkeDoingBayesianData2014; @mcelreathStatisticalRethinkingBayesian2020].
+
+Lorem ipsum bayesian propagandum.
+
+# Probabilistic assessment of heterogeneity
+
+We now return to examining the heterogeneity in valence effects but with using bayesian methods. First, we use the R package brms to estimate the same model as above [@burknerAdvancedBayesianMultilevel2018; @burknerBrmsPackageBayesian2017; @rcoreteamLanguageEnvironmentStatistical2022]. The goal of bayesian inference is the multivariate posterior probability distribution of the model's parameters. However, because closed-form solutions are not available for posterior distributions of many important types of statistical models, in practice bayesian methods rely on drawing many random samples from the posterior distribution [@gelmanBayesianDataAnalysis2013]. Therefore, "estimate" here means drawing a large number of---here, 4,000---random samples from the posterior distribution. These samples can then be used to calculate and summarise the posterior distribution of any desired quantity. In practice, one obtains (e.g.) 4,000 samples from the posterior distribution, which can then be summarized using familiar data processing techniques. Below, we show the posterior mean and 2.5 and 97.5 percentiles of the parameters' distributions in the rightmost column of Table \@ref(tab:tbl-fit-1). Note that because we used the default noninformative prior distributions, summaries of the resulting posterior distributions are numerically almost identical to the maximum likelihood estimates. To highlight the issue at hand, Table \@ref(tab:tbl-samples-1) shows the first six rows of samples from their joint distribution.
+
+```{r}
+#| label: tbl-samples-1
+#| cache: false
+
+post1 <- as.data.frame(fit1, variable = c("b_", "sd_", "cor_"), regex = TRUE) %>% 
+  tibble() %>% 
+  mutate(b = b_valence1, sd = sd_person__valence1, .keep = "none") %>% 
+  mutate(hi_low = b + qnorm(.05)*sd, hi_high = b + qnorm(.95)*sd) %>% 
+  mutate(Sample = 1:n(), .before = 1)
+post1_sum <- post1 %>% 
+  mean_qi(hi_low, hi_high)
+post1 %>% 
+  setNames(c("Sample", m1_parnames)) %>% 
+  head() %>% 
+  apa_table(
+    span_text_columns = FALSE,
+    caption = "First six rows of samples from the posterior distribution of Model 1.",
+    escape = FALSE,
+    placement = "h"
+  )
+```
+
+To return to the $HI_{90}$, we could reproduce the above calculations for the expected interval using the posterior modes. Instead, to carry uncertainty forward from parameters to (e.g.) $HI_{90}$, we calculate samples of $HI_{90}$ from samples of the model's parameters (Table \@ref(tab:tbl-fit-1); Figure \@ref(fig:hdist-2)A). Specifically, because an interval is defined by its endpoints, the resulting posterior distribution is a two-dimensional distribution of lower and upper limits of the heterogeneity interval (Figure \@ref(fig:hdist-2)B).
+
+<!-- todo panel b: explain / give insight into why panel b is a negative correlation -->
+<!-- todo panel d requires a lot more introduction--move into its own figure & section -->
+
+```{r}
+#| label: hdist-2
+#| fig.height: 6.4
+#| fig.cap: \textbf{A}. Scatterplot of 4,000 random samples from the joint posterior distribution of the mean $\beta_1$ and standard deviation $\tau_1$ of the gaussian population distribution of valence effects. \textbf{B}. Scatterplot of 4,000 samples from the joint posterior distribution of the $HI_{90}$ lower ($\beta_1 + \phi_{0.05}\tau_1$; x-axis) and upper ($\beta_1 + \phi_{0.95}\tau_1$; y-axis) limits, calculated from samples in panel A. \textbf{C}. A sample of 200 $HI_{90}$s arranged in increasing magnitude of the standard deviation. Red symbols in each panel indicate the posterior mean quantities; e.g. the expected heterogeneity interval in C. \textbf{D}. Histogram of 4,000 samples from the posterior distribution of the proportion of negative effects in the population distribution of effects defined by $\beta_1$ and $\tau_1$. The red point and interval in the bottom indicate the proportion's posterior mean and 95\%CI.
+
+post1 <- post1 %>%
+  arrange(hi_low) %>% 
+  mutate(i = 1:n())
+
+hcol <- "#cc4778"
+p_scatter <- post1 %>% 
+  ggplot(aes(b, sd)) +
+  labs(x = bquote(beta[1]), y = bquote(tau[1])) +
+  labs(
+    x = "Mean of slope distribution",
+    y = "SD of slope distribution"
+  ) +
+  geom_point(shape = 1, alpha = .25, size = .75) +
+  stat_summary_xy(col = hcol, .fun.x = mean, .fun.y = mean, size = 2) +
+  theme(
+    aspect.ratio = 1
+  )
+
+p_scatter_hi <- post1 %>% 
+  ggplot(aes(hi_low, hi_high)) +
+  labs(
+    x = TeX("$HI_{90}$ lower limit"), 
+    y = TeX("$HI_{90}$ upper limit")
+  ) +
+  geom_point(shape = 1, alpha = .25, size = .75) +
+  stat_summary_xy(col = hcol, .fun.x = mean, .fun.y = mean, size = 2) +
+  theme(
+    aspect.ratio = 1
+  )
+
+post1_snip <- post1 %>% 
+  filter(i %in% as.integer(seq(1, 4000, length.out = 200)))
+p_intervals <- post1_snip %>% 
+  ggplot(aes(y = as.numeric(i), yend = as.numeric(i))) +
+  scale_fill_brewer(
+    "HI limit",
+    palette = "Set1",
+    aesthetics = c("fill", "color"),
+    breaks = c("hi_low", "hi_high"),
+    labels = c("Low", "High")
+  ) +
+  scale_y_continuous(
+    expand = expansion(0.01)
+  ) +
+  labs(
+    x = "Slope magnitude",
+    y = "Posterior sample"
+  ) +
+  geom_segment(
+    aes(x = hi_low, xend = hi_high),
+    linewidth = .1, col = "gray50"
+  ) +
+  geom_point(
+    data = post1_snip %>% 
+      pivot_longer(c(hi_low, hi_high)),
+    aes(x = value), col = "gray50",
+    size = .25, alpha = .5
+  ) +
+  geom_segment(
+    data = post1 %>% 
+      summarise(hi_low = mean(hi_low), hi_high = mean(hi_high)) %>% 
+      mutate(i = 2000),
+    aes(x = hi_low, xend = hi_high),
+    col = hcol
+  ) +
+  geom_point(
+    data = post1 %>% 
+      summarise(hi_low = mean(hi_low), hi_high = mean(hi_high)) %>% 
+      pivot_longer(c(hi_low, hi_high)) %>% 
+      mutate(i = 2000),
+    aes(x = value),
+    col = hcol
+  ) +
+  guides(color = guide_legend(override.aes = list(size = 2))) +
+  theme(
+    axis.text.y = element_blank(),
+    axis.ticks.y = element_blank()
+  )
+
+p_slopezero <- post1 %>% 
+  mutate(
+    p_slopes_under_zero = pnorm(0, b, sd)
+  ) %>% 
+  ggplot(aes(p_slopes_under_zero)) +
+  scale_y_continuous(
+    "Count",
+    expand = expansion(c(0.0025, .1))
+  ) +
+  scale_x_continuous(
+    "Proportion of negative slopes"
+  ) +
+  stat_histinterval(
+    breaks = 30,
+    outline_bars = TRUE,
+    slab_color = "gray20",
+    slab_fill = "gray80",
+    slab_linewidth = .2,
+    justification = .01,
+    point_color = hcol, interval_color = hcol,
+    .width = .90
+  ) +
+  theme(
+    axis.text.y = element_blank(),
+    axis.ticks.y = element_blank()
+  )
+
+((p_scatter |
+    p_scatter_hi) /
+    (p_intervals |
+       p_slopezero)) +
+  plot_annotation(tag_levels = "A")
+```
+
+```{r}
+p1s <- post1 %>% 
+  mean_qi(hi_low, hi_high) %>% 
+  mutate(
+    across(where(is.numeric), ~number(., .01)),
+    l = str_glue("[{hi_low.lower}, {hi_low.upper}]"),
+    u = str_glue("[{hi_high.lower}, {hi_high.upper}]")
+  )
+```
+
+Summarising a distribution of intervals entails some challenges, however, because an interval is defined by two quantities---the lower and upper bounds. The 95% most credible lower bounds of $HI_{90}$ range between `r p1s$l`, whereas the 95% most credible upper bounds range between `r p1s$u`. Communicating these two credibility intervals is not only cumbersome, but also ignores the correlation between the heterogeneity interval endpoints' posterior distributions (Figure \@ref(fig:hdist-2)B)). We therefore turn to alternative summaries of the population distribution of slopes.
+
+## Alternatives to the heterogeneity interval
+
+To reiterate, the model's estimated distribution of slopes is a normal distribution with mean $\beta_1$ and standard deviation $\tau_1$. The 90% heterogeneity interval reports the $5^{th}$ and $95^{th}$ quantiles of the distribution, of whose posterior distributions are correlated. But we are not limited to describing the plausible ranges of slopes in the population. In fact, for many applications, quantities such as proportions of slopes above or below some critical value, or within some critical range, might serve as more informative summaries.
+
+```{r}
+tmp <- p_slopezero$data %>% 
+  mean_qi(p_slopes_under_zero, .width = .95) %>% 
+  mutate(
+    across(where(is.numeric), ~number(., .01)),
+    p = str_glue("{p_slopes_under_zero}, [{.lower}, {.upper}]")
+  )
+
+tmp2 <- p_slopezero$data %>% 
+  mean_qi(1-p_slopes_under_zero, .width = .95) %>% 
+  mutate(
+    across(where(is.numeric), ~percent(., .1)),
+    p = str_glue("{`1 - p_slopes_under_zero`}, [{.lower}, {.upper}]")
+  )
+```
+
+
+To make this concrete, we ask "What proportion of individuals in the population have a negative effect of valence?" To answer, we calculate the probability density below zero of $\operatorname{Normal}(\beta_1, \tau_1)$ for each posterior sample of $\beta_1$ and $\tau_1$, and obtain samples of this density. Figure \@ref(fig:hdist-2)D then shows these samples' histogram, and the posterior mean and 95% Credibility Interval (`r tmp$p`): We expect about `r percent(as.numeric(tmp$p_slopes_under_zero))` to be negative, but with 95% credibility, this value could be as low as `r percent(as.numeric(tmp$.lower))` or as high as `r percent(as.numeric(tmp$.upper))`. Alternatively [@bolgerCausalProcessesPsychology2019, p.605-606], the model predicts that `r tmp2$p` of individuals in the population would show reversals of the valence effect.
+
+```{r}
+tmp <- post1 %>% 
+  summarise(
+    post_prob_90p_negative = percent(
+      sum(hi_high < 0) / n(), 
+      .01
+    )
+  ) %>% 
+  pull(1)
+```
+
+Additionally, we might ask, for example, "What is the posterior probability that (e.g.) 90% of slopes in the population are negative?" To answer, we calculate, for each posterior sample of $\beta_1$ and $\tau_1$, whether the resulting $HI_{90}$'s upper limit is below zero. Visually, this calculation represents drawing a vertical line at 0 on the y-axis of Figure \@ref(fig:hdist-2)B and calculating the proportion of samples below zero over all the samples. The result, `r tmp`, indicates that we expect `r tmp` of slopes in the population to be negative. Note that this quantity cannot be calculated from the point estimates alone.
+
+## Does heterogeneity matter?
+
+```{r}
+tmp <- post1 %>% 
+  mutate(ratio = abs(sd / b)) %>% 
+  mean_qi(ratio) %>% 
+  mutate(
+    across(where(is.numeric), ~number(., .1)),
+    r = str_glue("{ratio} [{.lower}, {.upper}]")
+  )
+```
+
+The above two quantities summarized the heterogeneity of valence effects in the population in absolute terms. To ask whether heterogeneity is substantial enough to matter, we might directly calculate the posterior mean and (e.g.) 95%CI of $\tau_1$ to decide whether the spread of effects in the population is large enough to be of practical significance. Alternatively, we might focus on the relative size of heterogeneity when compared to the average effect. [@bolgerCausalProcessesPsychology2019, p.609] suggest as a rule of thumb that if the standard deviation is 0.25 or greater in magnitude than the average effect, heterogeneity is noteworthy. With these data and model, the ratio $\frac{\tau_1}{\beta_1}$ is `r tmp$r` (posterior mean and 95% CI), suggesting that the degree of heterogeneity in the effect of valence is noteworthy. (We reiterate the point made by @bolgerCausalProcessesPsychology2019 that the cutoff value of 0.25 is arbitrary and researchers should choose the cutoff based on their substantive goals.)
+
+### Smallest effect size of interest
+
+todo: Examine proportions of effects in context of hypothesized SESOIs.
+
+# Example 3: Comparing heterogeneity between groups
+
+todo: Model separate random effects distributions for e.g. labs in a large replication project, then compare heterogeneity between labs. (In the current running example men vs women would be obvious & easy--maybe create a fake gender variable?)
+
+# Example 4: Multivariate heterogeneity
+
+todo: Extend Study 4 from Bolger et al., studying correlations of random effects between timepoints among the same individuals.
+
+# Discussion
+
+# Competing interests
+
+The author(s) declare no competing interests.
+
+# Author contributions
+
+Conceptualization: MV & NB    
+Methodology: MV   
+Software: MV    
+Validation: MV    
+Formal Analysis: MV   
+Writing -- Original Draft: MV & NB    
+Writing -- Review & Editing: MV & NB    
+Visualization: MV & NB   
+Project Administration: MV    
+
+# References {-}
+
+::: {#refs custom-style="Bibliography"}
+:::
+
+\clearpage
+\onecolumn
+
+# Appendix: Code listings
+
+\setcounter{page}{1}
+\setcounter{table}{0}
+\setcounter{figure}{0}
+\renewcommand{\thetable}{A-\arabic{table}}
+\renewcommand{\thefigure}{A-\arabic{figure}}
+
+## Contrast coding
+
+By default, R uses dummy coding (called "treatment contrasts" in R) for categorical predictors, meaning that one category is used as a baseline, and then contrasts between the baseline category and the other categories are estimated. It is often useful to use contrast coding (called "sum to zero contrasts" in R) instead, where the levels of a categorical factor are assigned codes that sum to zero: In this manner, the intercept of the model is at the midpoint between the category levels, and consequently the other parameters are easier to interpret. To use contrast codes for Valence, in the example data, the R code is `contrasts(dat$valence) <- "contr.sum"`. However, this has the slight drawback that the levels are assigned numerical codes of -1 and 1, and the resulting parameter estimate indicates a contrast to the "average" valence, and must be multiplied by two to give the difference between the conditions. We therefore used the more readily interpretable values of -0.5 and 0.5:
+
+```{r contrast-coding, echo = TRUE, eval = TRUE}
+```
+
+In addition to making the resulting parameter estimate directly indicate the difference between conditions, this keeps the `valence` variable in R as a factor, which ensures that downstream functions using that variable will appropriately treat it as a categorical variable with interpretable labels (e.g. for figures.) For useful references to predictor coding in R, see [@rabeHyprPackageHypothesisdriven2020; @schadHowCapitalizePriori2020].
+
+## Estimating a multilevel model using maximum likelihood
+
+```{r fit1-lmer, echo=TRUE, eval=FALSE}
+```
+
+## Calculating a heterogeneity interval
+
+```{r hi90-appendix, echo = -1}
+options(digits = 2)
+mean <- -0.16 # Mean of slope distribution point estimate from Table 1
+sd <- 0.12 # Standard deviation of slope distribution point estimate from Table 1
+quantiles <- c(0.05, 0.95) # Desired quantiles (these define 90%)
+mean + qnorm(quantiles)*sd
+```
+
+## Estimating a multilevel model using probabilistic inference
+
+```{r fit1-brms, echo=TRUE, eval=FALSE}
+```
+
+todo: think about if this appendix is needed at all
