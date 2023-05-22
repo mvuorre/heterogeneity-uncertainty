@@ -542,7 +542,7 @@ Summarising a distribution of intervals entails some challenges, however, becaus
 
 ## Alternatives to the heterogeneity interval
 
-To reiterate, the model's estimated distribution of slopes is a normal distribution with mean $\beta_1$ and standard deviation $\tau_1$. The 90% heterogeneity interval reports the $5^{th}$ and $95^{th}$ quantiles of the distribution, of whose posterior distributions are correlated. But we are not limited to describing the plausible ranges of slopes in the population. In fact, for many applications, quantities such as proportions of slopes above or below some critical value, or within some critical range, might serve as more informative summaries.
+To reiterate, the model's estimated distribution of slopes is a normal distribution with mean $\beta_1$ and standard deviation $\tau_1$. The 90% heterogeneity interval describes the central 90% of this slope distribution. But we are not limited to describing the plausible ranges of slopes in the population. In fact, for many applications, quantities such as proportions of slopes above or below some critical value, or within some critical range, might serve as more informative summaries.
 
 ```{r}
 tmp <- p_slopezero$data %>% 
