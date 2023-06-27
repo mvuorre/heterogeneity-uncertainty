@@ -1,6 +1,6 @@
 {
   "R": {
-    "Version": "4.2.3",
+    "Version": "4.3.0",
     "Repositories": [
       {
         "Name": "CRAN",
@@ -21,12 +21,6 @@
       "Version": "1.2-9",
       "Source": "Repository",
       "Repository": "CRAN",
-      "RemoteType": "standard",
-      "RemotePkgRef": "Brobdingnag",
-      "RemoteRef": "Brobdingnag",
-      "RemoteRepos": "https://cloud.r-project.org",
-      "RemotePkgPlatform": "aarch64-apple-darwin20",
-      "RemoteSha": "1.2-9",
       "Requirements": [
         "Matrix",
         "R",
@@ -47,7 +41,7 @@
     },
     "DT": {
       "Package": "DT",
-      "Version": "0.27",
+      "Version": "0.28",
       "Source": "Repository",
       "Repository": "CRAN",
       "Requirements": [
@@ -59,7 +53,7 @@
         "magrittr",
         "promises"
       ],
-      "Hash": "3444e6ed78763f9f13aaa39f2481eb34"
+      "Hash": "ab745834dfae7eaf71dd0b90f3b66759"
     },
     "MASS": {
       "Package": "MASS",
@@ -78,7 +72,7 @@
     },
     "Matrix": {
       "Package": "Matrix",
-      "Version": "1.5-4",
+      "Version": "1.5-4.1",
       "Source": "Repository",
       "Repository": "CRAN",
       "Requirements": [
@@ -90,7 +84,7 @@
         "stats",
         "utils"
       ],
-      "Hash": "e779c7d9f35cc364438578f334cffee2"
+      "Hash": "38082d362d317745fb932e13956dccbb"
     },
     "R6": {
       "Package": "R6",
@@ -149,21 +143,15 @@
     },
     "StanHeaders": {
       "Package": "StanHeaders",
-      "Version": "2.21.0-7",
+      "Version": "2.26.27",
       "Source": "Repository",
       "Repository": "CRAN",
-      "RemoteType": "standard",
-      "RemotePkgRef": "StanHeaders",
-      "RemoteRef": "StanHeaders",
-      "RemoteRepos": "https://cloud.r-project.org",
-      "RemotePkgPlatform": "aarch64-apple-darwin20",
-      "RemoteSha": "2.21.0-7",
       "Requirements": [
         "R",
         "RcppEigen",
         "RcppParallel"
       ],
-      "Hash": "0459d4dd7a8c239be18469a30c23dd4b"
+      "Hash": "f29d708a8e830a90d8f6d2acf1734974"
     },
     "abind": {
       "Package": "abind",
@@ -234,12 +222,6 @@
       "Version": "1.10.0",
       "Source": "Repository",
       "Repository": "CRAN",
-      "RemoteType": "standard",
-      "RemotePkgRef": "bayesplot",
-      "RemoteRef": "bayesplot",
-      "RemoteRepos": "https://cloud.r-project.org",
-      "RemotePkgPlatform": "aarch64-apple-darwin20",
-      "RemoteSha": "1.10.0",
       "Requirements": [
         "R",
         "dplyr",
@@ -400,7 +382,7 @@
     },
     "broom": {
       "Package": "broom",
-      "Version": "1.0.4",
+      "Version": "1.0.5",
       "Source": "Repository",
       "Repository": "CRAN",
       "Requirements": [
@@ -417,11 +399,11 @@
         "tibble",
         "tidyr"
       ],
-      "Hash": "f62b2504021369a2449c54bbda362d30"
+      "Hash": "fd25391c3c4f6ecf0fa95f1e6d15378c"
     },
     "bslib": {
       "Package": "bslib",
-      "Version": "0.4.2",
+      "Version": "0.5.0",
       "Source": "Repository",
       "Repository": "CRAN",
       "Requirements": [
@@ -437,7 +419,7 @@
         "rlang",
         "sass"
       ],
-      "Hash": "a7fbf03946ad741129dc81098722fca1"
+      "Hash": "1b117970533deb6d4e992c1b34e9d905"
     },
     "cachem": {
       "Package": "cachem",
@@ -508,6 +490,29 @@
       ],
       "Hash": "3f038e5ac7f41d4ac41ce658c85e3042"
     },
+    "cmdstanr": {
+      "Package": "cmdstanr",
+      "Version": "0.5.3",
+      "Source": "GitHub",
+      "RemoteType": "github",
+      "RemoteHost": "api.github.com",
+      "RemoteRepo": "cmdstanr",
+      "RemoteUsername": "stan-dev",
+      "RemotePkgRef": "stan-dev/cmdstanr",
+      "RemoteRef": "HEAD",
+      "RemoteSha": "01aa7f1b1930f76fe7fd4a14153f80a390355cf3",
+      "Requirements": [
+        "R",
+        "R6",
+        "checkmate",
+        "data.table",
+        "jsonlite",
+        "posterior",
+        "processx",
+        "withr"
+      ],
+      "Hash": "04905c6d5c8bbd5f6e5ed8eb69a6afc2"
+    },
     "coda": {
       "Package": "coda",
       "Version": "0.19-4",
@@ -548,12 +553,6 @@
       "Version": "1.2.0",
       "Source": "Repository",
       "Repository": "CRAN",
-      "RemoteType": "standard",
-      "RemotePkgRef": "colourpicker",
-      "RemoteRef": "colourpicker",
-      "RemoteRepos": "https://cloud.r-project.org",
-      "RemotePkgPlatform": "aarch64-apple-darwin20",
-      "RemoteSha": "1.2.0",
       "Requirements": [
         "R",
         "ggplot2",
@@ -621,13 +620,13 @@
     },
     "curl": {
       "Package": "curl",
-      "Version": "5.0.0",
+      "Version": "5.0.1",
       "Source": "Repository",
       "Repository": "CRAN",
       "Requirements": [
         "R"
       ],
-      "Hash": "e4f97056611e8e6b8b852d13b7400cf1"
+      "Hash": "2118af9cb164c8d2dddc7b89eaf732d9"
     },
     "data.table": {
       "Package": "data.table",
@@ -642,7 +641,7 @@
     },
     "datawizard": {
       "Package": "datawizard",
-      "Version": "0.7.1",
+      "Version": "0.8.0",
       "Source": "Repository",
       "Repository": "CRAN",
       "Requirements": [
@@ -651,7 +650,7 @@
         "stats",
         "utils"
       ],
-      "Hash": "001775ea47f92ef8e2916ed0cfa59735"
+      "Hash": "b78bb7a4b7f2762630eb3a75269e6005"
     },
     "dbplyr": {
       "Package": "dbplyr",
@@ -914,7 +913,7 @@
     },
     "gargle": {
       "Package": "gargle",
-      "Version": "1.4.0",
+      "Version": "1.5.1",
       "Source": "Repository",
       "Repository": "CRAN",
       "Requirements": [
@@ -932,7 +931,7 @@
         "utils",
         "withr"
       ],
-      "Hash": "8c72a723822dc317613da5ff8e8da6ee"
+      "Hash": "d3a3cb2fefea5b3d4f8e0ea33c948406"
     },
     "generics": {
       "Package": "generics",
@@ -999,6 +998,12 @@
       "Version": "0.5.2",
       "Source": "Repository",
       "Repository": "CRAN",
+      "RemoteType": "standard",
+      "RemotePkgRef": "ggpp",
+      "RemoteRef": "ggpp",
+      "RemoteRepos": "https://cran.rstudio.com/",
+      "RemotePkgPlatform": "aarch64-apple-darwin20",
+      "RemoteSha": "0.5.2",
       "Requirements": [
         "MASS",
         "R",
@@ -1055,12 +1060,6 @@
       "Version": "0.16.2",
       "Source": "Repository",
       "Repository": "CRAN",
-      "RemoteType": "standard",
-      "RemotePkgRef": "globals",
-      "RemoteRef": "globals",
-      "RemoteRepos": "https://cloud.r-project.org",
-      "RemotePkgPlatform": "aarch64-apple-darwin20",
-      "RemoteSha": "0.16.2",
       "Requirements": [
         "R",
         "codetools"
@@ -1080,7 +1079,7 @@
     },
     "googledrive": {
       "Package": "googledrive",
-      "Version": "2.1.0",
+      "Version": "2.1.1",
       "Source": "Repository",
       "Repository": "CRAN",
       "Requirements": [
@@ -1101,11 +1100,11 @@
         "vctrs",
         "withr"
       ],
-      "Hash": "e88ba642951bc8d1898ba0d12581850b"
+      "Hash": "e99641edef03e2a5e87f0a0b1fcc97f4"
     },
     "googlesheets4": {
       "Package": "googlesheets4",
-      "Version": "1.1.0",
+      "Version": "1.1.1",
       "Source": "Repository",
       "Repository": "CRAN",
       "Requirements": [
@@ -1129,7 +1128,7 @@
         "vctrs",
         "withr"
       ],
-      "Hash": "fd7b97bd862a14297b0bb7ed28a3dada"
+      "Hash": "d6db1667059d027da730decdc214b959"
     },
     "gridExtra": {
       "Package": "gridExtra",
@@ -1165,12 +1164,6 @@
       "Version": "3.9.4",
       "Source": "Repository",
       "Repository": "CRAN",
-      "RemoteType": "standard",
-      "RemotePkgRef": "gtools",
-      "RemoteRef": "gtools",
-      "RemoteRepos": "https://cloud.r-project.org",
-      "RemotePkgPlatform": "aarch64-apple-darwin20",
-      "RemoteSha": "3.9.4",
       "Requirements": [
         "methods",
         "stats",
@@ -1299,12 +1292,13 @@
     },
     "igraph": {
       "Package": "igraph",
-      "Version": "1.4.2",
+      "Version": "1.5.0",
       "Source": "Repository",
       "Repository": "CRAN",
       "Requirements": [
         "Matrix",
         "R",
+        "cli",
         "cpp11",
         "grDevices",
         "graphics",
@@ -1315,19 +1309,13 @@
         "stats",
         "utils"
       ],
-      "Hash": "3e476b375c746d899fd53a7281d78191"
+      "Hash": "84818361421d5fc3ff0bf4e669524217"
     },
     "inline": {
       "Package": "inline",
       "Version": "0.3.19",
       "Source": "Repository",
       "Repository": "CRAN",
-      "RemoteType": "standard",
-      "RemotePkgRef": "inline",
-      "RemoteRef": "inline",
-      "RemoteRepos": "https://cloud.r-project.org",
-      "RemotePkgPlatform": "aarch64-apple-darwin20",
-      "RemoteSha": "0.3.19",
       "Requirements": [
         "methods"
       ],
@@ -1335,7 +1323,7 @@
     },
     "insight": {
       "Package": "insight",
-      "Version": "0.19.1",
+      "Version": "0.19.2",
       "Source": "Repository",
       "Repository": "CRAN",
       "Requirements": [
@@ -1344,7 +1332,7 @@
         "stats",
         "utils"
       ],
-      "Hash": "b7a721ab3228268ed3a4ac3d585a09bf"
+      "Hash": "e5389ad6bc8445203e2bbbe3f42fc96f"
     },
     "isoband": {
       "Package": "isoband",
@@ -1391,17 +1379,17 @@
     },
     "jsonlite": {
       "Package": "jsonlite",
-      "Version": "1.8.4",
+      "Version": "1.8.5",
       "Source": "Repository",
       "Repository": "CRAN",
       "Requirements": [
         "methods"
       ],
-      "Hash": "a4269a09a9b865579b2635c77e572374"
+      "Hash": "3ee4d9899e4db3e976fc82b98d24a31a"
     },
     "knitr": {
       "Package": "knitr",
-      "Version": "1.42",
+      "Version": "1.43",
       "Source": "Repository",
       "Repository": "CRAN",
       "Requirements": [
@@ -1413,7 +1401,7 @@
         "xfun",
         "yaml"
       ],
-      "Hash": "8329a9bcc82943c8069104d4be3ee22d"
+      "Hash": "9775eb076713f627c07ce41d8199d8f6"
     },
     "koRpus": {
       "Package": "koRpus",
@@ -1518,12 +1506,6 @@
       "Version": "0.9.0",
       "Source": "Repository",
       "Repository": "CRAN",
-      "RemoteType": "standard",
-      "RemotePkgRef": "listenv",
-      "RemoteRef": "listenv",
-      "RemoteRepos": "https://cloud.r-project.org",
-      "RemotePkgPlatform": "aarch64-apple-darwin20",
-      "RemoteSha": "0.9.0",
       "Requirements": [
         "R"
       ],
@@ -1594,7 +1576,7 @@
     },
     "markdown": {
       "Package": "markdown",
-      "Version": "1.6",
+      "Version": "1.7",
       "Source": "Repository",
       "Repository": "CRAN",
       "Requirements": [
@@ -1603,23 +1585,17 @@
         "utils",
         "xfun"
       ],
-      "Hash": "c0e8495f796d73f2d2e1a8c6964d67e8"
+      "Hash": "0ffaea87c070a56d140ce00b0727b278"
     },
     "matrixStats": {
       "Package": "matrixStats",
-      "Version": "0.63.0",
+      "Version": "1.0.0",
       "Source": "Repository",
       "Repository": "CRAN",
-      "RemoteType": "standard",
-      "RemotePkgRef": "matrixStats",
-      "RemoteRef": "matrixStats",
-      "RemoteRepos": "https://cloud.r-project.org",
-      "RemotePkgPlatform": "aarch64-apple-darwin20",
-      "RemoteSha": "0.63.0",
       "Requirements": [
         "R"
       ],
-      "Hash": "57af0c3da1f1a50680b186591c3359af"
+      "Hash": "9143629fd64335aac6a6250d1c1ed82a"
     },
     "memoise": {
       "Package": "memoise",
@@ -1712,15 +1688,14 @@
     },
     "mvtnorm": {
       "Package": "mvtnorm",
-      "Version": "1.1-3",
+      "Version": "1.2-2",
       "Source": "Repository",
       "Repository": "CRAN",
       "Requirements": [
         "R",
-        "methods",
         "stats"
       ],
-      "Hash": "7a7541cc284cb2ba3ba7eae645892af5"
+      "Hash": "ef6270cb713747aa8211620d6a47188d"
     },
     "nleqslv": {
       "Package": "nleqslv",
@@ -1775,9 +1750,15 @@
     },
     "papaja": {
       "Package": "papaja",
-      "Version": "0.1.1",
-      "Source": "Repository",
-      "Repository": "CRAN",
+      "Version": "0.1.1.9001",
+      "Source": "GitHub",
+      "RemoteType": "github",
+      "RemoteHost": "api.github.com",
+      "RemoteRepo": "papaja",
+      "RemoteUsername": "crsh",
+      "RemotePkgRef": "crsh/papaja",
+      "RemoteRef": "HEAD",
+      "RemoteSha": "1c488f73598ae088a4f0201e767aaa87f28387d3",
       "Requirements": [
         "R",
         "bookdown",
@@ -1792,11 +1773,11 @@
         "yaml",
         "zip"
       ],
-      "Hash": "f9f3049e73e59b394c624568ad209b54"
+      "Hash": "420e17893047f24dc535cad7e7ab1aa5"
     },
     "parallelly": {
       "Package": "parallelly",
-      "Version": "1.35.0",
+      "Version": "1.36.0",
       "Source": "Repository",
       "Repository": "CRAN",
       "Requirements": [
@@ -1804,11 +1785,11 @@
         "tools",
         "utils"
       ],
-      "Hash": "1cf5a54cfc5dcb0b84037acfd93cbca7"
+      "Hash": "bca377e1c87ec89ebed77bba00635b2e"
     },
     "parameters": {
       "Package": "parameters",
-      "Version": "0.21.0",
+      "Version": "0.21.1",
       "Source": "Repository",
       "Repository": "CRAN",
       "Requirements": [
@@ -1821,7 +1802,7 @@
         "stats",
         "utils"
       ],
-      "Hash": "8f9ce3aced4a6381a36f6314e3171718"
+      "Hash": "8694e865941e3d79a29122f60a74249b"
     },
     "patchwork": {
       "Package": "patchwork",
@@ -1858,15 +1839,9 @@
     },
     "pkgbuild": {
       "Package": "pkgbuild",
-      "Version": "1.4.0",
+      "Version": "1.4.2",
       "Source": "Repository",
       "Repository": "CRAN",
-      "RemoteType": "standard",
-      "RemotePkgRef": "pkgbuild",
-      "RemoteRef": "pkgbuild",
-      "RemoteRepos": "https://cloud.r-project.org",
-      "RemotePkgPlatform": "aarch64-apple-darwin20",
-      "RemoteSha": "1.4.0",
       "Requirements": [
         "R",
         "R6",
@@ -1876,10 +1851,9 @@
         "desc",
         "prettyunits",
         "processx",
-        "rprojroot",
-        "withr"
+        "rprojroot"
       ],
-      "Hash": "d6c3008d79653a0f267703288230105e"
+      "Hash": "beb25b32a957a22a5c301a9e441190b3"
     },
     "pkgconfig": {
       "Package": "pkgconfig",
@@ -1927,6 +1901,12 @@
       "Version": "1.4-1",
       "Source": "Repository",
       "Repository": "CRAN",
+      "RemoteType": "standard",
+      "RemotePkgRef": "polynom",
+      "RemoteRef": "polynom",
+      "RemoteRepos": "https://cran.rstudio.com/",
+      "RemotePkgPlatform": "aarch64-apple-darwin20",
+      "RemoteSha": "1.4-1",
       "Requirements": [
         "graphics",
         "stats"
@@ -2180,7 +2160,7 @@
     },
     "rmarkdown": {
       "Package": "rmarkdown",
-      "Version": "2.21",
+      "Version": "2.22",
       "Source": "Repository",
       "Repository": "CRAN",
       "Requirements": [
@@ -2200,7 +2180,7 @@
         "xfun",
         "yaml"
       ],
-      "Hash": "493df4ae51e2e984952ea4d5c75786a3"
+      "Hash": "75a01be060d800ceb14e32c666cacac9"
     },
     "rmdfiltr": {
       "Package": "rmdfiltr",
@@ -2337,12 +2317,6 @@
       "Version": "1.7.4",
       "Source": "Repository",
       "Repository": "CRAN",
-      "RemoteType": "standard",
-      "RemotePkgRef": "shiny",
-      "RemoteRef": "shiny",
-      "RemoteRepos": "https://cloud.r-project.org",
-      "RemotePkgPlatform": "aarch64-apple-darwin20",
-      "RemoteSha": "1.7.4",
       "Requirements": [
         "R",
         "R6",
@@ -2512,10 +2486,10 @@
     },
     "sys": {
       "Package": "sys",
-      "Version": "3.4.1",
+      "Version": "3.4.2",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "34c16f1ef796057bfa06d3f4ff818a5d"
+      "Hash": "3a1be13d68d47a8cd0bfd74739ca1555"
     },
     "systemfonts": {
       "Package": "systemfonts",
@@ -2541,7 +2515,7 @@
     },
     "testthat": {
       "Package": "testthat",
-      "Version": "3.1.8",
+      "Version": "3.1.9",
       "Source": "Repository",
       "Repository": "CRAN",
       "Requirements": [
@@ -2567,7 +2541,7 @@
         "waldo",
         "withr"
       ],
-      "Hash": "e0eded5dd915510f8e0d6e6277506203"
+      "Hash": "bcc48d6c50770b435c655954e45672c1"
     },
     "textshaping": {
       "Package": "textshaping",
@@ -2784,7 +2758,7 @@
     },
     "vctrs": {
       "Package": "vctrs",
-      "Version": "0.6.2",
+      "Version": "0.6.3",
       "Source": "Repository",
       "Repository": "CRAN",
       "Requirements": [
@@ -2794,7 +2768,7 @@
         "lifecycle",
         "rlang"
       ],
-      "Hash": "a745bda7aff4734c17294bb41d4e4607"
+      "Hash": "d0ef2856b83dc33ea6e255caf6229ee2"
     },
     "viridisLite": {
       "Package": "viridisLite",
