@@ -12,4 +12,4 @@ renv:
 clean:
 	rm -rf ms_cache ms_files ms.pdf ms.docx
 
-.PHONY all clean renv
+.PHONY: all clean renv
