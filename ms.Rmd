@@ -113,21 +113,21 @@ if (!file.exists(path)) {
 }
 
 # Save variables as numerical & factor (might need for more complex contrast/eff/etc codes)
-dat <- read_csv("data/heterogeneity_dataset1_traitvalence.csv") %>% 
+dat <- read_csv("data/heterogeneity_dataset1_traitvalence.csv") |> 
   # Cleaning as in Bolger et al 2019
   filter(
     response.keys == "up",
     scale(rt) < 3,
     !(id %in% c(250, 257, 272))
-  ) %>% 
+  ) |> 
   # Some more cleaning
   mutate(
     person = fct_anon(factor(id)),
     trial,
     valence = factor(valenceE, levels = c(-0.5, 0.5), labels = c("Negative", "Positive")),
     rt = logrt
-  ) %>% 
-  select(person, trial, valence, rt) %>% 
+  ) |> 
+  select(person, trial, valence, rt) |> 
   arrange(person, trial)
 ```
 
@@ -160,8 +160,8 @@ To begin our exposition, we reproduce the analyses presented in @bolgerCausalPro
 
 ```{r}
 #| label: tab-dat1
-dat %>% 
-  head() %>% 
+dat |> 
+  head() |> 
   apa_table(
     span_text_columns = FALSE, 
     digits = c(0,0,0,2),
@@ -213,8 +213,8 @@ fit1_lmer <- lmer(
 
 ```{r}
 # Create a table of coefficients
-tab1_lmer <- model_parameters(fit1_lmer, effects = "all") %>% 
-  tibble() %>% 
+tab1_lmer <- model_parameters(fit1_lmer, effects = "all") |> 
+  tibble() |> 
   select(Parameter, Coefficient, starts_with("CI_"))
 
 # Bootstrap CIs for variance parameters
@@ -234,8 +234,8 @@ fit1 <- brm(
 #| label: tbl-fit-1-brms
 #| cache: false
 
-tab1_brms <- parameters(fit1, centrality = "mean", effects = "all") %>% 
-  tibble() %>% 
+tab1_brms <- parameters(fit1, centrality = "mean", effects = "all") |> 
+  tibble() |> 
   select(Parameter, Mean, starts_with("CI_"))
 ```
 
@@ -249,15 +249,15 @@ m1_parnames <- c(
   "$\\rho$", "$\\sigma$"
 )
 
-tab1_lmer %>% 
+tab1_lmer |> 
   mutate(
     across(where(is.numeric), ~number(., .01)),
     MLE = str_glue("{Coefficient} [{CI_low}, {CI_high}]"),
-  ) %>% 
-  select(Parameter, `Estimate [95\\%CI]` = MLE) %>% 
+  ) |> 
+  select(Parameter, `Estimate [95\\%CI]` = MLE) |> 
   mutate(
     Parameter = m1_parnames
-  ) %>% 
+  ) |> 
   apa_table(
     span_text_columns = FALSE,
     caption = "Parameter estimates from Model 1.",
@@ -309,7 +309,7 @@ p0 <- ggplot() +
     axis.title.x = element_text(lineheight = rel(0.5))
     ) +
   scale_fill_manual(values = c("grey90", "grey80"), na.value = "white")
-d1 <- dist_normal(mu1n, sd1n) %>% 
+d1 <- dist_normal(mu1n, sd1n) |> 
   mean_qi(.width = c(.66, .9))
 
 p1 <- p0 +
@@ -445,29 +445,29 @@ We think that probabilistic (i.e. "bayesian") methods are uniquely applicable to
 #| label: tbl-samples-1
 #| cache: false
 
-post1 <- as.data.frame(fit1, variable = c("b_", "sd_", "cor_", "sigma"), regex = TRUE) %>% 
-  tibble() %>% 
+post1 <- as.data.frame(fit1, variable = c("b_", "sd_", "cor_", "sigma"), regex = TRUE) |> 
+  tibble() |> 
   rownames_to_column("Sample")
-post1_sum <- fit1 %>% 
-  parameters(effects = "all", centrality = "mean", dispersion = TRUE) %>% 
-  tibble() %>% 
+post1_sum <- fit1 |> 
+  parameters(effects = "all", centrality = "mean", dispersion = TRUE) |> 
+  tibble() |> 
   mutate(
     Mean = number(Mean, .01), 
     SD = number(SD, .001)
-  ) %>% 
-  select(Parameter, Mean, SD) %>% 
-  pivot_longer(c(Mean, SD), names_to = "Sample") %>%
+  ) |> 
+  select(Parameter, Mean, SD) |> 
+  pivot_longer(c(Mean, SD), names_to = "Sample") |>
   pivot_wider(names_from = Parameter, values_from = value)
 
 set.seed(191)
-post1 %>% 
-  slice_sample(n = 6) %>% 
-  arrange(as.integer(Sample)) %>% 
+post1 |> 
+  slice_sample(n = 6) |> 
+  arrange(as.integer(Sample)) |> 
   mutate(
     across(-Sample, ~number(., .01))
-  ) %>%
-  add_row(post1_sum) %>% 
-  setNames(c("Sample", m1_parnames)) %>% 
+  ) |>
+  add_row(post1_sum) |> 
+  setNames(c("Sample", m1_parnames)) |> 
   apa_table(
     span_text_columns = FALSE,
     font_size = "small",
@@ -498,23 +498,23 @@ set.seed(99)
 x <- seq(-0.55, 0.25, length = 301)
 
 calc_pdf <- function(posterior) {
-  posterior %>% 
-    crossing(x) %>% 
+  posterior |> 
+    crossing(x) |> 
     mutate(
       pdf = dnorm(x, b_valence1, sd_person__valence1),
       cdf = pnorm(x, b_valence1, sd_person__valence1)
     )
 }
 
-dist_mean <- post1 %>% 
-  mean_qi(b_valence1, sd_person__valence1) %>% 
+dist_mean <- post1 |> 
+  mean_qi(b_valence1, sd_person__valence1) |> 
   calc_pdf()
 
-dist_samples <- post1 %>% 
-  slice_sample(n = 100) %>% 
+dist_samples <- post1 |> 
+  slice_sample(n = 100) |> 
   calc_pdf()
 
-p1 <- dist_mean %>% 
+p1 <- dist_mean |> 
   ggplot(aes(x, pdf)) +
   scale_x_continuous(
     "Valence effect",
@@ -540,12 +540,12 @@ p1 <- dist_mean %>%
     axis.title.x = element_blank(), 
     plot.margin = unit(c(4,4,16,4), "pt")
   )
-p2 <- distinct(dist_samples, Sample, b_valence1, sd_person__valence1) %>% 
-  arrange(b_valence1) %>% 
-  mutate(i = 1:n()) %>% 
+p2 <- distinct(dist_samples, Sample, b_valence1, sd_person__valence1) |> 
+  arrange(b_valence1) |> 
+  mutate(i = 1:n()) |> 
   mutate(
     dist = dist_normal(b_valence1, sd_person__valence1)
-  ) %>% 
+  ) |> 
   ggplot() +
   scale_x_continuous(
     "Valence effect",
@@ -575,12 +575,12 @@ p2 <- distinct(dist_samples, Sample, b_valence1, sd_person__valence1) %>%
 To carry uncertainty forward from model parameters to their transformations, such as $HI_{90}$, we reproduce the calculations described above, but instead of using the point estimates we repeat the calculation over each posterior sample. In this manner, we obtain (samples from) posterior distributions of the parameter transformations, such as $HI_{90}$ (Figure \@ref(fig:hdist-2)B).
 
 ```{r}
-p1s <- post1 %>% 
+p1s <- post1 |> 
   mutate(
     hi_low = b_valence1 + qnorm(0.05) * sd_person__valence1,
     hi_high = b_valence1 + qnorm(0.95) * sd_person__valence1
-  ) %>% 
-  mean_qi(hi_low, hi_high) %>% 
+  ) |> 
+  mean_qi(hi_low, hi_high) |> 
   mutate(
     across(where(is.numeric), ~number(., .01)),
     l = str_glue("[{hi_low.lower}, {hi_low.upper}]"),
@@ -598,13 +598,13 @@ Summarising a distribution of intervals entails some challenges, however, becaus
 #| fig.width: 4
 #| fig-cap: \textbf{A}. 100 random draws from the valence effect distribution's posterior distribution. Darker area under the curve represents the proportion of negative effects in the population for that posterior draw ($p^d$). \textbf{B}. Histogram of all 4,000 draws from the posterior distribution of $p^d$, and its posterior mean and 95%CI.
 
-p1 <- distinct(dist_samples, Sample, b_valence1, sd_person__valence1) %>%
-  arrange(b_valence1) %>%
-  # slice(seq(1, nrow(.), by = 2)) %>%
-  mutate(i = 1:n()) %>% 
+p1 <- distinct(dist_samples, Sample, b_valence1, sd_person__valence1) |>
+  arrange(b_valence1) |>
+  # slice(seq(1, nrow(.), by = 2)) |>
+  mutate(i = 1:n()) |> 
   mutate(
     dist = dist_normal(b_valence1, sd_person__valence1)
-  ) %>% 
+  ) |> 
   ggplot() +
   scale_fill_manual(values = c("dodgerblue1", "dodgerblue3"), na.value = "white") +
   scale_x_continuous(
@@ -627,12 +627,12 @@ p1 <- distinct(dist_samples, Sample, b_valence1, sd_person__valence1) %>%
     p_limits = c(.01, .99),
     show.legend = FALSE
   )
-p2 <- post1 %>% 
+p2 <- post1 |> 
   mutate(
     dist = dist_normal(b_valence1, sd_person__valence1),
     pd = cdf(dist, 0),
     prope = percent(cdf(dist, 0.1) - cdf(dist, -0.1), .1)
-  ) %>% 
+  ) |> 
   ggplot(aes(pd)) +
   scale_y_continuous(
     "Count",
@@ -663,14 +663,14 @@ p2 <- post1 %>%
 ```
 
 ```{r}
-tmp <- post1 %>% 
+tmp <- post1 |> 
   mutate(
     dist = dist_normal(b_valence1, sd_person__valence1),
     pd = cdf(dist, 0),
     rope = cdf(dist, 0.1) - cdf(dist, -0.1),
     ratio = abs(sd_person__valence1 / b_valence1)
-  ) %>% 
-  mean_qi(pd, rope, ratio) %>% 
+  ) |> 
+  mean_qi(pd, rope, ratio) |> 
   mutate(
     pd_r = str_glue(
       "{percent(pd, .1)} [{percent(pd.lower, .1)}, {percent(pd.upper, .1)}]"
@@ -701,13 +701,13 @@ However, a sign test against zero is not always the most informative quantity be
 #| fig.height: 2.2
 #| fig.width: 4
 #| fig-cap: \textbf{A}. 100 random draws from the valence effect distribution's posterior distribution. Dark area under the curve represents the proportion of effects within a region of practical equivalence to zero (ROPE) in the population for that posterior draw ($p^{ROPE}$). \textbf{B}. Histogram of all 4,000 draws from the posterior distribution of $p^{ROPE}$, and its posterior mean and 95%CI.
-p1 <- distinct(dist_samples, Sample, b_valence1, sd_person__valence1) %>% 
-  arrange(b_valence1) %>% 
-  # slice(seq(1, nrow(.), by = 2)) %>%
-  mutate(i = 1:n()) %>% 
+p1 <- distinct(dist_samples, Sample, b_valence1, sd_person__valence1) |> 
+  arrange(b_valence1) |> 
+  # slice(seq(1, nrow(.), by = 2)) |>
+  mutate(i = 1:n()) |> 
   mutate(
     dist = dist_normal(b_valence1, sd_person__valence1)
-  ) %>% 
+  ) |> 
   ggplot() +
   scale_fill_manual(
     values = c("dodgerblue1", "dodgerblue3"), 
@@ -733,12 +733,12 @@ p1 <- distinct(dist_samples, Sample, b_valence1, sd_person__valence1) %>%
     p_limits = c(.01, .99),
     show.legend = FALSE
   )
-p2 <- post1 %>% 
+p2 <- post1 |> 
   mutate(
     dist = dist_normal(b_valence1, sd_person__valence1),
     pd = cdf(dist, 0),
     prope = cdf(dist, 0.1) - cdf(dist, -0.1)
-  ) %>% 
+  ) |> 
   ggplot(aes(prope)) +
   scale_y_continuous(
     "Count",
@@ -779,7 +779,7 @@ Finally, we can assess heterogeneity in relative terms by comparing the magnitud
 #| fig.height: 2.2
 #| fig.width: 4
 #| fig-cap: \textbf{A}. 4,000 random draws from the posterior distribution of the valence effect distribution's mean ($\beta_1$) and standard deviation ($\tau_1$). \textbf{B}. Histogram of 4,000 draws from the posterior distribution of the ratio of the valence distribution's scale over its  location $\frac{\tau_1}{\beta_1}$, and its posterior mean and 95%CI.
-p1 <- post1 %>% 
+p1 <- post1 |> 
   ggplot(aes(b_valence1, sd_person__valence1)) +
   scale_y_continuous(
     TeX("$\\tau_1$")
@@ -793,8 +793,8 @@ p1 <- post1 %>%
     alpha = .25,
     size = .5
   )
-p2 <- post1 %>% 
-  mutate(ratio = abs(sd_person__valence1 / b_valence1)) %>% 
+p2 <- post1 |> 
+  mutate(ratio = abs(sd_person__valence1 / b_valence1)) |> 
   ggplot(aes(ratio)) +
     scale_y_continuous(
     "Count",
@@ -836,7 +836,7 @@ As an example, we randomly divided the participants in the example data to two G
 
 ```{r}
 set.seed(999)
-dat2 <- distinct(dat, person) %>% 
+dat2 <- distinct(dat, person) |> 
   mutate(
     g = sample(
       c("a", "b"), 
@@ -844,7 +844,7 @@ dat2 <- distinct(dat, person) %>%
       replace = TRUE
     ),
     g = factor(g)
-  ) %>% 
+  ) |> 
   right_join(dat)
 contrasts(dat2$g) <- c(-0.5, 0.5)
 ```
@@ -876,39 +876,39 @@ m2_parnames <- c(
   "$\\rho$",
   "$\\sigma$"
 )
-post2 <- gather_draws(fit2, `b_g.*`, `sd_.*`, `cor_.*`, `b_sigma.*`, regex = TRUE) %>% 
-  ungroup() %>% 
+post2 <- gather_draws(fit2, `b_g.*`, `sd_.*`, `cor_.*`, `b_sigma.*`, regex = TRUE) |> 
+  ungroup() |> 
   mutate(
-    g = str_extract(.variable, "g[a|b]") %>% str_remove("g"),
-    .variable = .variable %>% str_replace_all(":", "_") %>% str_remove_all("([_|:]g[a|b])+")
+    g = str_extract(.variable, "g[a|b]") |> str_remove("g"),
+    .variable = .variable |> str_replace_all(":", "_") |> str_remove_all("([_|:]g[a|b])+")
   )
 
-post2 <- post2 %>% 
-  pivot_wider(names_from = .variable, values_from = .value) %>% 
+post2 <- post2 |> 
+  pivot_wider(names_from = .variable, values_from = .value) |> 
   mutate(
     dist = dist_normal(`b_valence1`, sd_person__valence1),
     pd = cdf(dist, 0),
     prope = cdf(dist, 0.1) - cdf(dist, -0.1),
     ratio = abs(sd_person__valence1 / `b_valence1`)
-  ) %>% 
+  ) |> 
   select(-dist)
 
-post2 %>% 
-  pivot_longer(b:ratio) %>% 
-  pivot_wider(names_from = g, values_from = value) %>% 
-  rename(A = a, B = b) %>% 
-  mutate(`B - A` = B - A) %>% 
-  pivot_longer(c(A, B, `B - A`), names_to = "g") %>% 
-  mutate(name = fct_inorder(name)) %>% 
-  group_by(g, name) %>% 
-  mean_qi(value) %>% 
+post2 |> 
+  pivot_longer(b:ratio) |> 
+  pivot_wider(names_from = g, values_from = value) |> 
+  rename(A = a, B = b) |> 
+  mutate(`B - A` = B - A) |> 
+  pivot_longer(c(A, B, `B - A`), names_to = "g") |> 
+  mutate(name = fct_inorder(name)) |> 
+  group_by(g, name) |> 
+  mean_qi(value) |> 
   mutate(
     r = if_else(
       name %in% c("pd", "prope"),
       str_glue("{percent(value, .1)} [{number(.lower*100, .1)}, {number(.upper*100, .1)}]"),
       str_glue("{number(value, .01)} [{number(.lower, .01)}, {number(.upper, .01)}]")
       )
-  ) %>% 
+  ) |> 
   mutate(
     name2 = rep(
       c(
@@ -919,10 +919,10 @@ post2 %>%
         ), 
       times = 3
     )
-  ) %>% 
-  select(Parameter = name2, g, r) %>% 
-  mutate(g = str_glue("Group {toupper(g)}")) %>% 
-  pivot_wider(names_from = g, values_from = r) %>% 
+  ) |> 
+  select(Parameter = name2, g, r) |> 
+  mutate(g = str_glue("Group {toupper(g)}")) |> 
+  pivot_wider(names_from = g, values_from = r) |> 
   apa_table(
     span_text_columns = FALSE,
     font_size = "scriptsize",
