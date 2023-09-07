@@ -423,7 +423,7 @@ Having estimated the parameters of the heterogeneity distribution, we now turn t
 
 To begin with, and following @bolgerCausalProcessesPsychology2019, we used the point estimates in Table \@ref(tab:tbl-fit-1) to construct an expected *heterogeneity interval* that describes a range within which a certain percentage of the population's slopes are expected to fall. By convention, @bolgerCausalProcessesPsychology2019 and others have focused on the 95% heterogeneity interval ($HI_{95}$), but because there are already confusingly many quantities using the five percent cutoff, in this manuscript we focus on the 90% heterogeneity interval, and reserve 95% to describing uncertainties. 
 
-To calculate a heterogeneity interval, we first specify the desired probability limits. For a 90% interval, we use the .05 and .95 percentiles (which define the central 90% of the distribution). Then, we pass those percentiles and the estimated mean and standard deviation (see Table \@ref(tab:tbl-fit-1)) to the normal quantile function ($q$; `qnorm()` in R) to obtain the interval: $HI_{90} = q([.05, .95], \beta_1, \tau_1) = q([.05, .95],$ `r mu1`, `r sd1`) = [`r hi90`]. In words, this equation calculates the 0.05 and 0.95 quantiles of the normal distribution defined by the mean's ($\beta_1$) and standard deviation's ($\tau_1$) point estimates: We expect 90% of valence effects in the population to fall within this interval. We illustrate this interval in Figure \@ref(fig:hdist-1)B.
+To calculate a heterogeneity interval, we first specify the desired probability limits. For a 90% interval, we use the .05 and .95 percentiles (which define the central 90% of the distribution). Then, we pass those percentiles and the estimated mean and standard deviation (see Table \@ref(tab:tbl-fit-1)) to the normal quantile function ($q$; `qnorm()` in R) to obtain the interval: $HI_{90} = q([.05, .95], \beta_1, \tau_1) = q([.05, .95],$ `r mu1[1]`, `r sd1[1]`) = [`r hi90`]. In words, this equation calculates the 0.05 and 0.95 quantiles of the normal distribution defined by the mean's ($\beta_1$) and standard deviation's ($\tau_1$) point estimates: We expect 90% of valence effects in the population to fall within this interval. We illustrate this interval in Figure \@ref(fig:hdist-1)B.
 
 ### Proportion descriptors
 
@@ -657,7 +657,7 @@ Summarising a distribution of intervals entails some challenges, however, becaus
 #| label: hdist-3
 #| fig.height: 2.2
 #| fig.width: 4
-#| fig-cap: **A**. 100 random draws from the valence effect distribution's posterior distribution. Darker area under the curve represents the proportion of negative effects in the population for that posterior draw ($p^d$). **B**. Histogram of all 4,000 draws from the posterior distribution of $p^d$, and its posterior mean and 95%CI.
+#| fig-cap: "**A**. 100 random draws from the valence effect distribution's posterior distribution. Darker area under the curve represents the proportion of negative effects in the population for that posterior draw ($p^d$). **B**. Histogram of all 4,000 draws from the posterior distribution of $p^d$, and its posterior mean and 95%CI."
 
 p1 <- distinct(dist_samples, Sample, b_valence1, sd_person__valence1) |>
   arrange(b_valence1) |>
@@ -761,7 +761,8 @@ However, a sign test against zero is not always the most informative quantity be
 #| label: hdist-4
 #| fig.height: 2.2
 #| fig.width: 4
-#| fig-cap: **A**. 100 random draws from the valence effect distribution's posterior distribution. Dark area under the curve represents the proportion of effects within a region of practical equivalence to zero (ROPE) in the population for that posterior draw ($p^{ROPE}$). **B**. Histogram of all 4,000 draws from the posterior distribution of $p^{ROPE}$, and its posterior mean and 95%CI.
+#| fig-cap: "**A**. 100 random draws from the valence effect distribution's posterior distribution. Dark area under the curve represents the proportion of effects within a region of practical equivalence to zero (ROPE) in the population for that posterior draw ($p^{ROPE}$). **B**. Histogram of all 4,000 draws from the posterior distribution of $p^{ROPE}$, and its posterior mean and 95%CI."
+
 p1 <- distinct(dist_samples, Sample, b_valence1, sd_person__valence1) |> 
   arrange(b_valence1) |> 
   # slice(seq(1, nrow(.), by = 2)) |>
@@ -839,7 +840,8 @@ Finally, we can assess heterogeneity in relative terms by comparing the magnitud
 #| label: hdist-5
 #| fig.height: 2.2
 #| fig.width: 4
-#| fig-cap: **A**. 4,000 random draws from the posterior distribution of the valence effect distribution's mean ($\beta_1$) and standard deviation ($\tau_1$). **B**. Histogram of 4,000 draws from the posterior distribution of the ratio of the valence distribution's scale over its  location $\frac{\tau_1}{\beta_1}$, and its posterior mean and 95%CI.
+#| fig-cap: Panel **A**. 4,000 random draws from the posterior distribution of the valence effect distribution's mean ($\beta_1$) and standard deviation ($\tau_1$). **B**. Histogram of 4,000 draws from the posterior distribution of the ratio of the valence distribution's scale over its  location $\frac{\tau_1}{\beta_1}$, and its posterior mean and 95\\%CI.
+
 p1 <- post1 |> 
   ggplot(aes(b_valence1, sd_person__valence1)) +
   scale_y_continuous(
