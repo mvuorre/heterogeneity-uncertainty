@@ -1,10 +1,10 @@
 {
   "R": {
-    "Version": "4.3.0",
+    "Version": "4.3.1",
     "Repositories": [
       {
         "Name": "CRAN",
-        "URL": "https://cloud.r-project.org"
+        "URL": "https://packagemanager.posit.co/cran/latest"
       }
     ]
   },
@@ -896,6 +896,22 @@
       ],
       "Hash": "94af08e0aa9675a16fadbb3aaaa90d2a"
     },
+    "furrr": {
+      "Package": "furrr",
+      "Version": "0.3.1",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Requirements": [
+        "R",
+        "future",
+        "globals",
+        "lifecycle",
+        "purrr",
+        "rlang",
+        "vctrs"
+      ],
+      "Hash": "da7a4c32196cb2262a41dd5a25d486ff"
+    },
     "future": {
       "Package": "future",
       "Version": "1.32.0",
@@ -998,12 +1014,6 @@
       "Version": "0.5.2",
       "Source": "Repository",
       "Repository": "CRAN",
-      "RemoteType": "standard",
-      "RemotePkgRef": "ggpp",
-      "RemoteRef": "ggpp",
-      "RemoteRepos": "https://cran.rstudio.com/",
-      "RemotePkgPlatform": "aarch64-apple-darwin20",
-      "RemoteSha": "0.5.2",
       "Requirements": [
         "MASS",
         "R",
@@ -1901,12 +1911,6 @@
       "Version": "1.4-1",
       "Source": "Repository",
       "Repository": "CRAN",
-      "RemoteType": "standard",
-      "RemotePkgRef": "polynom",
-      "RemoteRef": "polynom",
-      "RemoteRepos": "https://cran.rstudio.com/",
-      "RemotePkgPlatform": "aarch64-apple-darwin20",
-      "RemoteSha": "1.4-1",
       "Requirements": [
         "graphics",
         "stats"
@@ -2104,13 +2108,13 @@
     },
     "renv": {
       "Package": "renv",
-      "Version": "0.17.3",
+      "Version": "1.0.2",
       "Source": "Repository",
       "Repository": "CRAN",
       "Requirements": [
         "utils"
       ],
-      "Hash": "4543b8cd233ae25c6aba8548be9e747e"
+      "Hash": "4b22ac016fe54028b88d0c68badbd061"
     },
     "reprex": {
       "Package": "reprex",
@@ -2203,6 +2207,29 @@
         "R"
       ],
       "Hash": "1de7ab598047a87bba48434ba35d497d"
+    },
+    "rsample": {
+      "Package": "rsample",
+      "Version": "1.1.1",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Requirements": [
+        "R",
+        "dplyr",
+        "furrr",
+        "generics",
+        "glue",
+        "methods",
+        "pillar",
+        "purrr",
+        "rlang",
+        "slider",
+        "tibble",
+        "tidyr",
+        "tidyselect",
+        "vctrs"
+      ],
+      "Hash": "cb0c54ebc268ec382be8e4d4a8c34557"
     },
     "rstan": {
       "Package": "rstan",
@@ -2398,6 +2425,20 @@
         "shiny"
       ],
       "Hash": "30f0ebc41feba25691073626ff5e2cf4"
+    },
+    "slider": {
+      "Package": "slider",
+      "Version": "0.3.0",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Requirements": [
+        "R",
+        "cli",
+        "rlang",
+        "vctrs",
+        "warp"
+      ],
+      "Hash": "c1c73df260af9e1e3692eb3b8e1ecb88"
     },
     "snakecase": {
       "Package": "snakecase",
@@ -2822,6 +2863,16 @@
         "tibble"
       ],
       "Hash": "2c993415154cdb94649d99ae138ff5e5"
+    },
+    "warp": {
+      "Package": "warp",
+      "Version": "0.2.0",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Requirements": [
+        "R"
+      ],
+      "Hash": "2982481615756e24e79fee95bdc95daa"
     },
     "withr": {
       "Package": "withr",
