@@ -495,61 +495,6 @@ Armed with the bayesian estimates (Table \@ref(tab:tbl-samples-1)), we now retur
 Moreover, the location of these curves differ: Some curves are further to the left (average effect is more negative), and some further to the right (average effect is more positive). The distribution of these curves represents our uncertainty over the heterogeneity distribution of valence effects in the population. Thus, a good summary of heterogeneity that incorporates uncertainty must include information about uncertainty in both the location (mean) and scale (standard deviation) parameters of the heterogeneity distribution.
 
 ```{r}
-set.seed(99)
-tmp <- post1 |> 
-  slice_sample(n = 4) |> 
-  mutate(dist = dist_normal(b_valence1, sd_person__valence1)) |> 
-  mutate(i = 1:n())
-
-tmp <- tmp |> 
-  mutate(
-    plot = map2(
-      b_valence1, sd_person__valence1, 
-      ~tibble(dist = dist_normal(.x, .y)) |> 
-        ggplot(aes(xdist = dist)) +
-        scale_x_continuous(
-          breaks = extended_breaks(3)
-        ) +
-        coord_cartesian(xlim = c(-0.4, 0.1), clip = "off") +
-        scale_y_continuous(
-          expand = expansion(c(0.0, 0.1))
-        ) +
-        stat_slab(slab_fill = "grey30") +
-        theme(
-          axis.title = element_blank(),
-          axis.ticks.x = element_line(size = rel(0.33)),
-          axis.ticks.y = element_blank(),
-          axis.text.y = element_blank(),
-          axis.text.x = element_text(size = rel(0.6)),
-          axis.line.y = element_blank()
-          )
-      )
-  )
-
-p1 <- post1 |> 
-  ggplot(aes(b_valence1, sd_person__valence1)) +
-  scale_x_continuous(
-    expand = expansion(.33)
-  ) +
-  scale_y_continuous(
-    expand = expansion(.33)
-  ) +
-  geom_point(shape = 1, col = "dodgerblue") +
-  geom_curve(
-    data = tmp |> 
-      mutate(y = sd_person__valence1),
-    aes(x = b_valence1, xend = 0,
-        y = y, yend = y),
-    alpha = .33, linewidth = .75, curvature = .2
-  ) +
-  theme(aspect.ratio = 1)
-
-p1 + 
-  inset_element(tmp$plot[[1]], 0.7, 0.1, 0.3, 0.28)
-```
-
-
-```{r}
 #| label: hdist-2
 #| fig.height: 3.4
 #| fig.width: 4
