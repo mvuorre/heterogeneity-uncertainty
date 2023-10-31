@@ -1037,6 +1037,8 @@ post2 <- post2 |>
     b_difference = b_taskCued - b_taskFree,
     sd_person_difference = 
       `sd_person__Intercept:taskCued` - `sd_person__Intercept:taskFree`,
+    sd_person_ratio = 
+      `sd_person__Intercept:taskCued` / `sd_person__Intercept:taskFree`,
     pd_person_difference = pd_person_cued - pd_person_free,
     ratio_person_difference = ratio_person_cued - ratio_person_free,
     hi_low_difference = hi_low_cued - hi_low_free,
@@ -1075,7 +1077,7 @@ Descriptively, we reproduced @mahVariabilitySubjectsFree2023's finding that part
 
 The top panel of Figure \@ref(fig:fig-2-person)A illustrates the posterior distributions of memory performance for the average person in the free and cued recall tasks, and their difference (cued - free recall). Notice that all quantities in this model are in the probit space ("z-scores"): While recall performance was `r post2_sum$x[post2_sum$variable=="b_taskFree"]` and `r post2_sum$x[post2_sum$variable=="b_taskCued"]` in the free and cued recall conditions, respectively, in the probit space, they can be converted to probabilities, in which the quantities were `r post2_sum$x[post2_sum$variable=="b_taskFree_p"]` and `r post2_sum$x[post2_sum$variable=="b_taskCued"]`. However, this conversion does not work in general and we therefore restrict descriptions to probits in what follows.
 
-Second, and more importantly, the second panel in Figure \@ref(fig:fig-2-person)A describes the posterior distributions of the between-person standard deviations in memory ability in the free and cued recall tasks, and their difference (cued - free recall). The third row of Figure \@ref(fig:fig-2-person)A shows the estimated proportions of individuals whose memory performance is above chance in the two tasks, and their difference. The model estimates the proportion of individuals who perform above chance to be `r post2_sum$x[post2_sum$variable=="pd_person_difference"]` greater in the cued than in the free recall task. 
+Second, and more importantly, the second row in Figure \@ref(fig:fig-2-person)A describes the posterior distributions of the between-person standard deviations in memory ability in the free and cued recall tasks, and their difference (cued - free recall). The standard deviation was `r post2_sum$x[post2_sum$variable=="sd_person_difference"]` probits greater in the cued recall task (ratio: `r post2_sum$x[post2_sum$variable=="sd_person_ratio"]`). The third row of Figure \@ref(fig:fig-2-person)A shows the estimated proportions of individuals whose memory performance is above chance in the two tasks, and their difference. The model estimates the proportion of individuals who perform above chance to be `r post2_sum$x[post2_sum$variable=="pd_person_difference"]` greater in the cued than in the free recall task. 
 
 Perhaps surprisingly, even though the absolute measures of heterogeneity differed greatly between the two recall tasks, the bottom panel of Figure \@ref(fig:fig-2-person)A shows that the degree of relative heterogeneity is identical across the two tasks. (We truncated the Ratio axis at [-10, 10] because estimates of the ratio are extreme for estimated distributions with very small average effects but large standard deviations. The difference in ratios is very uncertain partly for the same reason.)
 
