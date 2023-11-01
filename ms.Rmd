@@ -818,7 +818,7 @@ So far, these examples have highlighted the importance of quantifying uncertaint
 
 ### Ratio descriptors
 
-Finally, we can assess heterogeneity in relative terms by comparing the magnitude of the heterogeneity in valence effects (the standard deviation $\tau_1$) to the magnitude of the average effect (the mean $\beta_1$) by calculating the ratio $\frac{\tau_1}{\beta_1}$. Figure \@ref(fig:hdist-5)A shows 4,000 samples from the joint posterior distribution of the mean and standard deviation, which we then transformed into 4,000 samples of the posterior distribution of $\frac{\tau_1}{\beta_1}$ in Figure \@ref(fig:hdist-5)B. The ratio `r tmp$ratio_r` suggests that the relative magnitude of heterogeneity is substantial, but might be as low as `r number(tmp$ratio.lower, .01)` or as great as `r number(tmp$ratio.upper, .01)`, with 95% confidence.
+Finally, we can assess heterogeneity in relative terms by comparing the magnitude of the heterogeneity in valence effects (the standard deviation $\tau_1$) to the magnitude of the average effect (the mean $\beta_1$) by calculating the ratio $\frac{\tau_1}{\beta_1}$. Figure \@ref(fig:hdist-5)A shows 4,000 samples from the joint posterior distribution of the mean and standard deviation, which we then transformed into 4,000 samples of the posterior distribution of $\frac{\tau_1}{\beta_1}$ in Figure \@ref(fig:hdist-5)B. The ratio `r tmp$ratio_r` suggests that the relative magnitude of heterogeneity is substantial, but might be as low as `r number(tmp$ratio.lower, .01)` or as great as `r number(tmp$ratio.upper, .01)`, with 95% confidence. If we used rule of thumb of 0.25 in @bolgerCausalProcessesPsychology2019, with these results we could say *with confidence* that heterogeneity in valence effects is notable.
 
 ```{r}
 #| label: hdist-5
@@ -870,7 +870,7 @@ p2 <- post1 |>
   plot_annotation(tag_levels = "A")
 ```
 
-Throughout these examples, we have seen that---in these example data---our uncertainty in the estimated heterogeneity metrics is substantial: Point estimates provide at best incomplete descriptions of our current state of knowledge regarding heterogeneity in valence effects. While useful in its own right, next we see that incorporating uncertainty is not only useful but critical when we turn from describing heterogeneity in one population to comparing it across multiple populations.
+Throughout these examples, we have seen that---in these example data---our uncertainty in the estimated heterogeneity metrics is substantial: Point estimates provide at best incomplete descriptions of our current state of knowledge regarding heterogeneity in valence effects. We will next see that incorporating uncertainty is not only useful but critical when we turn from describing heterogeneity in one population to comparing it across multiple populations.
 
 # Comparing heterogeneity
 
@@ -1601,9 +1601,13 @@ We provide all the code supporting this manuscript at [todo]. There, we implemen
 
 ## Limitations
 
-- We assume gaussian distributions but see rouder
+In our example analyses, we have brushed many important modelling decisions under the rug in order to focus on the main topic of heterogeneity. First, in example 1 we analyzed reaction times by simply taking log-transforming the RTs. Proper analyses of RTs benefit from models that make more realistic assumptions about the data generating process underlying a reaction time response, but here we necessarily excluded this complication for reasons of brevity.
+
+Our exposition and interpretation of heterogeneity relied on a critical assumption in line with standard practices in multilevel and generalized linear mixed modelling; that of (multivariate) normality of the person-level parameters. Assuming that random effects are normally distributed is a computationally and conceptually useful fiction, and we recognize that it is unlikely to hold exactly in real psychological phenomena. Excellent work by Haaf, Rouder, and colleagues have explored alternatives to continuous normal distributions of random effects [e.g., @haafDevelopingConstraintBayesian2017; @haafDonAccountingVariability2019].
 
 ## Conclusion
+
+We hope that the computational, graphical, and conceptual tools that we have discussed here prove useful to researchers interested in better understanding heterogeneity in psychological phenomena.
 
 # Data and code availability
 
