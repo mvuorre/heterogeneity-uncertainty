@@ -1,15 +1,15 @@
-all: renv ms.pdf ms.docx
-
-ms.pdf: ms.Rmd
-	Rscript -e "rmarkdown::render('ms.Rmd', 'papaja::apa6_pdf')"
-
-ms.docx: ms.Rmd
-	Rscript -e "rmarkdown::render('ms.Rmd', 'papaja::apa6_docx')"
+all: renv ms
 
 renv:
 	Rscript -e "renv::restore()"
 
+ms: pdf docx
+
+pdf: ms.Rmd
+	Rscript -e "rmarkdown::render('$<', 'papaja::apa6_pdf')"
+
+docx: ms.Rmd
+	Rscript -e "rmarkdown::render('$<', 'papaja::apa6_docx')"
+
 clean:
 	rm -rf ms_cache ms_files ms.pdf ms.docx
-
-.PHONY: all clean renv
