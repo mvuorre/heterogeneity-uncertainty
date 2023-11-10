@@ -23,8 +23,8 @@ abstract: |
   Advances in statistics and data collection methods have brought variability in psychological phenomena to the forefront of theoretical development. Yet, established methods and practices for studying heterogeneity underestimate the true uncertainty in those estimates. In the current work, we aim to deliver methods and guidelines for more rigorous treatments of heterogeneity in psychological phenomena. We provide a walkthrough of methods for i. estimating, ii. summarising, and iii. describing heterogeneity. Although other methods for incorporating estimation uncertainty are available, the methods we propose---involving bayesian hierarchical models---are especially suitable for investigating heterogeneity because they naturally describe uncertainty in all model parameters. We hope that the methods we discuss would help researchers to widen their inferential focus from statistical averages to include statistical heterogeneity in psychological phenomena.
 keywords: variation, heterogeneity, hierarchical models, mixed models, methodology
 authornote: |
-  \noindent \textbf{This working paper is not yet peer reviewed.}
-wordcount: 5196
+  \textbf{This working paper is not yet peer reviewed.}
+wordcount: "5,837"
 bibliography: references.bib
 floatsintext: yes
 numbersections: false
@@ -39,7 +39,7 @@ classoption: jou
 header-includes:
   - |
     \usepackage{float}
-    \setlength{\parskip}{4pt}
+    \setlength{\parskip}{0.5em}
 output: 
   papaja::apa6_pdf:
     number_sections: true
@@ -58,7 +58,6 @@ library(scales)
 library(ellipse)
 library(knitr)
 library(readxl)
-library(latex2exp)
 library(lme4)
 library(ggpp)
 library(patchwork)
@@ -74,6 +73,8 @@ library(tidyverse)
 
 # Output options
 opts_chunk$set(
+  fig.width = 6,
+  fig.align = "center",
   eval = TRUE,
   cache = TRUE,
   warning = FALSE,
@@ -98,7 +99,7 @@ dir.create("models", FALSE)
 options(
   mc.cores = 4
 )
-if (require(cmdstanr)) {
+if ("cmdstanr" %in% installed.packages()[,"Package"]) {
   options(
     brms.backend = "cmdstanr",
     brms.threads = 2
@@ -107,21 +108,15 @@ if (require(cmdstanr)) {
 dir.create("data", FALSE)
 ```
 
-# Introduction
+When building and testing theories of psychological phenomena, psychologists have long focused on asking whether an effect exists or not. Yet, establishing that an independent variable affects a dependent variable may not be a sufficient description of the phenomenon if the treatment effect is variable from one individual to another. The importance of such between-person variation, or *heterogeneity*, for theory development is widely recognized, yet rarely communicated sufficiently in the empirical literature [@bolgerCausalProcessesPsychology2019; @brandCausalEffectHeterogeneity2013]. 
 
-When building and testing theories of psychological phenomena, psychologists have long focused on asking whether an effect exists or not. Yet, establishing that an independent variable affects a dependent variable on average may not be a sufficient description of the phenomenon if the treatment effect is highly variable from one individual to another. The importance of such between-person variation, or *heterogeneity*, for theory development is widely recognized, yet rarely communicated sufficiently in the empirical literature [@bolgerCausalProcessesPsychology2019; @brandCausalEffectHeterogeneity2013]. 
+One reason for the scarcity of reporting and interpreting heterogeneity is that psychologists still commonly analyze data with models that obscure the assessment of heterogeneity, such as ANOVA [@bolgerCausalProcessesPsychology2019]. Although more appropriate hierarchical (or multilevel, mixed-effects) models are rapidly becoming more widespread, we believe a second important reason is that researchers do not yet have the conceptual and practical tools required to sufficiently estimate and describe heterogeneity. 
 
-One reason for the scarcity of reporting and interpreting heterogeneity is that psychologists still tend to analyze data with models that obscure the assessment of heterogeneity, such as ANOVA [@bolgerCausalProcessesPsychology2019]. Although more appropriate hierarchical (or multilevel, mixed-effects) models are rapidly becoming more widespread, we believe a second important reason is that researchers do not yet have the conceptual and practical tools required to sufficiently estimate and describe heterogeneity. In the current work, we highlight several practical methods, descriptions, and visualizations that allow researchers to better estimate, interpret, and report heterogeneity in a manner that maximizes empirical results' impact on theory building.
+When person-to-person variability is modeled and reported, those descriptions often focus on point estimates [@bolgerCausalProcessesPsychology2019], sample statistics [@beyensEffectSocialMedia2020; @vuorreThreeObjectionsNovel2022], or quantities such as the standard deviation of person-specific parameters [@bartosFairCoinsTend2023] which, in isolation, might be difficult to interpret. That is, although we are excited about the increased focus on heterogeneity, we offer that commonly used descriptions of it leave room for improvement.
 
-## Current work
+Because this focus on heterogeneity in psychological phenomena is relatively new, work remains to be done in developing models, descriptions, and reporting practices that maximize investigations' impact on theory development. Our goal is to contribute to that work. We describe and illustrate the use of numerical and graphical descriptions of heterogeneity that (1) Go beyond model parameters to describe heterogeneity in clear and actionable terms, and (2) Take uncertainty in model parameters into account.
 
-Our aim is to outline methods for studying and communicating heterogeneity in a manner that fully takes uncertainty into account. We first introduce an example dataset from social psychology and review established procedures for estimating and communicating the expected heterogeneity in causal effects in the population. We then outline useful summaries of heterogeneity that focus on informative numerical and graphical descriptions, and note how they are limited by established methods' focus on point estimates of model parameters.
-
-We then turn to our proposed method of interrogating and communicating causal effect heterogeneity using probabilistic methods. By estimating probability distributions over model parameters, these bayesian methods are uniquely suitable for examining heterogeneity and researchers' uncertainty about it. Moreover, advances in computational procedures and statistical software make these methods available to researchers with a minimal learning curve beyond established maximum likelihood based methods.
-
-In the following sections, we detail calculations and graphics that make use of bayesian methods in communicating descriptions of heterogeneity such that uncertainty in the model parameters and, subsequently, heterogeneity, is taken into account. We then further extend the practice and consequent benefits of probabilistic inference for causal effect heterogeneity to comparing heterogeneity between populations and across timepoints in further example analyses.
-
-We conclude by discussing additional benefits of probabilistic inference in psychology in general, and for multilevel models specifically. We emphasize that these benefits come with little or no cost to applied practitioners. We also discuss our findings regarding causal effect heterogeneity in light of this new perspective.
+Our plan is as follows. We first review established methods for estimating and communicating expected heterogeneity of causal effects in the population using an example dataset from social psychology. We then describe additional ways in which model parameters can be interrogated and transformed to describe distributions of causal effects in the population. We then move beyond summarizing expected degrees of heterogeneity to describing distributions of plausible degrees of heterogeneity. Finally, we extend these methods to compare heterogeneity across different populations using an example dataset from cognitive psychology.
 
 # Review of expected heterogeneity in hierarchical models
 
@@ -179,43 +174,43 @@ dat |>
   )
 ```
 
-In this section, we replicate @bolgerCausalProcessesPsychology2019's analysis, using their openly available data (https://github.com/kzee/heterogeneityproject). We first cleaned the data as in @bolgerCausalProcessesPsychology2019, leaving `r number(nrow(dat), big.mark = ",")` trials from 59 participants that were endorsed as self-relevant. (We present all our code in the online analysis supplement.) We show a sample of these data in Table \@ref(tab:tab-dat1). Then, we estimated the same statistical model with these data (Model 1; equations 1.1-1.3). First, we model the (log) reaction time of subject $j$ on trial $i$ as a random draw from a normal distribution with mean $\eta$ (*eta*, which can differ between trials $i$ and individuals $j$) and standard deviation $\sigma$ (*sigma*):
+In this section, we replicate @bolgerCausalProcessesPsychology2019's analysis, using their openly available data (https://github.com/kzee/heterogeneityproject). We first wrangled the data as in @bolgerCausalProcessesPsychology2019, which led to a sample of `r number(nrow(dat), big.mark = ",")` trials from 59 participants that were endorsed as self-relevant. (We present all our code in the online analysis supplement.) We show a sample of these data in Table \@ref(tab:tab-dat1). Then, we estimated the same statistical model (Model 1; equations 1.1-1.3). We modeled the log-transformed reaction time (logRT) of subject $j$ on trial $i$ as a random draw from a normal distribution with mean $\eta$ (*eta*), which could differ between trials $i$ and individuals $j$, and standard deviation $\sigma$ (*sigma*), which we assumed constant across individuals and trials, as indicated by the lack of subscripts:
 
 \begin{equation}
 \tag{1.1}
-\text{RT}_{ij} \sim \operatorname{Normal}(\eta_{ij}, \sigma^2).
+\text{logRT}_{ij} \sim \operatorname{Normal}\left(\eta_{ij}, \sigma^2\right).
 \end{equation}
 
-The lack of subscripts on $\sigma$ indicates that we assume it to be invariant across trials and subjects. (Note that there are better alternatives for modelling reaction times (RT) than modelling the log-transformed RTs as normal, but those are outside the scope of this manuscript.) Then, we specify a model of the mean $\eta_{ij}$ such that the regression coefficients capture our substantive questions: 
+(We note that there are better and more informative alternatives than modeling the log-transformed RTs as normal, but those are outside the scope of this manuscript.) Then, we specified a model of the mean of the logRT distribution ($\eta_{ij}$) such that the regression coefficients captured our substantive questions: 
 
 \begin{equation}
 \tag{1.2}
-\eta_{ij} = \beta_0 + \gamma_{0j} + (\beta_1 + \gamma_{1j})\text{V}_{ij}.
+\eta_{ij} = \beta_0 + \gamma_{0j} + \left(\beta_1 + \gamma_{1j}\right)\text{V}_{ij}.
 \end{equation}
 
-This equation includes two kinds of parameters: $\beta_0$ (*beta*), the intercept, and $\beta_1$, the slope or effect of valence (V), do not have subscripts. That means that they are not further modelled except by way of (optional) prior distributions with fixed hyperparameters. In line with existing conventions in bayesian inference and software, we refer to these as *population level* parameters. From the frequentist perspective, these terms are constants (i.e. do not potentially vary as functions of covariates) and are therefore sometimes "fixed". For all practical purposes, because we do not discuss prior distributions with constant hyperparameters, readers can equate the terms "fixed" and "population level" parameters in the current discussion.
-
-We contrast coded valence such that negative words are coded as -0.5, and positive words as 0.5. This coding results in an intercept that corresponds to the average reaction time across negative and positive words, and a slope coefficient that reflects the difference in log(rt) between negative and positive words. The second set of parameters, $\gamma_{0j}$ (*gamma*) and $\gamma_{1j}$ are person-specific deviations from the average intercept and slope, respectively. That is, $\beta_0 + \gamma_{01}$ is the average reaction time for person $j=1$. The $\gamma$ coefficients have subscripts, which in this context indicates that they are further modelled on covariates---here, index variables for "person" in the data. We refer to these as "group level" parameters, in line with conventions. In the frequentist discourse, these parameters are called "random" parameters [@gelmanDataAnalysisUsing2007]. Again, readers can equate the term "group level" parameters with "random" parameters in the ongoing discussion.
-
-As is standard in multilevel modelling, we model $\gamma_0$ and $\gamma_1$ as multivariate normal distributed:
+This equation includes two kinds of parameters: $\beta_0$ (*beta*), the intercept, and $\beta_1$, the slope or effect of valence (V), do not have subscripts. In the frequentist tradition, these parameters are considered constants---not modelled on covariates---and typically referred to as "fixed" parameters [e.g. @raudenbushHierarchicalLinearModels2002]. The second set of parameters, $\gamma_{0j}$ (*gamma*) and $\gamma_{1j}$, have the subscript $j$ to indicate that they are person-specific deviations from the average intercept and slope, respectively. That is, $\beta_0 + \gamma_{01}$ is the average reaction time for person $j=1$. In frequentist texts, these are typically called "random" parameters, because they are modeled as varying randomly according to a specified distribution. Following standard multilevel modeling assumptions, we model $\gamma_0$ and $\gamma_1$ as multivariate normal distributed:
 
 \begin{equation}
 \tag{1.3}
 \begin{bmatrix} 
-\gamma_{0} \\ \gamma_{1}
+  \gamma_0 \\ \gamma_1
 \end{bmatrix} \sim 
-\operatorname{MVN}(
-\begin{bmatrix} 0 \\ 0 \end{bmatrix}, 
-\begin{bmatrix} 
-\tau_{\gamma_{0}} &\rho_{\gamma_0\gamma_1} \\ 
-\rho_{\gamma_0\gamma_1} &\tau_{\gamma_{1}} 
-\end{bmatrix}
-).
+\operatorname{MVN}\left(
+  \begin{bmatrix} 0 \\ 0 \end{bmatrix}, 
+  \begin{pmatrix} 
+    \tau_0 &\rho \\ 
+    \rho &\tau_1 
+  \end{pmatrix}
+\right).
 \end{equation}
 
-In these equations, we assume that the subject-specific deviations have means of zero, standard deviations $\tau$ (*tau*), and a correlation $\rho$ (*rho*). Note that the $\gamma$s are zero-centered because the means are added to them in the above linear mixed-effects equation for $\eta_{ij}$. What these equations mean substantively is that the extent to which the effect of valence varies around the average effect ($\beta_1$) is estimated by the standard deviation $\tau_{\gamma_1}$. Moreover, $\rho$ indicates the extent to which individuals' average reaction times correlate with how much their reaction time is affected by valence. 
+In this equation, we assume that the subject-specific deviations $\gamma_0$ and $\gamma_1$ have means of zero (because the means are added to them in equation 1.2), standard deviations $\tau$ (*tau*), and a correlation $\rho$ (*rho*). Perhaps confusingly, $\tau$s and $\rho$ are also sometimes called random effects because they describe random (co)variations of the person-specific effects. To be clear, despite this naming convention they are "fixed" features of the population, not of any one group or individual. 
 
-With data described in Table \@ref(tab:tab-dat1) loaded to R, we can estimate this model using standard maximum likelihood methods as implemented in the R package lme4 [@batesFittingLinearMixedEffects2015; @rcoreteamLanguageEnvironmentStatistical2023].
+What these equations mean substantively is that the extent to which the effect of valence on logRT varies around the average effect ($\beta_1$) is estimated by the standard deviation $\tau_1$. $\tau_0$, on the other hand, describes the standard deviation of the population of individuals' average logRTs across negatively and positively valenced words (intercepts). Moreover, $\rho$ indicates the extent to which individuals' average logRTs correlate with how much their logRTs are affected by valence. 
+
+Finally, we contrast coded valence such that negative words were assigned -0.5, and positive words 0.5. This coding results in an intercept that corresponds to the average reaction time across negative and positive words, and a slope that reflects the difference in logRT between negative and positive words. 
+
+With data described in Table \@ref(tab:tab-dat1), we can estimate this model using standard maximum likelihood methods as implemented in, for example, the R package lme4 [@batesFittingLinearMixedEffects2015; @rcoreteamLanguageEnvironmentStatistical2023].
 
 ```{r fit1-lmer}
 fit_lmer <- lmer(
@@ -231,17 +226,23 @@ tab_1 <- model_parameters(fit_lmer, effects = "all") |>
   select(Parameter, Coefficient, starts_with("CI_"))
 
 # Bootstrap CIs for variance parameters
-tab_1[3:6, 3:4] <- confint(
-  fit_lmer,
-  method = "boot",
-  nsim = 100,
-  oldNames = FALSE
-)[c(1, 3, 2, 4), 1:2]
+path <- "models/lmer-fit1-bootstrap.rds"
+if (!file.exists(path)) {
+  boots <- confint(
+    fit_lmer,
+    method = "boot",
+    nsim = 1000,
+    oldNames = FALSE
+  )
+  boots <- boots[c(5, 6, 1, 3, 4, 2), ]
+  tab_1[, 3:4] <- boots
+  saveRDS(tab_1, path)
+} else {tab_1 <- readRDS(path)}
 
 # Get approx SEs
 tab_1 <- tab_1 |> 
   mutate(SE = (CI_high - Coefficient) / 1.96) |> 
-  select(1, 2, 5, 3:4)
+  select(Parameter, Coefficient, SE, CI_low, CI_high)
 ```
 
 ```{r}
@@ -274,43 +275,47 @@ tab_1 |>
     caption = "Parameter estimates from Model 1.",
     escape = FALSE
   )
-mu1 <- number(as.numeric(tab_1[2, 2:4, TRUE]))
-sd1 <- number(as.numeric(tab_1[4, 2:4, TRUE]))
 mu1n <- tab_1[2, 2, TRUE]
+mu1n_low <- tab_1[2, "CI_low", TRUE]
 sd1n <- tab_1[4, 2, TRUE]
+sd1n_low <- tab_1[4, "CI_low", TRUE]
+mu1 <- number(
+  as.numeric(tab_1[2, c("Coefficient", "CI_low", "CI_high"), TRUE]), 
+  .01
+)
+sd1 <- number(
+  as.numeric(tab_1[4, c("Coefficient", "CI_low", "CI_high"), TRUE]), 
+  .01
+)
 ```
 
-We show a traditional summary of the estimated parameters from this model in Table \@ref(tab:tbl-fit-1). For the average person, the estimated effect of valence on RT is `r mu1[1]` log seconds, with a 95% bootstrap confidence interval (CI) extending from `r mu1[2]` to `r mu1[3]`. The estimated standard deviation of between-person differences in the valence effects is `r sd1[1]` log seconds, with a 95% CI of [`r sd1[2]`, `r sd1[3]`]. 
+We show a traditional summary of the estimated parameters from this model in Table \@ref(tab:tbl-fit-1). For the average person, the estimated effect of valence on logRT is `r mu1[1]` log seconds, with a 95% bootstrap confidence interval (CI) extending from `r mu1[2]` to `r mu1[3]`. The estimated standard deviation of valence effects in the population is `r sd1[1]` log seconds, with a 95% CI of [`r sd1[2]`, `r sd1[3]`]. 
 
 ## Heterogeneity distribution
 
 ```{r descriptors, include = FALSE}
 # Heterogeneity interval
-hi90_num <- mu1n + qnorm(c(0.05, .95)) * sd1n
+hi90_num <- qnorm(c(0.05, .95), mu1n, sd1n)
 hi90 <- paste(
   number(hi90_num, .01),
   collapse = ", "
 )
 hi90_low <- paste(
-  number(
-    tab_1[2, 3, TRUE] + qnorm(c(0.05, .95)) * 
-      tab_1[4, 3, TRUE], .01
-  ),
+  number(qnorm(c(0.05, .95), mu1n_low, sd1n_low), .01),
   collapse = ", "
 )
 
 # Proportions
 p_less_zero <- percent(pnorm(0, mu1n, sd1n), .1)
 p_rope <- percent(pnorm(0.1, mu1n, sd1n) - pnorm(-0.1, mu1n, sd1n), .1)
-
 # Ratio
 ratio <- number(abs(sd1n / mu1n), .01)
+ratio_low <- number(abs(sd1n_low / mu1n_low), .01)
 ```
 
 ```{r}
 #| label: fig-1
-#| fig.height: 2
-#| fig.width: 8
+#| fig.height: 1.8
 #| fig.env: "figure*"
 #| fig.align: "center"
 #| fig.cap: Heterogeneity distribution of valence effects and various descriptions of their expected heterogeneity as estimated with Model 1. A. The normal density curve defined by the point estimates of the valence effect distribution's mean ($\beta_1$) and standard deviation ($\tau_1$). Shaded areas represent areas under the normal curve within 1 (dark) and 2 (light) standard deviations of the mean. B. The 90\% Heterogeneity Interval as represented by a line segment with arrows, and the dark shaded area. C. Proportion of negative valence effects in the population (dark). D. Proportion of valence effects in the population that are within the region of practical equivalence to zero (ROPE; dark).
@@ -349,7 +354,7 @@ fig_1 <- fig_0 +
   ) +
   geom_text(
     label = TeX("$\\beta_1$"),
-    x = mu1n - .05, y = .075,
+    x = mu1n - .075, y = .075,
     size = 3,
     parse = TRUE
   ) +
@@ -390,7 +395,7 @@ fig_3 <- fig_0 +
     slab_linewidth = .4
   ) +
   geom_text(
-    label = TeX("$p^d$"),
+    label = TeX("$p^-$"),
     x = mu1n, y = .175,
     size = 3,
     parse = TRUE
@@ -405,7 +410,7 @@ fig_4 <- fig_0 +
   ) +
   geom_text(
     label = TeX("$p^{ROPE}$"),
-    x = 0, y = .07,
+    x = 0.0, y = 0.5, hjust = 0,
     size = 3,
     parse = TRUE
   )
@@ -426,37 +431,41 @@ fig_4 <- fig_0 +
   plot_annotation(tag_levels = "A")
 ```
 
-The point estimates in Table \@ref(tab:tbl-fit-1) define the expected normal distribution of valence effects in the population, visualized in Figure \@ref(fig:fig-1)A. As such, Normal(`r mu1`, `r sd1`^2^) is a valid description of heterogeneity in valence effects. However, it is an incomplete description of heterogeneity for two reasons. First, it does not necessarily communicate the degree of heterogeneity in clear and actionable terms. Second, it ignores the uncertainty with which the heterogeneity parameters are estimated. 
+Rows 2 and 4 in Table \@ref(tab:tbl-fit-1) define the expected normal distribution of valence effects in the population, visualized in Figure \@ref(fig:fig-1)A. In other words, our point estimate of the distribution of valence effects is Normal(`r mu1[1]`, `r sd1[1]`^2^). However, it is an incomplete description of heterogeneity for two reasons. First, it does not necessarily communicate the degree of heterogeneity in clear and actionable terms: In addition to the SD, we want quantities that describe heterogeneity in clearer terms. Below, we introduce several metrics that e.g. directly describe where a given proportion of the slopes are expected to fall. Second, it ignores the uncertainty with which the heterogeneity parameters are estimated. That is, we need ways to describe (uncertainty) distributions of distributions.
+
+We now turn to this first issue and outline several additional metrics of heterogeneity afforded by the model's parameter estimates.
 
 ### Interval descriptors
 
-Having estimated the parameters of the heterogeneity distribution, we now turn to using them to define alternative, more informative descriptions of the degree of heterogeneity in valence effects in the population.
+First, we can use the point estimates in Table \@ref(tab:tbl-fit-1) to construct an expected *heterogeneity interval* that describes the range within which a certain percentage of the population's slopes are expected to fall [@bolgerCausalProcessesPsychology2019]. To do so, we must first determine an appropriate percentage to describe: By convention, @bolgerCausalProcessesPsychology2019 and others have focused on the 95% heterogeneity interval ($HI_{95}$). However, because there are already confusingly many quantities using the five percent cutoff, in this manuscript we focus on the 90% heterogeneity interval, and reserve 95% to describing uncertainties. The appropriate percentage to describe with a heterogeneity interval is determined by the substantive and communicative aims at hand; for our illustration 90% seemed reasonable. 
 
-To begin with, and following @bolgerCausalProcessesPsychology2019, we used the point estimates in Table \@ref(tab:tbl-fit-1) to construct an expected *heterogeneity interval* that describes a range within which a certain percentage of the population's slopes are expected to fall. By convention, @bolgerCausalProcessesPsychology2019 and others have focused on the 95% heterogeneity interval ($HI_{95}$), but because there are already confusingly many quantities using the five percent cutoff, in this manuscript we focus on the 90% heterogeneity interval, and reserve 95% to describing uncertainties. 
-
-To calculate a heterogeneity interval, we first specify the desired probability limits. For a 90% interval, we use the .05 and .95 percentiles (which define the central 90% of the distribution). Then, we pass those percentiles and the estimated mean and standard deviation (see Table \@ref(tab:tbl-fit-1)) to the normal quantile function ($q$; `qnorm()` in R) to obtain the interval: $HI_{90} = q([.05, .95], \beta_1, \tau_1) = q([.05, .95],$ `r mu1[1]`, `r sd1[1]`) = [`r hi90`]. In words, this equation calculates the 0.05 and 0.95 quantiles of the normal distribution defined by the mean's ($\beta_1$) and standard deviation's ($\tau_1$) point estimates: We expect 90% of valence effects in the population to fall within this interval. We illustrate this interval in Figure \@ref(fig:fig-1)B.
+To calculate a heterogeneity interval, we first specify the desired probability limits. For a 90% interval, we use .05 and .95, which together define the central 90% of the distribution. Then, we pass those probabilities and the estimated mean and standard deviation to the normal quantile function $\Phi^{-1}$ (*phi*, `qnorm()` in R), to obtain the interval: $HI_{90} = \Phi^{-1}([.05, .95], \beta_1, \tau_1) = \Phi^{-1}([.05, .95],$ `r mu1[1]`, `r sd1[1]`) = [`r hi90`]. In words, this equation calculates the 0.05 and 0.95 quantiles of the normal distribution defined by the mean's ($\beta_1$) and standard deviation's ($\tau_1$) point estimates: We expect 90% of valence effects in the population to fall within this interval. We illustrate this interval in Figure \@ref(fig:fig-1)B.
 
 ### Proportion descriptors
 
-For many applications, quantities such as proportions of slopes above or below some critical value, or within some critical range, might serve as more informative summaries. For example, we might ask "What proportion of individuals in the population respond faster to positively valenced words?" Thus, we first define a critical value, here zero. We then pass that value and the valence effect's estimated mean and standard deviation to the cumulative normal distribution function ($p$; `pnorm()` in R) to obtain the probability density in this distribution that falls below zero: $p^d = p(0, \beta_1, \tau_1) = p(0,$ `r mu1`, `r sd1`) = `r p_less_zero`. Specifically, this metric indicates the proportion of individuals in the population with negative effects. In words, we have estimated that `r p_less_zero` of the population respond faster to positively valenced words. We show this area under the curve in Figure \@ref(fig:fig-1)C.
+In contrast, proportions of slopes above or below some critical value, or within some critical range, might serve as more informative summaries. For example, we might ask "What proportion of individuals in the population respond faster to positively valenced words?" In other words, we ask what proportion of the heterogeneity distribution is below zero. To answer, we pass zero and the estimated mean and standard deviation to the normal cumulative distribution function ($\Phi$; `pnorm()` in R): $p^- = \Phi(0, \beta_1, \tau_1) = \Phi(0,$ `r mu1[1]`, `r sd1[1]`) = `r p_less_zero`. This number---$p^-$ for proportion of population with negative effects---is the probability that a random slope from this population would take a negative value, or, in other words, the proportion of individuals in the population with negative valence effects. We illustrate this probability in Figure \@ref(fig:fig-1)C.
 
-However, using zero as a critical value might not be sufficiently informative especially when theory allows defining a smallest effect sizes of interest, or what is known as a region of practical equivalence (to zero) [@anvariUsingAnchorbasedMethods2021; @kruschkeBayesianDataAnalysis2017; @kruschkeDoingBayesianData2014]. For example, we might know from theory that valence effects in the interval [-0.1, 0.1] are practically equivalent to zero. To calculate, we can again use the cumulative normal distribution function ($p$) to calculate the proportion of individuals in the population whose valence effect falls within this interval or region of practical equivalence: $p^{ROPE} = p(0.1, \beta_1, \tau_1) - p(-0.1, \beta_1, \tau_1)$ = `r p_rope`. In words, `r p_rope` of the population is expected to have valence effects that are practically equivalent to zero (within the [-0.1, 0.1] interval). We visualize this area under the curve in Figure \@ref(fig:fig-1)D.
+However, using zero as a critical value might not be sufficiently informative, especially when theory allows specifying a smallest effect size of interest, or what is known as a region of practical equivalence [ROPE, @anvariUsingAnchorbasedMethods2021; @lakensEquivalenceTestingPsychological2018; @kruschkeBayesianDataAnalysis2017; @kruschkeDoingBayesianData2014]. In common applications, ROPE is used to statistically infer whether an estimated parameter, such as the effect of valence on logRT for the average person, is practically significant. But we can equally well use a theory-informed region of parameter values to describe and make inferences about the heterogeneity distribution of this effect in the population. 
+
+For example, we might know from theory that valence effects in the interval [-0.1, 0.1] are practically equivalent to zero. To calculate, we can again use the normal cumulative distribution function to calculate the proportion of individuals in the population whose valence effect falls within this interval or region of practical equivalence: $p^{ROPE} = \Phi(0.1, \beta_1, \tau_1) - \Phi(-0.1, \beta_1, \tau_1)$ = `r p_rope`. In words, `r p_rope` of the population is expected to have valence effects that are practically equivalent to zero. Note that this statement's validity critically depends on the chosen interval, which we arbitrarily set as [-0.1, 0.1] in this example. We visualize this probability in Figure \@ref(fig:fig-1)D.
 
 ### Ratio descriptors
 
-Although the interval and proportion descriptors show where the population's slope values are likely to fall, they do so in absolute terms, such as log(rt) in the running example. A contrasting, relative way to show heterogeneity is to express it as a ratio of the standard deviation to the mean. In our example this is the ratio of the standard deviation to the mean of the valence effect.
+Although the interval and proportion descriptors show where the population's slopes are likely to fall, they do so in absolute terms such as log(rt) in the running example. A contrasting or *relative* way to describe heterogeneity is to express it as a ratio of the standard deviation to the mean. The benefit of this descriptor is that in isolation a standard deviation says very little, but when directly compared to the mean effect, it allows for a sufficient description of the relative degree of heterogeneity of the phenomenon under study.
 
 [@bolgerCausalProcessesPsychology2019, p.609] suggest as a rule of thumb that if the ratio of the standard deviation to the average effect is 0.25 or greater, then heterogeneity can be deemed noteworthy. With these data and model, the ratio $\frac{\tau_1}{\beta_1}$ is `r ratio`, suggesting that the degree of heterogeneity in valence effects is noteworthy. (We reiterate the point made by @bolgerCausalProcessesPsychology2019 that the cutoff value of 0.25 is arbitrary and researchers should choose the cutoff based on their substantive goals.)
 
 ## Uncertainty
 
-Although informative, the expected normal distribution of valence effects, or any transformation of those point estimates such as the ones illustrated in Figure \@ref(fig:fig-1), ignores the uncertainty inherent in the estimated parameters, and therefore cannot communicate the analyst's uncertainty about the degree of heterogeneity. That is, the uncertainty with which we have estimated the population parameters, indicated by e.g. the confidence intervals in Table \@ref(tab:tbl-fit-1), is not carried forward to the calculations described above. For example, we only presented the expected heterogeneity interval, but not the range of credible values that it might take. For instance, if we re-calculate $HI_{90}$ based on the lowest 95%CI bounds in Table \@ref(tab:tbl-fit-1), the result is a heterogeneity interval that indicates 90% of the population's slopes falling in the [`r hi90_low`] interval. In contrast to the first interval, this interval implies much less heterogeneity and that 90% of the population's slopes are expected to fall below zero. 
+Although informative, the expected normal distribution of valence effects and its transformations, such as the ones illustrated in Figure \@ref(fig:fig-1), ignore the uncertainty inherent in the estimated parameters. The point estimates alone cannot fully communicate the model's knowledge about the degree of heterogeneity. That is, the uncertainty with which we have estimated the population parameters, indicated by e.g. the confidence intervals in Table \@ref(tab:tbl-fit-1), is not carried forward to the calculations described above or any description based on them. 
+
+For example, we only presented the expected heterogeneity interval, but not the range of credible values that it might take. If we re-calculate $HI_{90}$ based on the lowest 95%CI bounds in Table \@ref(tab:tbl-fit-1), the resulting heterogeneity interval indicates that 90% of the population's slopes would fall in the [`r hi90_low`] interval. In contrast to the expected interval, this interval implies that 90% of the population's slopes are expected to fall below zero. 
 
 We have now arrived at the crux of the current work: How should we estimate and describe heterogeneity in psychological phenomena such that the fundamental uncertainty in the estimated parameters is retained?
 
 # Probabilistic assessment of heterogeneity
 
-We think that probabilistic (i.e. "bayesian") methods are uniquely applicable to estimating and describing heterogeneity in psychological phenomena in ways that naturally incorporate information about uncertainty because they deliver distributions of plausible values that could underlie hypothetical data generating processes [@gelmanBayesianDataAnalysis2013; @kruschkeBayesianDataAnalysis2017; @kruschkeDoingBayesianData2014; @mcelreathStatisticalRethinkingBayesian2020]. Moreover, these methods are widely available in modern software packages: For typical scenarios, probabilistic models are as easily estimated as their maximum likelihood counterparts.
+We think that probabilistic (i.e. "bayesian") methods are uniquely able to address this challenge. Bayesian methods estimate and describe heterogeneity in ways that naturally incorporate information about uncertainty because they deliver distributions of plausible values that could underlie hypothetical data generating processes [@gelmanBayesianDataAnalysis2013; @kruschkeBayesianDataAnalysis2017; @kruschkeDoingBayesianData2014; @mcelreathStatisticalRethinkingBayesian2020]. For typical scenarios, probabilistic models are as easy to use as their maximum likelihood counterparts [@burknerBrmsPackageBayesian2017; @burknerAdvancedBayesianMultilevel2018] Moreover, many advanced models *require* bayesian methods [@muthenBayesianStructuralEquation2012; @asparouhovDynamicStructuralEquation2018].
 
 ```{r fit1-brms}
 fit_1 <- brm(
@@ -525,15 +534,13 @@ post1 |>
 
 The goal of bayesian inference is the multivariate posterior probability distribution of the model's parameters. However, because closed-form solutions are not available for posterior distributions of many important types of statistical models, in practice bayesian methods rely on drawing many random samples from the posterior distribution [@gelmanBayesianDataAnalysis2013; @ravenzwaaijSimpleIntroductionMarkov2016]. Therefore, "estimate" means a large number of random samples from the posterior distribution. These samples can then be used to calculate, summarize, and visualize the posterior distribution of any desired quantity. 
 
-In practice, one obtains (e.g.) 4,000 samples from the posterior distribution using computational algorithms [e.g. @standevelopmentteamStanModelingLanguage2023] through accessible software [e.g., @burknerBrmsPackageBayesian2017], and then summarizes them using familiar data processing techniques [e.g. @rcoreteamLanguageEnvironmentStatistical2023]. Here, we used the R package brms [@burknerBrmsPackageBayesian2017] to specify the model and then draw random samples from its posterior distribution [@standevelopmentteamStanModelingLanguage2023]. The MCMC estimation algorithm completed in about 2 minutes on a modern laptop. We then assessed the estimation algorithm convergence graphically and numerically, and model adequacy using a graphical posterior predictive check [@gelmanBayesianDataAnalysis2013].
+In practice, one obtains (for example) 4,000 samples from the posterior distribution using computational algorithms [e.g. @standevelopmentteamStanModelingLanguage2023] through accessible software [e.g., @burknerBrmsPackageBayesian2017], and then summarizes them using familiar data processing techniques [e.g. @rcoreteamLanguageEnvironmentStatistical2023]. Here, we used the R package brms [@burknerBrmsPackageBayesian2017] to specify the model and then draw random samples from its posterior distribution. The MCMC estimation algorithm completed in about 5 seconds on a modern laptop. We then assessed the estimation algorithm convergence graphically and numerically, and model adequacy using a graphical posterior predictive check [@gelmanBayesianDataAnalysis2013].
 
-Table \@ref(tab:tbl-samples-1) shows six random samples from Model 1's posterior distribution; the two bottom rows show their means and standard deviations. Note that because we used the brms package's default noninformative prior distributions, the posterior summaries are numerically very similar to the maximum likelihood estimates in Table \@ref(tab:tbl-fit-1). 
+Table \@ref(tab:tbl-samples-1) shows six random samples from the posterior distribution of Model 1's population-level parameters ("fixed" parameters in the frequentist nomenclature). The two bottom rows show their means and standard deviations (which correspond to frequentist standard errors). Note that because we used brms's default noninformative prior distributions, the posterior summaries are numerically very similar to the maximum likelihood estimates in Table \@ref(tab:tbl-fit-1). 
 
 ## Heterogeneity distribution
 
-Armed with the bayesian estimates (Table \@ref(tab:tbl-samples-1)), we now return to the distribution of valence effects in the population. We first redraw the expected heterogeneity distribution from Figure \@ref(fig:fig-1) using the posterior mean values of $\beta_1$ and $\tau_1$ in Figure \@ref(fig:fig-2)A (thick dark blue curve). Superimposed on that normal density curve are heterogeneity distributions calculated not from the posterior means, but from 100 randomly sampled values from the joint posterior distribution of $\beta_1$ and $\tau_1$. From these curves we glean that the distribution of valence effects might well be narrower (i.e. less heterogeneity) or wider (more heterogeneity) than is suggested by the point estimates. 
-
-<!-- TODO: Conceptually link this to Figure 1 Panel A -->
+Armed with the bayesian estimates (Table \@ref(tab:tbl-samples-1)), we now return to the distribution of valence effects in the population. We now have 4,000 samples from this heterogeneity distribution's posterior distribution. We first redraw the expected heterogeneity distribution from Figure \@ref(fig:fig-1) using the posterior mean values of $\beta_1$ and $\tau_1$ in Figure \@ref(fig:fig-2)A (thick dark blue curve). Superimposed on that normal density curve are heterogeneity distributions calculated not from the posterior means, but from 100 random posterior samples of $\beta_1$ and $\tau_1$. From these curves we glean that the distribution of valence effects might well be narrower (i.e. less heterogeneity) or wider (more heterogeneity) than is suggested by the point estimates. 
 
 ```{r}
 #| label: calc-dfs
@@ -590,10 +597,9 @@ summary(fit_1)
 ```{r}
 #| label: fig-2
 #| fig.height: 3
-#| fig.width: 8
+#| fig.width: 5.4
 #| fig.env: "figure*"
-#| fig.align: "center"
-#| fig.cap: "Bayesian estimates of the heterogeneity distribution of valence effects. A. Probability density function (PDF) curves. The thick line illustrates the expected (point estimate; posterior mean) PDF of the valence effect heterogeneity distribution. Thin lines show 100 random samples of the PDF's posterior distribution, and facilitate visual communication of uncertainty in the PDF and, therefore, the valence effects' heterogeneity distribution. Dark line segments are inside the [-0.1, 0.1] ROPE, light segments are outside. The y-axis is in arbitrary probability density units at each point of the x-axis. B. The heterogeneity distribution's posterior mean PDF curve (line), and 90\\%CI (ribbon). C. Cumulative density function (CDF) curves, annotated as A. D. Histogram of the posterior distribution of $p^d$ (CDF segments below zero): This value describes the proportion of individuals with negative valence effects on logRT. Point and interval representes the posterior mean and 95\\%CI. E. As C, but represents uncertainty with a 95\\% confidence ribbon. F. Approximate posterior density of $p^d$."
+#| fig.cap: "Bayesian estimates of the heterogeneity distribution of valence effects. A. Probability density function (PDF) curves. The thick line illustrates the expected (point estimate; posterior mean) PDF of the valence effect heterogeneity distribution. Thin lines show 100 random samples of the PDF's posterior distribution, and facilitate visual communication of uncertainty in the PDF and, therefore, the valence effects' heterogeneity distribution. Dark line segments are inside the [-0.1, 0.1] ROPE, light segments are outside. The y-axis is in arbitrary probability density units at each point of the x-axis. B. The heterogeneity distribution's posterior mean PDF curve (line), and 90\\%CI (ribbon). C. Cumulative density function (CDF) curves, annotated as A. D. Histogram of the posterior distribution of $p^-$ (CDF segments below zero): This value describes the proportion of individuals with negative valence effects on logRT. Point and interval representes the posterior mean and 95\\%CI. E. As C, but represents uncertainty with a 95\\% confidence ribbon. F. Approximate posterior density of $p^-$."
 
 # Shared Y axis
 scale_y_01 <- scale_y_continuous(
@@ -696,7 +702,7 @@ p_p0 <- post1 |>
     expand = expansion(c(0.0, 0.1))
   ) +
   scale_y_01 +
-  theme_void(base_size = 9) + 
+  theme_void(base_size = 9) +
   theme(
     plot.tag.position = c(.55, .75), 
     plot.tag = element_text(size = rel(1))
@@ -747,11 +753,11 @@ p_pdf <- p_pdf_samples | p_pdf_ribbon
   plot_annotation(tag_levels = "A")
 ```
 
-Moreover, the location of these curves differ: Some curves are further to the left (valence effect for the average person is more negative), and some further to the right (effect for the average person is more positive). The distribution of these curves represents our uncertainty over the heterogeneity distribution of valence effects in the population, and can be more completely summarized graphically as a ribbon: Figure \@ref(fig:fig-2)B shows the 95%CI of the valence effect's probability density for each value of the effect on the x-axis. A sufficient description of heterogeneity must include information about uncertainty in both the location (mean) and scale (standard deviation) parameters of the heterogeneity distribution.
+Moreover, the location of these curves differ: Some curves are further to the left (valence effect for the average person is more negative), and some further to the right (effect for the average person is more positive). The distribution of these curves represents our current knowledge about the heterogeneity distribution of valence effects in the population---given these data and this model---and can be more completely summarized graphically as a ribbon: Figure \@ref(fig:fig-2)B shows the 95%CI of the valence effect's probability density for each value of the effect on the x-axis. A sufficient description of heterogeneity must include information about uncertainty in both the location (mean) and scale (standard deviation) parameters of the heterogeneity distribution.
 
-However, depicting the heterogeneity distribution visually as a probability density function (PDF) curve has its drawbacks. First, it appears to us visually more challenging to read the degree of uncertainty from a PDF, even when the underlying parameters' uncertainty is summarized as an interval (Figure \@ref(fig:fig-2)B). Second, for many applications, the y-axis is not informative: We do not care that the probability density of the curve is (e.g.) 3.0 at some specific value of the valence effect.
+However, depicting the heterogeneity distribution visually as a probability density function (PDF) curve has its drawbacks. First, it appears to us visually more challenging to read the degree of uncertainty from a PDF, even when the underlying parameters' uncertainty is summarized as a ribbon around the posterior mean (Figure \@ref(fig:fig-2)B). Second, for many applications, the y-axis is not informative: We do not care that the probability density of the curve is (for example) 3.0 at some specific value of the valence effect.
 
-Therefore, in Figure \@ref(fig:fig-2)C we depict the heterogeneity distribution as a *cumulative density* function (CDF). We again superimposed 100 random samples from the curve's posterior distribution on the posterior mean curve, and summarize the entire posterior distribution with a credibility ribbon in Figure \@ref(fig:fig-2)D. We believe the CDF is particularly useful as a descriptor of heterogeneity, because the y-axis specifically describes the proportion of population with valence effects below (or above) some specific value of the effect, as we highlight below.
+Therefore, in Figure \@ref(fig:fig-2)C we depict the heterogeneity distribution as a *cumulative density* function (CDF). We again superimposed 100 random samples from the curve's posterior distribution on the posterior mean, and summarize the entire posterior distribution with a 95% credibility ribbon in Figure \@ref(fig:fig-2)D. We believe the CDF is particularly useful as a descriptor of heterogeneity, because the y-axis describes a directly interpretable quantity: Namely, the proportion of population with valence effects below some specific value.
 
 ### Interval descriptors
 
@@ -774,7 +780,7 @@ Above, we described the heterogeneity interval as a range of values where a spec
 
 Summarizing a distribution of intervals entails some challenges, however, because an interval is defined by two quantities---the lower and upper bounds. The 95% most credible lower bounds of $HI_{90}$ range between `r p1s$l`, whereas the 95% most credible upper bounds range between `r p1s$u` (Figure \@ref(fig:intervals)B). Thus, to adequately describe an estimated heterogeneity interval, researchers must communicate two separate uncertainty intervals: In words, we estimate that 90% of the population's valence effects range from `r paste(p1s$hi_low, p1s$l)` to `r paste(p1s$hi_high, p1s$u)`.
 
-Figure \@ref(fig:intervals)A further suggests that communicating the two uncertainty intervals of a heterogeneity interval is not only cumbersome, but also ignores potential correlations between the heterogeneity interval endpoints' posterior distributions.
+Figure \@ref(fig:intervals)A further suggests that communicating the two uncertainty intervals of a heterogeneity interval is not only cumbersome, but also ignores potential correlations between the heterogeneity interval endpoints' posterior distributions. For these reasons, although the HI can be a useful summary, we occasionally favor [e.g., @vuorreAffectiveUpliftVideo2023] the scalar descriptors discussed below.
 
 ### Proportion descriptors
 
@@ -808,17 +814,15 @@ tmp <- post1 |>
   )
 ```
 
-To answer, we calculate the cumulative probability density at zero of $\operatorname{Normal}(\beta_1, \tau_1)$ for each posterior sample of $\beta_1$ and $\tau_1$. We show 100 random samples of the CDF in Figure \@ref(fig:fig-2)C with a vertical line superimposed at zero. The y-axis value where each CDF crosses zero on the x-axis indicates the population proportion of negative valence effects. 
+To answer, we calculate $p^- = \Phi(0, \beta_1, \tau_1)$ for each posterior sample of $\beta_1$ and $\tau_1$. We show 100 posterior samples of the CDF in Figure \@ref(fig:fig-2)C with a vertical line superimposed at zero. The y-axis value where the CDF crosses zero on the x-axis indicates the population proportion of negative valence effects ($p^-$). We also show a histogram of all 4,000 posterior samples of that proportion in the top left margin of Figure \@ref(fig:fig-2)C, with the associated 95%CI. The model predicts the proportion of individuals in the population with negative valence effects to be approximately `r percent(as.numeric(tmp$pd), .1)` (posterior mean), but with 95% confidence this value could be as low as `r percent(as.numeric(tmp$pd.lower), .1)` or as high as `r percent(as.numeric(tmp$pd.upper), .1)`. Alternatively, the model predicts that `r tmp$pd_r_n` of individuals in the population would show reversals of the valence effect. 
 
-Critically, we also show a histogram of all 4,000 posterior samples of that proportion in the top left margin of Figure \@ref(fig:fig-2)C, with the associated 95%CI: According to the model, the proportion of individuals in the population with negative valence effects is approximately `r percent(as.numeric(tmp$pd), .1)` (posterior mean), but could be as low as `r percent(as.numeric(tmp$pd.lower), .1)` or as high as `r percent(as.numeric(tmp$pd.upper), .1)` (with 95% confidence). Alternatively [@bolgerCausalProcessesPsychology2019, p.605-606], the model predicts that `r tmp$pd_r_n` of individuals in the population would show reversals of the valence effect. 
+Moreover, if theory allows defining a range of parameter values that are practically equivalent to zero (ROPE), we can use the posterior distribution to quantify uncertainty in the proportion of individuals predicted to have such practically negligible effects. We colored the curves in Figure \@ref(fig:fig-2)C such that curve segments within [-0.1, 0.1] are highlighted with a darker color. Those darker line segments represent proportions of the population whose valence effect is practically equivalent to zero ($p^{ROPE}$). To quantify uncertainty in $p^{ROPE}$ we then aggregate the segments' to a mean and a 95%CI: `r tmp$rope_r` of individuals in the population have a valence effect that is practically equivalent to zero. We note that the ROPE of [-0.1, 0.1] here was arbitrary and picked just to illustrate the example.
 
-We can use the posterior distribution of the valence effect's heterogeneity in other useful manners too. For example, if theory has helped us define a smallest effect size of interest (SESOI) to determine a range of magnitudes that are "practically equivalent to zero" (ROPE), we can use the posterior distribution to quantify uncertainty in the proportion of individuals predicted to have such practically equivalent to zero valence effects. We colored the curves in Figure \@ref(fig:fig-2)C such that curve segments within [-0.1, 0.1] are highlighted with a darker color. Those darker line segments represent proportions of the population whose valence effect is practically equivalent to zero ($p^{ROPE}$). To quantify uncertainty in $p^{ROPE}$ we then aggregate the segments' to a mean and a 95%CI: `r tmp$rope_r` of individuals in the population have a valence effect that is practically equivalent to zero. We note that the ROPE of [-0.1, 0.1] here was arbitrary and picked just to illustrate the example.
-
-So far, these examples have highlighted the importance of quantifying uncertainty in descriptions of heterogeneity. Had we only focused on the point estimates (posterior means), we might have misleadingly concluded that $p^d$ = `r percent(tmp$pd, .1)` and $p^{ROPE}$ = `r percent(tmp$rope, .1)`. However, with 95% confidence, these values might be as small as `r percent(tmp$pd.lower, .1)` and `r percent(tmp$rope.lower, .1)`, or as large as `r percent(tmp$pd.upper, .1)` and `r percent(tmp$rope.upper, .1)`, respectively.
+So far, these examples have highlighted the importance of quantifying uncertainty in descriptions of heterogeneity. Had we only focused on the point estimates (posterior means), we might have misleadingly concluded that $p^-$ = `r percent(tmp$pd, .1)` and $p^{ROPE}$ = `r percent(tmp$rope, .1)`. However, with 95% confidence, these values might be as small as `r percent(tmp$pd.lower, .1)` and `r percent(tmp$rope.lower, .1)`, or as large as `r percent(tmp$pd.upper, .1)` and `r percent(tmp$rope.upper, .1)`, respectively.
 
 ### Ratio descriptors
 
-Finally, we can assess heterogeneity in relative terms by comparing the magnitude of the heterogeneity in valence effects (the standard deviation $\tau_1$) to the magnitude of the average effect (the mean $\beta_1$) by calculating the ratio $\frac{\tau_1}{\beta_1}$. Figure \@ref(fig:hdist-5)A shows 4,000 samples from the joint posterior distribution of the mean and standard deviation, which we then transformed into 4,000 samples of the posterior distribution of $\frac{\tau_1}{\beta_1}$ in Figure \@ref(fig:hdist-5)B. The ratio `r tmp$ratio_r` suggests that the relative magnitude of heterogeneity is substantial, but might be as low as `r number(tmp$ratio.lower, .01)` or as great as `r number(tmp$ratio.upper, .01)`, with 95% confidence. If we used rule of thumb of 0.25 in @bolgerCausalProcessesPsychology2019, with these results we could say *with confidence* that heterogeneity in valence effects is notable.
+Finally, we can assess heterogeneity in relative terms by comparing the magnitude of the heterogeneity in valence effects (the standard deviation $\tau_1$) to the magnitude of the average effect (the mean $\beta_1$) by calculating the ratio $\frac{\tau_1}{\beta_1}$. Figure \@ref(fig:hdist-5)A shows 4,000 samples from the joint posterior distribution of the mean and standard deviation, from which we calculated 4,000 samples of the posterior distribution of $\frac{\tau_1}{\beta_1}$ (Figure \@ref(fig:hdist-5)B). The ratio `r tmp$ratio_r` suggests that the relative magnitude of heterogeneity is substantial, but might be as low as `r number(tmp$ratio.lower, .01)` or as great as `r number(tmp$ratio.upper, .01)`, with 95% confidence. If we used the 1/4 rule of thumb suggested in @bolgerCausalProcessesPsychology2019, with these results we could say *with confidence* that heterogeneity in valence effects is notable.
 
 ```{r}
 #| label: hdist-5
@@ -870,11 +874,11 @@ p2 <- post1 |>
   plot_annotation(tag_levels = "A")
 ```
 
-Throughout these examples, we have seen that---in these example data---our uncertainty in the estimated heterogeneity metrics is substantial: Point estimates provide at best incomplete descriptions of our current state of knowledge regarding heterogeneity in valence effects. We will next see that incorporating uncertainty is not only useful but critical when we turn from describing heterogeneity in one population to comparing it across multiple populations.
+We have seen that---with these example data and this model---our uncertainty in the estimated heterogeneity metrics is substantial: Point estimates provide at best incomplete descriptions of our current state of knowledge regarding heterogeneity in valence effects. We will next see that incorporating uncertainty is not only useful but critical when we turn from describing heterogeneity in one population to comparing its magnitude across multiple populations.
 
 # Comparing heterogeneity
 
-Next, we move beyond assessing heterogeneity in one population to comparing degrees of heterogeneity across multiple populations of study units. To illustrate, we reanalyze a dataset from @mahVariabilitySubjectsFree2023 addressing differences in between person variability (heterogeneity) in memory performance between a free recall memory experiment and a cued recall memory experiment. In @mahVariabilitySubjectsFree2023's Experiment 3, 260 individuals studied a list of twenty target words. After a short break, participants then either freely recalled as many of the target words as they could (Free recall group, N = 123) or recalled as many target words as they could when prompted with related cue words (Cued recall group, N = 137). Thus, the Free and Cued recall tasks had different groups of participants but the same target words. We show a sample of their data in Table \@ref(tab:tab-dat2).
+Next, we move beyond assessing heterogeneity in one population to comparing degrees of heterogeneity across potentially multiple populations of different kinds of study units. To illustrate, we reanalyze a dataset from @mahVariabilitySubjectsFree2023 addressing differences in between person variability (heterogeneity) in memory performance between a free recall memory experiment and a cued recall memory experiment. In @mahVariabilitySubjectsFree2023's Experiment 3, 260 individuals studied a list of twenty target words. After a short break, they then either freely recalled as many of the target words as they could (Free recall group, N = 123) or recalled as many target words as they could when prompted with related cue words (Cued recall group, N = 137). Thus, the Free and Cued recall tasks had different groups of participants but the same target words. We show a sample of these data in Table \@ref(tab:tab-dat2).
 
 ```{r data-mah-lindsay-3, include = FALSE}
 # Experiment 3: task type is between-person
@@ -916,9 +920,9 @@ dat |>
   )
 ```
 
-Here, we reproduce and extend those analyses to illustrate how our graphical and numerical descriptions of heterogeneity generalize to describing differences in heterogeneity. We ask three questions about between-task differences in heterogeneity: (1) To what extent is memory performance more variable between people in the cued recall task compared to the free recall task? (2) To what extent is memory performance variability between target words different across cued recall and free recall tasks? And (3) How consistent is target word heterogeneity across the two tasks: Are target words associated with good memory performance in cued recall experiments the same words that are associated with good memory performance in free recall experiments?
+We extend those analyses to illustrate how our descriptions of heterogeneity generalize to differences in heterogeneity in ways that inform audiences beyond variance ratios and model comparisons. We ask three questions about between-task differences in heterogeneity: (1) To what extent is memory performance more variable between people in the cued recall task compared to the free recall task? (2) To what extent is memory performance variability between target words different across cued recall and free recall tasks? And (3) How consistent is target word heterogeneity across the two tasks: Are target words associated with good memory performance in cued recall experiments the same words that are associated with good memory performance in free recall experiments?
 
-To answer these questions, we model the $i$th total recall accuracy in 1 to `r nrow(dat)`, of person $j$ in 1 to `r length(unique(dat$person))`, word $k$ in 1 to `r length(unique(dat$target))`, and task $m$ in {F (free recall), C (cued recall)} as Bernoulli distributed, where the probability of an accurate answer is determined by the rate parameter $\pi_{ijkm}$. As is common with generalized linear models, we model the rate parameter through a nonlinear link function. In this example, we use the cumulative normal density function ($\Phi$; "probit"), but other link functions are also available, such as the common logit. Consequently, it is the "linear predictor" $\eta$ that we then model as a linear combination of the predictors.
+To answer these questions, we model the $i$th total recall accuracy in 1 to `r nrow(dat)`, of person $j$ in 1 to `r length(unique(dat$person))`, word $k$ in 1 to `r length(unique(dat$target))`, and task $m$ in {F (free recall), C (cued recall)} as Bernoulli distributed, where the probability of an accurate answer is determined by the rate parameter $\pi_{ijkm}$. As is common with generalized linear models, we model the rate parameter through a nonlinear link function. In this example, we use the cumulative normal density function ($\Phi$, or "probit"), but other link functions are also available, such as the common logit. Consequently, it is the "linear predictor" $\eta$ that we then model as a linear combination of the predictors.
 
 \begin{align*}
 \tag{2}
@@ -934,10 +938,11 @@ To answer these questions, we model the $i$th total recall accuracy in 1 to `r n
 \end{bmatrix} &\sim 
   \operatorname{MVN}\left(
   \begin{bmatrix} 0 \\ 0 \end{bmatrix}, 
-  \begin{bmatrix} 
-  \tau_{\delta_{[m:F]}} &\rho_\delta \\ 
-  \rho_\delta &\tau_{\delta_{[m:C]}} 
-\end{bmatrix}\right).
+  \begin{pmatrix} 
+    \tau_{\delta_{[m:F]}} &\rho_\delta \\ 
+    \rho_\delta &\tau_{\delta_{[m:C]}} 
+  \end{pmatrix}
+\right).
 \end{align*}
 
 This Model 2 of memory performance is similar to our Model 1 of valence effects above, but contains two sources of heterogeneity (persons, whose parameters we represent with $\gamma$, and target words, whose parameters we write with $\delta$). In addition, instead of coding the task type (free recall vs. cued recall) using predictor coding schemes such as contrast or dummy coding, we have index-coded task using subscripts $_{m:F}$ to stand for Free recall parameters, and $_{m:C}$ for parameters pertaining to the Cued recall task. This reparameterization is useful, because it allows us to quantify heterogeneity in memory performance separately for the two tasks, rather than for (if using contrast coding) the average task and their difference. Notice also that we model $\gamma$ using to independent normal distributions, and $\delta$ with a multivariate normal distribution. Because different persons participated in the two tasks, we cannot assess whether participant-specific abilities are correlated across the tasks. But we can assess this for target items, which were common across the tasks.
@@ -970,7 +975,7 @@ mcmc_plot(fit2, type = "rhat_hist")
 pp_check(fit2, type = "bars_grouped", group = "task", ndraws = 100)
 ```
 
-We estimated the model as above by drawing 4,000 random samples from the posterior distribution [@burknerBrmsPackageBayesian2017]. We then confirmed graphically and numerically that the estimation algorithm had converged, and that the model performed adequately using a graphical posterior predictive check [@gelmanBayesianDataAnalysis2013]. We summarise the model's posterior distribution in Table \@ref(tab:tbl-samples-2).
+We estimated Model 2 exactly as Model 1, by drawing 4,000 random samples from its posterior distribution [@burknerBrmsPackageBayesian2017]. We then confirmed graphically and numerically that the estimation algorithm had converged, and that the model performed adequately using a graphical posterior predictive check [@gelmanBayesianDataAnalysis2013]. We summarise the model's posterior distribution in Table \@ref(tab:tbl-samples-2).
 
 ```{r}
 #| label: tbl-samples-2
@@ -1075,13 +1080,7 @@ post2_sum <- post2 |>
 
 Descriptively, we reproduced @mahVariabilitySubjectsFree2023's finding that participants' memory performance was more heterogeneous in the cued recall than in the free recall experiment (columns 4 and 5 in Table \@ref(tab:tbl-samples-2)). We show the relevant estimated quantities, and the implied heterogeneity distributions in Figure \@ref(fig:fig-2-person). 
 
-The top panel of Figure \@ref(fig:fig-2-person)A illustrates the posterior distributions of memory performance for the average person in the free and cued recall tasks, and their difference (cued - free recall). Notice that all quantities in this model are in the probit space ("z-scores"): While recall performance was `r post2_sum$x[post2_sum$variable=="b_taskFree"]` and `r post2_sum$x[post2_sum$variable=="b_taskCued"]` in the free and cued recall conditions, respectively, in the probit space, they can be converted to probabilities, in which the quantities were `r post2_sum$x[post2_sum$variable=="b_taskFree_p"]` and `r post2_sum$x[post2_sum$variable=="b_taskCued"]`. However, this conversion does not work in general and we therefore restrict descriptions to probits in what follows.
-
-Second, and more importantly, the second row in Figure \@ref(fig:fig-2-person)A describes the posterior distributions of the between-person standard deviations in memory ability in the free and cued recall tasks, and their difference (cued - free recall). The standard deviation was `r post2_sum$x[post2_sum$variable=="sd_person_difference"]` probits greater in the cued recall task (ratio: `r post2_sum$x[post2_sum$variable=="sd_person_ratio"]`). The third row of Figure \@ref(fig:fig-2-person)A shows the estimated proportions of individuals whose memory performance is above chance in the two tasks, and their difference. The model estimates the proportion of individuals who perform above chance to be `r post2_sum$x[post2_sum$variable=="pd_person_difference"]` greater in the cued than in the free recall task. 
-
-Perhaps surprisingly, even though the absolute measures of heterogeneity differed greatly between the two recall tasks, the bottom panel of Figure \@ref(fig:fig-2-person)A shows that the degree of relative heterogeneity is identical across the two tasks. (We truncated the Ratio axis at [-10, 10] because estimates of the ratio are extreme for estimated distributions with very small average effects but large standard deviations. The difference in ratios is very uncertain partly for the same reason.)
-
-Moreover, we depict the heterogeneity distributions---both as PDFs and CDFs---in Figure \@ref(fig:fig-2-person)B. These figures, especially the bottom panel, allow for a concise description of (differences in) heterogeneity in the two tasks: First, we see that the majority of the free recall CDF is to the left of the zero (chance) line, indicating that the majority of this population is predicted to perform worse than chance. This information is described in more detail in the small posterior densities and point-intervals on the left y-axis: The model predicts above-chance performance only for `r post2_sum$x[post2_sum$variable=="pd_person_free"]` of the population. Second, we see that the slope of the cued recall CDF is less steep than that of the free recall CDF: The between-person distribution of memory abilities is more dispersed in the cued than in the free recall task.
+The top panel of Figure \@ref(fig:fig-2-person)A illustrates the posterior distributions of memory performance for the average person in the free and cued recall tasks, and their difference (cued - free recall). Notice that the model's parameters refer to probits ("z-scores"): While recall performance was `r post2_sum$x[post2_sum$variable=="b_taskFree"]` and `r post2_sum$x[post2_sum$variable=="b_taskCued"]` probits in the free and cued recall conditions, respectively, the corresponding probabilities were `r post2_sum$x[post2_sum$variable=="b_taskFree_p"]` and `r post2_sum$x[post2_sum$variable=="b_taskCued_p"]`. However, this conversion does not work in general and we therefore restrict descriptions to probits in what follows.
 
 ```{r}
 #| label: fig-2-person-calc
@@ -1123,13 +1122,12 @@ post2 |>
 
 ```{r}
 #| label: fig-2-person
-#| fig-width: 8
-#| fig-height: 3.6
+#| fig.height: 3.2
 #| fig.env: "figure*"
 #| fig.cap: "Estimated between-person heterogeneity in memory performance in Free recall and Cued recall tasks from Model 2. A. Histograms of 4,000 posterior draws from the model parameters and their transformations, with points and intervals showing posterior means and 95\\%CIs. Differences calculated as Cued - Free recall. B. Probability density (top) and cumulative density functions (bottom) of the two groups' heterogeneity distributions (green: free recall, red: cued recall). The densities, points, and intervals on the left y-axis of the bottom panel indicate approximate posterior densities, with means and 95\\%CIs, of the proportions of the populations with memory performance above chance."
 
 p2_pars_person <- post2 |> 
-  select(contains("b_") | contains("person")) |> 
+  select(contains("b_") | contains("person"), -sd_person_ratio) |> 
   pivot_longer(everything()) |> 
   mutate(
     name = str_to_lower(name) |> 
@@ -1272,11 +1270,19 @@ p2_pcdf_person <- p2_pdf_person / p2_cdf_person
   plot_annotation(tag_levels = "A")
 ```
 
-Finally, we return to the heterogeneity interval (HI). The $HI_{90}$'s lower bound in the free recall task is `r post2_sum$x[post2_sum$variable=="hi_low_free"]`, and `r post2_sum$x[post2_sum$variable=="hi_low_cued"]` in the cued recall task. While this 5th percentile of the heterogeneity distribution was not credibly different across the two tasks (`r post2_sum$x[post2_sum$variable=="hi_low_difference"]`), the 95th percentiles differed at the 95% credibility level (`r post2_sum$x[post2_sum$variable=="hi_high_difference"]`). Moreover, studying Figure \@ref(fig:fig-2-person)B closely makes another implication of the different standard deviations clear: While the average person likely has greater memory performance in the cued recall task, the model predicts that there are also more individuals with very poor performances in the cued recall condition.
+Second, and more importantly, the second row in Figure \@ref(fig:fig-2-person)A describes the posterior distributions of the between-person standard deviations in memory ability in the free and cued recall tasks, and their difference (cued - free recall). The standard deviation was `r post2_sum$x[post2_sum$variable=="sd_person_difference"]` probits greater in the cued recall task (ratio: `r post2_sum$x[post2_sum$variable=="sd_person_ratio"]`). 
+
+The third row of Figure \@ref(fig:fig-2-person)A shows the estimated proportions of individuals whose memory performance is above chance in the two tasks ($p^+$), and their difference. The model estimates the proportion of individuals who perform above chance to be `r post2_sum$x[post2_sum$variable=="pd_person_difference"]` greater in the cued than in the free recall task. Notice that the this quantity refers to population proportions and is not a z-score.
+
+Perhaps surprisingly, even though the absolute measures of heterogeneity differed greatly between the two recall tasks, the bottom panel of Figure \@ref(fig:fig-2-person)A shows that the degree of relative heterogeneity is virtually identical across the two tasks. (We truncated the Ratio axis at [-10, 10] because estimates of the ratio are extreme for estimated distributions with very small average effects but large standard deviations. The difference in ratios is very uncertain partly for the same reason.)
+
+We also depict the heterogeneity distributions as PDFs and CDFs in Figure \@ref(fig:fig-2-person)B. These figures, especially the bottom panel, allow for a concise description of (differences in) heterogeneity in the two tasks: First, we see that the majority of the free recall CDF (green) is to the left of zero (chance), indicating that the majority of this population is predicted to perform worse than chance. This information is described in more detail in the small posterior densities and point-intervals on the left y-axis: The model predicts above-chance performance only for a proportion of `r post2_sum$x[post2_sum$variable=="pd_person_free"]` of the population. Second, we see that the slope of the cued recall CDF (red) is less steep than that of the free recall CDF: The between-person distribution of memory abilities is more dispersed in the cued than in the free recall task.
+
+Finally, we turn to the heterogeneity interval (HI). The $HI_{90}$'s lower bound in the free recall task is `r post2_sum$x[post2_sum$variable=="hi_low_free"]`, and `r post2_sum$x[post2_sum$variable=="hi_low_cued"]` in the cued recall task. While this 5th percentile of the heterogeneity distribution was not credibly different across the two tasks (Cued - Free recall; `r post2_sum$x[post2_sum$variable=="hi_low_difference"]`), the 95th percentiles differed at the 95% credibility level (the Cued recall upper $HI_90$ limit was `r post2_sum$x[post2_sum$variable=="hi_high_difference"]` probits greater). Studying Figure \@ref(fig:fig-2-person)B closely makes another implication of the different standard deviations clear: While the average person likely has greater memory performance in the cued recall task, the model predicts that there are also more individuals with very poor performances in the cued recall condition.
 
 ## Comparing between-target heterogeneity across tasks
 
-Naturally, heterogeneity across people is the more theoretically important phenomenon for psychologists. However, examining and understanding heterogeneity in other sampled units can be both theoretically and methodologically important. Without weighing in on this difference too strongly, for the sake of our example analyses we next turn to our second and third questions regarding potential differences and consistency in between-target word heterogeneity.
+Between-person heterogeneity is typically the more theoretically important phenomenon for psychologists than differences in model parameters between other randomly sampled study units, such as stimuli. However, examining heterogeneity in other sampled units can be both theoretically and methodologically important. Recognizing this difference, and for the sake of our example analyses we next turn to our second and third questions regarding potential differences and consistencies in between-target word heterogeneity.
 
 ```{r}
 #| label: fig-2-target-calc
@@ -1300,8 +1306,8 @@ tmp_target <- bind_rows(
 
 ```{r}
 #| label: fig-2-target
-#| fig.width: 8
-#| fig.height: 3.6
+#| fig.height: 4
+#| fig.width: 7.4
 #| fig.env: "figure*"
 #| fig.cap: "Estimated between-target word heterogeneity in memory performance in Free recall and Cued recall tasks from Model 2. A. Histograms of 4,000 posterior draws from the model parameters and their transformations, with points and intervals showing posterior means and 95\\%CIs. Differences calculated as Cued - Free recall. B. Probability density (top) and cumulative density functions (bottom) of the two tasks' heterogeneity distributions (green: free recall, red: cued recall). The densities, points, and intervals on the left y-axis of the bottom panel indicate approximate posterior densities, with means and 95\\%CIs, of the proportions of the populations with memory performance above chance. C. Posterior mean (dark), and 100 posterior draws (light) of the correlation between target words' proportions correct in the free (x-axis) and cued recall (y-axis) tasks. Ellipses indicate the 90th percentile of the bivariate normal distribution."
 
@@ -1507,13 +1513,11 @@ dat2_target_coefs <- left_join(
     )
 )
 
-lims <- c(-1.8, 1.8)
-
 p2_ellipse <- ellipse_median |>
   ggplot(aes(x, y)) +
   coord_cartesian(
-    ylim = lims,
-    xlim = lims
+    xlim = c(-1.8, 1.5),
+    ylim = c(-1.5, 1.8)
   ) +
   geom_vline(
     xintercept = 0, linewidth = .1, linetype = "dashed"
@@ -1574,40 +1578,31 @@ p2_ellipse <- ellipse_median |>
   plot_annotation(tag_levels = "A")
 ```
 
-The results regarding differences in memory performance heterogeneity across target words were similar to those as observed regarding heterogeneity in people's memory performances. Figure \@ref(fig:fig-2-target)A shows that heterogeneity (standard deviations) in memory performance was greater when words appeared in the cued recall task. The interpretation of this difference is quantitatively similar to that observed about people above: Units of study exhibit greater memory task performance variability in the cued recall than in the free recall task. However, because this experiment used the same target words across the two tasks, this interpretation is subtly more complex: This difference holds even when the exact same units---target words, in this example---are used in the two different tasks.
+The results regarding differences in memory performance heterogeneity across target words were similar to those as observed regarding heterogeneity in people's memory performances. Figure \@ref(fig:fig-2-target)A shows that heterogeneity (standard deviations) in memory performance was greater when words appeared in the cued recall task. The interpretation of this difference is quantitatively similar to that observed about people above: Both people and target words exhibit greater memory task performance variability in the cued recall than in the free recall task. However, because @mahVariabilitySubjectsFree2023 used the same target words across the two tasks, this interpretation is subtly more complex: This difference holds even when the exact same units---target words, in this example---are used in the two different tasks.
 
-Moreover, we observe similar differences in between-target word heterogeneity between the two tasks' as we did in the above analysis of between-person heterogeneity: The model predicts a greater proportion of words to elicit greater than chance performance in the cued recall than in the free recall task. Yet, the ratio of the standard deviation to the mean again appeared identical across the two tasks.
+Moreover, we observe similar differences in between-target word heterogeneity between the two tasks as we did above regarding between-person heterogeneity: The model predicts a greater proportion of words to elicit greater than chance performance in the cued recall than in the free recall task. Yet, the ratio of the heterogeneity distribution's standard deviation to its mean again appeared nearly identical across the two tasks.
 
-However, this analysis of target word heterogeneity afforded an additional piece of information: There was a clear positive correlation between free and cued recall memory performance (bottom panel of Figure \@ref(fig:fig-2-target)B, and Figure \@ref(fig:fig-2-target)C). The posterior mean and 95%CI of this correlation was `r post2_sum$x[post2_sum$variable=="cor_target__taskFree__taskCued"]`. What this correlation means substantively is that words that are likely better recalled in the free recall task are also likely to be those that are better recalled in the cued recall task. @bolgerCausalProcessesPsychology2019 found the conceptually similar result within a correlation of random effects that individuals whose valence effect was stronger at Time 1 were also those whose valence effect was likely to be stronger at Time 2, one week later.
+This analysis of target word heterogeneity afforded an additional piece of information, because the same target words were used across the two tasks, and thus allowed answering our third question. There was a clear positive correlation between target words' rates of correct responses across the free and cued recall tasks (bottom panel of Figure \@ref(fig:fig-2-target)A, and Figure \@ref(fig:fig-2-target)C). The posterior mean and 95%CI of this correlation was `r post2_sum$x[post2_sum$variable=="cor_target__taskFree__taskCued"]`. What this correlation means substantively is that words that are likely better recalled in the free recall task are also likely to be those that are better recalled in the cued recall task. @bolgerCausalProcessesPsychology2019 found a conceptually similar result regarding valence effects' stability across time but within individuals: Individuals whose valence effect was stronger at Time 1 were also those whose valence effect was likely to be stronger at Time 2, one week later.
 
-Although outside our current scope, we note that these analyses might indicate exciting new avenues for this line of inquiry. One explanation for the between-person heterogeneity difference is that participants might adopt different strategies for remembering in the two different recall tasks [@mahVariabilitySubjectsFree2023]. Our additional results suggest that such a mechanism may not be a complete account of differences in memory performance heterogeneity: Target words are presumably invariant regarding memory strategies, yet we find that recall accuracy is more heterogeneous across target words in the cued recall task than in the free recall task (columns 6 and 7 in Table \@ref(tab:tbl-samples-2); top panel in Figure \@ref(fig:fig-2-target)A). Further, we observed across two kinds of study units (people, target words) that the ratio of the between-unit standard deviation to the average effect was nearly identical across the free and cued recall tasks.
+Although outside our current scope, we note that our study of Model 2's results might indicate exciting new avenues for this line of inquiry. One explanation for the between-task difference in between-person heterogeneity is that participants might adopt different strategies for remembering in the two different recall tasks [@mahVariabilitySubjectsFree2023]. Our additional results suggest that such a mechanism may not be a complete account of differences in memory performance heterogeneity: Target words are presumably invariant regarding memory strategies, yet we find that recall accuracy is more heterogeneous across target words in the cued recall task than in the free recall task (Figure \@ref(fig:fig-2-target)A). Moreover, we observed across two kinds of study units (people, target words) that the ratio of the between-unit standard deviation to the average effect was nearly identical across the free and cued recall tasks.
 
 # Discussion
 
-In the current work, we illustrated the use of practical descriptors of heterogeneity in psychological phenomena with examples drawn from the published literature in both social and cognitive psychology. Our aim was to incrementally build on the work of @bolgerCausalProcessesPsychology2019, who described the importance and available methods for examining heterogeneity in causal effects in psychology, and describe how it is both critically important and practically feasible to incorporate uncertainty in analyses and descriptions of heterogeneity. We believe our currently proposed methods to be particularly useful to researchers because they allow doing just that: Incorporating uncertainty in the analyses at every stage, from modelling to communicating resulting inferences. 
+In the current work, we illustrated the use of practical descriptors of heterogeneity in psychological phenomena with examples drawn from social and cognitive psychology. Our aim was to incrementally build on the work of @bolgerCausalProcessesPsychology2019 and others---who have described the importance and available methods for examining heterogeneity in causal effects in psychology---by describing how it is both critically important and practically feasible to incorporate uncertainty in analyses and descriptions of heterogeneity. We believe our currently proposed methods to be particularly useful to researchers because they allow doing just that: Incorporating uncertainty in the analyses at every stage, from modelling to communicating resulting inferences. 
 
-- Researchers already focusing on heterogeneity
-- awesome and my comments
-- coin flipping (standard deviations reported but not inferential quantities (e.g. pr positive))
-- in light of what we've presented they are not communicated in sufficient detail
+We emphasized throughout that a probabilistic ("bayesian") approach is uniquely positioned to answer the needs of researchers interested in heterogeneity. Bayesian methods allow carrying uncertainty forward from model parameters to descriptors of heterogeneity and beyond. The resulting metrics are useful because they not only convey analysts' expectations regarding heterogeneity, but more fully convey their states of knowledge regarding heterogeneity, including degrees of certainty. In addition, probabilistic modelling, by returning a matrix of samples from the posterior distribution, enables practically straightforward solutions whereby analysts can use familiar data wrangling techniques to easily compare various heterogeneity descriptors across groups. We further elucidate these points in our Online Supplementary Analysis [todo].
 
-Moreover, we emphasized throughout that probabilistic modelling allows carrying uncertainty forward from model parameters to heterogeneity descriptors. The resulting metrics are useful because they not only convey the analyst's expectation of the magnitude of heterogeneity, but also her uncertainty in the description. In addition, probabilistic modelling, by returning a matrix of samples from the posterior distribution, allows easily comparing these heterogeneity descriptors across groups.
-
-We believe that psychology should take a meta-theoretic step forward and try to incorporate an understanding of heterogeneity into substantive theories [@bolgerCausalProcessesPsychology2019]. In order to do so, descriptions of heterogeneity must include measures of uncertainty.
-
-## Practical implementation
-
-We provide all the code supporting this manuscript at [todo]. There, we implement the graphical and computational methods for investigating heterogeneity presented here in the R programming language [@rcoreteamLanguageEnvironmentStatistical2023]. Moreover, we make use of the ecosystem of R packages for bayesian computation, including brms [@burknerBrmsPackageBayesian2017; @burknerAdvancedBayesianMultilevel2018] and ggdist [@ggdist2023]. 
+We believe that psychology, broadly speaking, is methodologically and theoretically at a ripe position to taking a meta-theoretic step forward and try to incorporate an understanding of heterogeneity into substantive theories [@bolgerCausalProcessesPsychology2019]. In order to do so, descriptions of heterogeneity must include measures of uncertainty, and we hope the techniques illustrated here help researchers do so.
 
 ## Limitations
 
-In our example analyses, we have brushed many important modelling decisions under the rug in order to focus on the main topic of heterogeneity. First, in example 1 we analyzed reaction times by simply taking log-transforming the RTs. Proper analyses of RTs benefit from models that make more realistic assumptions about the data generating process underlying a reaction time response, but here we necessarily excluded this complication for reasons of brevity.
+In our example analyses, we have brushed many important modelling decisions under the rug in order to focus on the main topic of heterogeneity. First, in example 1 we analyzed reaction times by simply log-transforming reaction times. More informative analyses of RTs would make use of models that make more realistic assumptions about the data generating process underlying reaction time responses, but here we necessarily excluded this complication for reasons of brevity.
 
-Our exposition and interpretation of heterogeneity relied on a critical assumption in line with standard practices in multilevel and generalized linear mixed modelling; that of (multivariate) normality of the person-level parameters. Assuming that random effects are normally distributed is a computationally and conceptually useful fiction, and we recognize that it is unlikely to hold exactly in real psychological phenomena. Excellent work by Haaf, Rouder, and colleagues have explored alternatives to continuous normal distributions of random effects [e.g., @haafDevelopingConstraintBayesian2017; @haafDonAccountingVariability2019].
+Our exposition and interpretation of heterogeneity relied on a critical assumption in line with standard practices in multilevel and generalized linear mixed modelling; that of (multivariate) normality of the group-level parameters. Assuming that random effects are normally distributed is a computationally and conceptually useful fiction, and we recognize that it is unlikely to hold exactly in real psychological phenomena. Haaf, Rouder, and colleagues have explored alternatives to continuous normal distributions of random effects [e.g., @haafDevelopingConstraintBayesian2017; @haafDonAccountingVariability2019].
 
 ## Conclusion
 
-We hope that the computational, graphical, and conceptual tools that we have discussed here prove useful to researchers interested in better understanding heterogeneity in psychological phenomena.
+We hope that the conceptual, computational, and graphical tools that we have discussed here prove useful to researchers interested in better understanding heterogeneity in psychological phenomena.
 
 # Data and code availability
 
@@ -1650,7 +1645,6 @@ The author(s) declare no competing interests.
 ```{r}
 #| label: intervals
 #| fig.height: 2.4
-#| fig.width: 8
 #| fig.cap: Bayesian estimates of the 90% heterogeneity interval of valence effects. A. Scatterplot of 4,000 posterior samples of the lower (x-axis) and upper (y-axis) limits of the $HI_{90}$. B. Histograms of 4,000 samples of the HI90 lower (left) and upper (right) limits with their posterior means and 95%CIs as points and intervals. C. 100 random samples from the $HI_{90}$ posterior distribution, with the posterior mean heterogeneity interval superimposed in a darker shade of blue.
 
 p1 <- post1 |>
