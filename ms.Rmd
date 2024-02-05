@@ -57,6 +57,7 @@ library(janitor)
 library(scales)
 library(ellipse)
 library(knitr)
+library(cmdstanr)
 library(readxl)
 library(lme4)
 library(ggpp)
@@ -96,16 +97,12 @@ theme_set(
 
 # Model estimation options
 dir.create("models", FALSE)
+MAX_CORES <- as.numeric(Sys.getenv("MAX_CORES"), 4)
 options(
-  mc.cores = 4
+  brms.backend = Sys.getenv("BRMS_BACKEND", "rstan"), 
+  brms.threads = MAX_CORES %/% 4,
+  mc.cores = MAX_CORES
 )
-if ("cmdstanr" %in% installed.packages()[,"Package"]) {
-  options(
-    brms.backend = "cmdstanr",
-    brms.threads = 2
-  )
-}  
-dir.create("data", FALSE)
 ```
 
 When building and testing theories of psychological phenomena, psychologists have long focused on asking whether an effect exists or not. Yet, establishing that an independent variable affects a dependent variable may not be a sufficient description of the phenomenon if the treatment effect is variable from one individual to another. The importance of such between-person variation, or *heterogeneity*, for theory development is widely recognized, yet rarely communicated sufficiently in the empirical literature [@bolgerCausalProcessesPsychology2019; @brandCausalEffectHeterogeneity2013]. 
@@ -123,6 +120,7 @@ Our plan is as follows. We first review established methods for estimating and c
 To begin our exposition, we reproduce the analyses presented in @bolgerCausalProcessesPsychology2019. In their study, which replicated findings first presented in @scholerInflatingDeflatingSelf2014, 62 participants saw twenty positively and twenty negatively valenced words, and judged whether each word was self-descriptive or not. Because most people are typically motivated to view themselves positively, @bolgerCausalProcessesPsychology2019 predicted that response times to positively valenced words would be shorter than to negatively valenced words [@scholerInflatingDeflatingSelf2014]. 
 
 ```{r data-bolgeretal, include = FALSE}
+dir.create("data", FALSE)
 # Load, save, & clean example data from Bolger et al. (2019)
 path <- "data/bolger-etal.zip"
 if (!file.exists(path)) {
@@ -198,7 +196,7 @@ This equation includes two kinds of parameters: $\beta_0$ (*beta*), the intercep
 \operatorname{MVN}\left(
   \begin{bmatrix} 0 \\ 0 \end{bmatrix}, 
   \begin{pmatrix} 
-    \tau_0 &\rho \\ 
+    \tau_0 & \\ 
     \rho &\tau_1 
   \end{pmatrix}
 \right).
@@ -939,7 +937,7 @@ To answer these questions, we model the $i$th total recall accuracy in 1 to `r n
   \operatorname{MVN}\left(
   \begin{bmatrix} 0 \\ 0 \end{bmatrix}, 
   \begin{pmatrix} 
-    \tau_{\delta_{[m:F]}} &\rho_\delta \\ 
+    \tau_{\delta_{[m:F]}} & \\ 
     \rho_\delta &\tau_{\delta_{[m:C]}} 
   \end{pmatrix}
 \right).
