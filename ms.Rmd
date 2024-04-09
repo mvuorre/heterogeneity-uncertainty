@@ -50,7 +50,9 @@ output:
     keep_tex: false
 ---
 
-```{r setup, include = FALSE}
+```{r}
+#| label = "setup",
+#| include = FALSE
 # Packages
 library(papaja)
 library(janitor)
@@ -119,7 +121,9 @@ Our plan is as follows. We first review established methods for estimating and c
 
 To begin our exposition, we reproduce the analyses presented in @bolgerCausalProcessesPsychology2019. In their study, which replicated findings first presented in @scholerInflatingDeflatingSelf2014, 62 participants saw twenty positively and twenty negatively valenced words, and judged whether each word was self-descriptive or not. Because most people are typically motivated to view themselves positively, @bolgerCausalProcessesPsychology2019 predicted that response times to positively valenced words would be shorter than to negatively valenced words [@scholerInflatingDeflatingSelf2014]. 
 
-```{r data-bolgeretal, include = FALSE}
+```{r}
+#| label = "data-bolgeretal",
+#| include = FALSE
 dir.create("data", FALSE)
 # Load, save, & clean example data from Bolger et al. (2019)
 path <- "data/bolger-etal.zip"
@@ -210,7 +214,8 @@ Finally, we contrast coded valence such that negative words were assigned -0.5, 
 
 With data described in Table \@ref(tab:tab-dat1), we can estimate this model using standard maximum likelihood methods as implemented in, for example, the R package lme4 [@batesFittingLinearMixedEffects2015; @rcoreteamLanguageEnvironmentStatistical2023].
 
-```{r fit1-lmer}
+```{r}
+#| label = "fit1-lmer"
 fit_lmer <- lmer(
   rt ~ 1 + valence + (1 + valence | person),
   data = dat
@@ -291,7 +296,9 @@ We show a traditional summary of the estimated parameters from this model in Tab
 
 ## Heterogeneity distribution
 
-```{r descriptors, include = FALSE}
+```{r}
+#| label = "descriptors",
+#| include = FALSE
 # Heterogeneity interval
 hi90_num <- qnorm(c(0.05, .95), mu1n, sd1n)
 hi90 <- paste(
@@ -465,7 +472,8 @@ We have now arrived at the crux of the current work: How should we estimate and 
 
 We think that probabilistic (i.e. "bayesian") methods are uniquely able to address this challenge. Bayesian methods estimate and describe heterogeneity in ways that naturally incorporate information about uncertainty because they deliver distributions of plausible values that could underlie hypothetical data generating processes [@gelmanBayesianDataAnalysis2013; @kruschkeBayesianDataAnalysis2017; @kruschkeDoingBayesianData2014; @mcelreathStatisticalRethinkingBayesian2020]. For typical scenarios, probabilistic models are as easy to use as their maximum likelihood counterparts [@burknerBrmsPackageBayesian2017; @burknerAdvancedBayesianMultilevel2018] Moreover, many advanced models *require* bayesian methods [@muthenBayesianStructuralEquation2012; @asparouhovDynamicStructuralEquation2018].
 
-```{r fit1-brms}
+```{r}
+#| label = "fit1-brms"
 fit_1 <- brm(
   rt ~ 1 + valence + (1 + valence | person),
   data = dat,
@@ -878,7 +886,9 @@ We have seen that---with these example data and this model---our uncertainty in 
 
 Next, we move beyond assessing heterogeneity in one population to comparing degrees of heterogeneity across potentially multiple populations of different kinds of study units. To illustrate, we reanalyze a dataset from @mahVariabilitySubjectsFree2023 addressing differences in between person variability (heterogeneity) in memory performance between a free recall memory experiment and a cued recall memory experiment. In @mahVariabilitySubjectsFree2023's Experiment 3, 260 individuals studied a list of twenty target words. After a short break, they then either freely recalled as many of the target words as they could (Free recall group, N = 123) or recalled as many target words as they could when prompted with related cue words (Cued recall group, N = 137). Thus, the Free and Cued recall tasks had different groups of participants but the same target words. We show a sample of these data in Table \@ref(tab:tab-dat2).
 
-```{r data-mah-lindsay-3, include = FALSE}
+```{r}
+#| label = "data-mah-lindsay-3",
+#| include = FALSE
 # Experiment 3: task type is between-person
 path <- "data/mah-lindsay-experiment-3.zip"
 if (!file.exists(path)) {
@@ -906,7 +916,8 @@ dat <- read_excel(
 
 With a preregistered Pitman-Morgan test, @mahVariabilitySubjectsFree2023 found that participants who completed the cued recall task showed greater heterogeneity in memory performance than did the free recall group: The Cued:Free recall variance ratio was 1.33 (with a [1.14, 1.54] 95% bootstrap interval). @mahVariabilitySubjectsFree2023 also confirmed this result by comparing multilevel models that did and didn't allow for different between-person variabilities in memory ability for the two groups, and found similar results across three different experiments.
 
-```{r tab-dat2}
+```{r}
+#| label = "tab-dat2"
 dat |>
   slice(4:6, .by = task) |> 
   apa_table(
@@ -945,7 +956,8 @@ To answer these questions, we model the $i$th total recall accuracy in 1 to `r n
 
 This Model 2 of memory performance is similar to our Model 1 of valence effects above, but contains two sources of heterogeneity (persons, whose parameters we represent with $\gamma$, and target words, whose parameters we write with $\delta$). In addition, instead of coding the task type (free recall vs. cued recall) using predictor coding schemes such as contrast or dummy coding, we have index-coded task using subscripts $_{m:F}$ to stand for Free recall parameters, and $_{m:C}$ for parameters pertaining to the Cued recall task. This reparameterization is useful, because it allows us to quantify heterogeneity in memory performance separately for the two tasks, rather than for (if using contrast coding) the average task and their difference. Notice also that we model $\gamma$ using to independent normal distributions, and $\delta$ with a multivariate normal distribution. Because different persons participated in the two tasks, we cannot assess whether participant-specific abilities are correlated across the tasks. But we can assess this for target items, which were common across the tasks.
 
-```{r fit-brms-ml3}
+```{r}
+#| label = "fit-brms-ml3"
 #| message: false
 
 model <- bf(
