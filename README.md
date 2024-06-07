@@ -1,14 +1,14 @@
-# On investigating heterogeneity in psychological phenomena
+# Communicating causal effect heterogeneity
 
 - Matti Vuorre (mjvuorre@uvt.nl)
 - Matthew Kay
 - Niall Bolger
 
-Source of *On investigating heterogeneity in psychological phenomena* (Vuorre, Kay, Bolger, in prep). Repo at <https://github.com/mvuorre/heterogeneity-uncertainty>, archived at [todo insert Zenodo DOI].
+Source of *Communicating causal effect heterogeneity* (Vuorre, Kay, Bolger, in prep). Repo at <https://github.com/mvuorre/heterogeneity-uncertainty>.
 
 ## Reproduce / contribute
 
-The source code is written in R Markdown. Steps to reproduce the manuscript:
+The source code is written in R as a Quarto document. Steps to reproduce the manuscript:
 
 1. Clone the contents of this repository (e.g. bash: `git clone https://github.com/mvuorre/heterogeneity-uncertainty.git`)
 2. Run `make` in `/heterogeneity-uncertainty/`
