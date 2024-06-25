@@ -1,0 +1,1364 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.5.47">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Matti Vuorre">
+<meta name="author" content="Matthew Kay">
+<meta name="author" content="Niall Bolger">
+<meta name="keywords" content="heterogeneity, uncertainty, variation, hierarchical model, statistics">
+
+<title>Communicating causal effect heterogeneity</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="index_files/libs/clipboard/clipboard.min.js"></script>
+<script src="index_files/libs/quarto-html/quarto.js"></script>
+<script src="index_files/libs/quarto-html/popper.min.js"></script>
+<script src="index_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="index_files/libs/quarto-html/anchor.min.js"></script>
+<link href="index_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="index_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="index_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="index_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="index_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body>
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+  <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#review-of-heterogeneity" id="toc-review-of-heterogeneity" class="nav-link active" data-scroll-target="#review-of-heterogeneity">Review of heterogeneity</a>
+  <ul class="collapse">
+  <li><a href="#model-1" id="toc-model-1" class="nav-link" data-scroll-target="#model-1">Model 1</a></li>
+  <li><a href="#heterogeneity-distribution-at-maximum-likelihood-estimate-of-beta_1-and-tau_1" id="toc-heterogeneity-distribution-at-maximum-likelihood-estimate-of-beta_1-and-tau_1" class="nav-link" data-scroll-target="#heterogeneity-distribution-at-maximum-likelihood-estimate-of-beta_1-and-tau_1">Heterogeneity distribution at maximum likelihood estimate of <span class="math inline">\(\beta_1\)</span> and <span class="math inline">\(\tau_1\)</span></a>
+  <ul class="collapse">
+  <li><a href="#interval-descriptors" id="toc-interval-descriptors" class="nav-link" data-scroll-target="#interval-descriptors">Interval descriptors</a></li>
+  <li><a href="#proportion-descriptors" id="toc-proportion-descriptors" class="nav-link" data-scroll-target="#proportion-descriptors">Proportion descriptors</a></li>
+  <li><a href="#ratio-descriptors" id="toc-ratio-descriptors" class="nav-link" data-scroll-target="#ratio-descriptors">Ratio descriptors</a></li>
+  </ul></li>
+  <li><a href="#missing-uncertainty" id="toc-missing-uncertainty" class="nav-link" data-scroll-target="#missing-uncertainty">Missing uncertainty</a></li>
+  </ul></li>
+  <li><a href="#incorporating-inferential-uncertainty-to-assessments-of-heterogeneity" id="toc-incorporating-inferential-uncertainty-to-assessments-of-heterogeneity" class="nav-link" data-scroll-target="#incorporating-inferential-uncertainty-to-assessments-of-heterogeneity">Incorporating inferential uncertainty to assessments of heterogeneity</a>
+  <ul class="collapse">
+  <li><a href="#heterogeneity-distribution" id="toc-heterogeneity-distribution" class="nav-link" data-scroll-target="#heterogeneity-distribution">Heterogeneity distribution</a>
+  <ul class="collapse">
+  <li><a href="#interval-descriptors-1" id="toc-interval-descriptors-1" class="nav-link" data-scroll-target="#interval-descriptors-1">Interval descriptors</a></li>
+  <li><a href="#proportion-descriptors-1" id="toc-proportion-descriptors-1" class="nav-link" data-scroll-target="#proportion-descriptors-1">Proportion descriptors</a></li>
+  <li><a href="#ratio-descriptors-1" id="toc-ratio-descriptors-1" class="nav-link" data-scroll-target="#ratio-descriptors-1">Ratio descriptors</a></li>
+  </ul></li>
+  </ul></li>
+  <li><a href="#comparing-heterogeneity-between-populations" id="toc-comparing-heterogeneity-between-populations" class="nav-link" data-scroll-target="#comparing-heterogeneity-between-populations">Comparing heterogeneity between populations</a>
+  <ul class="collapse">
+  <li><a href="#comparing-between-person-heterogeneity-across-tasks" id="toc-comparing-between-person-heterogeneity-across-tasks" class="nav-link" data-scroll-target="#comparing-between-person-heterogeneity-across-tasks">Comparing between-person heterogeneity across tasks</a></li>
+  <li><a href="#comparing-between-target-heterogeneity-across-tasks" id="toc-comparing-between-target-heterogeneity-across-tasks" class="nav-link" data-scroll-target="#comparing-between-target-heterogeneity-across-tasks">Comparing between-target heterogeneity across tasks</a></li>
+  </ul></li>
+  <li><a href="#discussion" id="toc-discussion" class="nav-link" data-scroll-target="#discussion">Discussion</a>
+  <ul class="collapse">
+  <li><a href="#limitations" id="toc-limitations" class="nav-link" data-scroll-target="#limitations">Limitations</a></li>
+  <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion">Conclusion</a></li>
+  </ul></li>
+  <li><a href="#disclosures" id="toc-disclosures" class="nav-link" data-scroll-target="#disclosures">Disclosures</a>
+  <ul class="collapse">
+  <li><a href="#data-and-code-availability" id="toc-data-and-code-availability" class="nav-link" data-scroll-target="#data-and-code-availability">Data and code availability</a></li>
+  <li><a href="#author-contributions" id="toc-author-contributions" class="nav-link" data-scroll-target="#author-contributions">Author contributions</a></li>
+  <li><a href="#competing-interests" id="toc-competing-interests" class="nav-link" data-scroll-target="#competing-interests">Competing interests</a></li>
+  </ul></li>
+  </ul>
+<div class="quarto-alternate-formats"><h2>Other Formats</h2><ul><li><a href="ms.pdf"><i class="bi bi-file-pdf"></i>Typst (preprint)</a></li><li><a href="ms.docx"><i class="bi bi-file-word"></i>MS Word (preprint)</a></li></ul></div><div class="quarto-other-links"><h2>Other Links</h2><ul><li><a href="https://"><i class="bi bi-file-pdf"></i>Preprint (PsyArXiv)</a></li><li><a href="https://mvuorre.github.io/heterogeneity-uncertainty"><i class="bi bi-globe2"></i>Online supplement</a></li><li><a href="https://osf.io/yp2gq/"><i class="bi bi-github"></i>GitHub Repository</a></li><li><a href="https://github.com/mvuorre/heterogeneity-uncertainty"><i class="bi bi-archive"></i>OSF Repository</a></li></ul></div></nav>
+</div>
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Communicating causal effect heterogeneity</h1>
+</div>
+
+
+<div class="quarto-title-meta-author">
+  <div class="quarto-title-meta-heading">Authors</div>
+  <div class="quarto-title-meta-heading">Affiliations</div>
+  
+    <div class="quarto-title-meta-contents">
+    <p class="author">Matti Vuorre <a href="mailto:mjvuorre@uvt.nl" class="quarto-title-author-email"><i class="bi bi-envelope"></i></a> <a href="https://orcid.org/0000-0001-5052-066X" class="quarto-title-author-orcid"> <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAA2ZpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYwIDYxLjEzNDc3NywgMjAxMC8wMi8xMi0xNzozMjowMCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDo1N0NEMjA4MDI1MjA2ODExOTk0QzkzNTEzRjZEQTg1NyIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDozM0NDOEJGNEZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDozM0NDOEJGM0ZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ1M1IE1hY2ludG9zaCI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOkZDN0YxMTc0MDcyMDY4MTE5NUZFRDc5MUM2MUUwNEREIiBzdFJlZjpkb2N1bWVudElEPSJ4bXAuZGlkOjU3Q0QyMDgwMjUyMDY4MTE5OTRDOTM1MTNGNkRBODU3Ii8+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQgZW5kPSJyIj8+84NovQAAAR1JREFUeNpiZEADy85ZJgCpeCB2QJM6AMQLo4yOL0AWZETSqACk1gOxAQN+cAGIA4EGPQBxmJA0nwdpjjQ8xqArmczw5tMHXAaALDgP1QMxAGqzAAPxQACqh4ER6uf5MBlkm0X4EGayMfMw/Pr7Bd2gRBZogMFBrv01hisv5jLsv9nLAPIOMnjy8RDDyYctyAbFM2EJbRQw+aAWw/LzVgx7b+cwCHKqMhjJFCBLOzAR6+lXX84xnHjYyqAo5IUizkRCwIENQQckGSDGY4TVgAPEaraQr2a4/24bSuoExcJCfAEJihXkWDj3ZAKy9EJGaEo8T0QSxkjSwORsCAuDQCD+QILmD1A9kECEZgxDaEZhICIzGcIyEyOl2RkgwAAhkmC+eAm0TAAAAABJRU5ErkJggg=="></a></p>
+  </div>
+  <div class="quarto-title-meta-contents">
+        <p class="affiliation">
+            Tilburg University
+          </p>
+      </div>
+    <div class="quarto-title-meta-contents">
+    <p class="author">Matthew Kay <a href="https://orcid.org/0000-0001-9446-0419" class="quarto-title-author-orcid"> <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAA2ZpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYwIDYxLjEzNDc3NywgMjAxMC8wMi8xMi0xNzozMjowMCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDo1N0NEMjA4MDI1MjA2ODExOTk0QzkzNTEzRjZEQTg1NyIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDozM0NDOEJGNEZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDozM0NDOEJGM0ZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ1M1IE1hY2ludG9zaCI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOkZDN0YxMTc0MDcyMDY4MTE5NUZFRDc5MUM2MUUwNEREIiBzdFJlZjpkb2N1bWVudElEPSJ4bXAuZGlkOjU3Q0QyMDgwMjUyMDY4MTE5OTRDOTM1MTNGNkRBODU3Ii8+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQgZW5kPSJyIj8+84NovQAAAR1JREFUeNpiZEADy85ZJgCpeCB2QJM6AMQLo4yOL0AWZETSqACk1gOxAQN+cAGIA4EGPQBxmJA0nwdpjjQ8xqArmczw5tMHXAaALDgP1QMxAGqzAAPxQACqh4ER6uf5MBlkm0X4EGayMfMw/Pr7Bd2gRBZogMFBrv01hisv5jLsv9nLAPIOMnjy8RDDyYctyAbFM2EJbRQw+aAWw/LzVgx7b+cwCHKqMhjJFCBLOzAR6+lXX84xnHjYyqAo5IUizkRCwIENQQckGSDGY4TVgAPEaraQr2a4/24bSuoExcJCfAEJihXkWDj3ZAKy9EJGaEo8T0QSxkjSwORsCAuDQCD+QILmD1A9kECEZgxDaEZhICIzGcIyEyOl2RkgwAAhkmC+eAm0TAAAAABJRU5ErkJggg=="></a></p>
+  </div>
+  <div class="quarto-title-meta-contents">
+        <p class="affiliation">
+            Northwestern University
+          </p>
+      </div>
+    <div class="quarto-title-meta-contents">
+    <p class="author">Niall Bolger <a href="https://orcid.org/0000-0001-8698-8117" class="quarto-title-author-orcid"> <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAA2ZpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYwIDYxLjEzNDc3NywgMjAxMC8wMi8xMi0xNzozMjowMCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDo1N0NEMjA4MDI1MjA2ODExOTk0QzkzNTEzRjZEQTg1NyIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDozM0NDOEJGNEZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDozM0NDOEJGM0ZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ1M1IE1hY2ludG9zaCI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOkZDN0YxMTc0MDcyMDY4MTE5NUZFRDc5MUM2MUUwNEREIiBzdFJlZjpkb2N1bWVudElEPSJ4bXAuZGlkOjU3Q0QyMDgwMjUyMDY4MTE5OTRDOTM1MTNGNkRBODU3Ii8+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQgZW5kPSJyIj8+84NovQAAAR1JREFUeNpiZEADy85ZJgCpeCB2QJM6AMQLo4yOL0AWZETSqACk1gOxAQN+cAGIA4EGPQBxmJA0nwdpjjQ8xqArmczw5tMHXAaALDgP1QMxAGqzAAPxQACqh4ER6uf5MBlkm0X4EGayMfMw/Pr7Bd2gRBZogMFBrv01hisv5jLsv9nLAPIOMnjy8RDDyYctyAbFM2EJbRQw+aAWw/LzVgx7b+cwCHKqMhjJFCBLOzAR6+lXX84xnHjYyqAo5IUizkRCwIENQQckGSDGY4TVgAPEaraQr2a4/24bSuoExcJCfAEJihXkWDj3ZAKy9EJGaEo8T0QSxkjSwORsCAuDQCD+QILmD1A9kECEZgxDaEZhICIzGcIyEyOl2RkgwAAhkmC+eAm0TAAAAABJRU5ErkJggg=="></a></p>
+  </div>
+  <div class="quarto-title-meta-contents">
+        <p class="affiliation">
+            Columbia University
+          </p>
+      </div>
+  </div>
+
+<div class="quarto-title-meta">
+
+      
+  
+    
+  </div>
+  
+<div>
+  <div class="abstract">
+    <div class="block-title">Abstract</div>
+    <p>Advances in experimental, data collection, and analysis methods have brought population variability in psychological phenomena to the fore. Yet, current practices for interpreting such heterogeneity do not appropriately treat the uncertainty inevitable in any statistical summary. Heterogeneity is best thought of as a distribution of features with a mean (average person’s effect) and variance (between-person differences). This expected heterogeneity distribution can be further summarized e.g.&nbsp;as a heterogeneity interval <span class="citation" data-cites="bolgerCausalProcessesPsychology2019">(<a href="#ref-bolgerCausalProcessesPsychology2019" role="doc-biblioref">Bolger et al., 2019</a>)</span>. However, because empirical studies estimate the underlying mean and variance parameters with uncertainty, the expected distribution and interval will underestimate the actual range of plausible effects in the population. Using Bayesian hierarchical models, and with the aid of empirical datasets from social and cognitive psychology, we provide a walk-through of effective heterogeneity reporting and display tools that appropriately convey measures of uncertainty. We cover interval, proportion, and ratio measures of heterogeneity and their estimation and interpretation. These tools can be a spur to theory building, allowing researchers to widen their focus from population averages to population heterogeneity in psychological phenomena.</p>
+  </div>
+</div>
+
+<div>
+  <div class="keywords">
+    <div class="block-title">Keywords</div>
+    <p>heterogeneity, uncertainty, variation, hierarchical model, statistics</p>
+  </div>
+</div>
+
+</header>
+
+
+<p>When building and testing theories, psychologists have long focused on asking whether an effect exists and what its magnitude might be. Yet, establishing that an independent variable affects a dependent variable, possibly to some specific extent, may not be a sufficient description of the phenomenon if the effect varies appreciably from one treatment unit (e.g.&nbsp;person) to another. The relevance of such variation in the effect, or <em>heterogeneity</em>, for theory development is recognized yet typically insufficiently described in the empirical literature <span class="citation" data-cites="bolgerCausalProcessesPsychology2019 brandCausalEffectHeterogeneity2013 gricePersonsEffectSizes2020 richters2021">(<a href="#ref-bolgerCausalProcessesPsychology2019" role="doc-biblioref">Bolger et al., 2019</a>; <a href="#ref-brandCausalEffectHeterogeneity2013" role="doc-biblioref">Brand &amp; Thomas, 2013</a>; <a href="#ref-gricePersonsEffectSizes2020" role="doc-biblioref">Grice et al., 2020</a>; <a href="#ref-richters2021" role="doc-biblioref">Richters, 2021</a>)</span>.</p>
+<p>One reason for the scarcity of reporting and sufficiently interpreting heterogeneity is that psychologists still commonly analyze data with models that obscure its assessment, such as traditional ANOVA <span class="citation" data-cites="bolgerCausalProcessesPsychology2019">(<a href="#ref-bolgerCausalProcessesPsychology2019" role="doc-biblioref">Bolger et al., 2019</a>)</span>. However, more informative modeling is not the only challenge: Although more informative hierarchical (or multilevel, mixed-effects <span class="citation" data-cites="gelmanDataAnalysisUsing2007">(<a href="#ref-gelmanDataAnalysisUsing2007" role="doc-biblioref">Gelman &amp; Hill, 2007</a>)</span>) models are becoming widespread, many users do not yet have the conceptual and practical tools to benefit from the greater explanatory power such models afford.</p>
+<p>When person-to-person variability is modeled and reported, those descriptions often focus on point estimates <span class="citation" data-cites="bolgerCausalProcessesPsychology2019">(<a href="#ref-bolgerCausalProcessesPsychology2019" role="doc-biblioref">Bolger et al., 2019</a>)</span>, sample statistics <span class="citation" data-cites="beyensEffectSocialMedia2020 vuorreThreeObjectionsNovel2022 gricePersonsEffectSizes2020">(<a href="#ref-beyensEffectSocialMedia2020" role="doc-biblioref">Beyens et al., 2020</a>; <a href="#ref-gricePersonsEffectSizes2020" role="doc-biblioref">Grice et al., 2020</a>; <a href="#ref-vuorreThreeObjectionsNovel2022" role="doc-biblioref">Vuorre et al., 2022</a>)</span>, graphical displays that don’t yield numerical estimates of hypothetical data-generating mechanisms <span class="citation" data-cites="beck2022">(<a href="#ref-beck2022" role="doc-biblioref">Beck &amp; Jackson, 2022</a>)</span>, or quantities such as the standard deviation of person-specific parameters <span class="citation" data-cites="bartosFairCoinsTend2023">(<a href="#ref-bartosFairCoinsTend2023" role="doc-biblioref">Bartoš et al., 2023</a>)</span>. These, as we will show, provide an incomplete picture of variation that is sometimes difficult to interpret: If (e.g.) a treatment effect is found for 60% or participants in a sample but the uncertainty inherent in that percentage is not communicated, we cannot make inferential conclusions about the effect’s prevalence in the population. Therefore, to communicate heterogeneity effectively we need not only meaningful measures of it, but also effective methods for describing the associated uncertainties. Our goal in this paper is to address this challenge by illustrating measures of heterogeneity and how to communicate them, both numerically and graphically, in ways that take uncertainty into account.</p>
+<p>Our plan is as follows. First, we review established methods for estimating and communicating expected heterogeneity of causal effects in the population using an example dataset from social psychology. We then describe additional ways in which model parameters can be transformed to describe distributions of causal effects. We review the concepts and computations underlying three heterogeneity metrics: The effect’s mean and standard deviation in the population; the heterogeneity interval; and the prevalence proportion. Second, we move beyond summarizing expected degrees of heterogeneity that lack information about uncertainty to describing distributions of plausible degrees of heterogeneity. Such uncertainty distributions of population feature distributions are natural components of Bayesian hierarchical models and afford efficient tools for describing distributional uncertainty. Finally, we extend these methods to compare heterogeneity across different populations using an example dataset from cognitive psychology.</p>
+<section id="review-of-heterogeneity" class="level1">
+<h1>Review of heterogeneity</h1>
+<p>To begin our exposition, we reproduce the analyses presented in <span class="citation" data-cites="bolgerCausalProcessesPsychology2019">Bolger et al. (<a href="#ref-bolgerCausalProcessesPsychology2019" role="doc-biblioref">2019</a>)</span>. In their study, which replicated findings first presented in <span class="citation" data-cites="scholerInflatingDeflatingSelf2014">Scholer et al. (<a href="#ref-scholerInflatingDeflatingSelf2014" role="doc-biblioref">2014</a>)</span>, 62 participants saw twenty positively and twenty negatively valenced words, and judged whether each word was self-descriptive or not. Because most people are typically motivated to view themselves positively, <span class="citation" data-cites="bolgerCausalProcessesPsychology2019">Bolger et al. (<a href="#ref-bolgerCausalProcessesPsychology2019" role="doc-biblioref">2019</a>)</span> predicted that responses to positively valenced words would be faster than to negatively valenced words <span class="citation" data-cites="scholerInflatingDeflatingSelf2014">(<a href="#ref-scholerInflatingDeflatingSelf2014" role="doc-biblioref">Scholer et al., 2014</a>)</span>.</p>
+<section id="model-1" class="level2">
+<h2 class="anchored" data-anchor-id="model-1">Model 1</h2>
+<p>In this section, we replicate <span class="citation" data-cites="bolgerCausalProcessesPsychology2019">Bolger et al. (<a href="#ref-bolgerCausalProcessesPsychology2019" role="doc-biblioref">2019</a>)</span>’s analysis, using their openly available data. We first wrangled the data as in <span class="citation" data-cites="bolgerCausalProcessesPsychology2019">Bolger et al. (<a href="#ref-bolgerCausalProcessesPsychology2019" role="doc-biblioref">2019</a>)</span>, which led to a sample of 1,321 trials from 59 participants that were endorsed as self-descriptive. Our online analysis supplement (<a href="https://osf.io/yp2gq" class="uri">https://osf.io/yp2gq</a>) includes the complete code to reproduce this manuscript and computations therein. We show a sample of these data in <a href="#tbl-dat1" class="quarto-xref">Table&nbsp;1</a>.</p>
+<div class="cell">
+<div id="tbl-dat1" class="cell quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-dat1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;1: First six rows of example dataset 1 <span class="citation" data-cites="bolgerCausalProcessesPsychology2019">(<a href="#ref-bolgerCausalProcessesPsychology2019" role="doc-biblioref">Bolger et al., 2019</a>)</span>.
+</figcaption>
+<div aria-describedby="tbl-dat1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<table class="do-not-create-environment cell caption-top table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;">Person</th>
+<th style="text-align: right;">Trial</th>
+<th style="text-align: left;">Valence</th>
+<th style="text-align: right;">Log(reaction time)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">01</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">Negative</td>
+<td style="text-align: right;">6.7</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">01</td>
+<td style="text-align: right;">8</td>
+<td style="text-align: left;">Positive</td>
+<td style="text-align: right;">6.7</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">01</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: left;">Positive</td>
+<td style="text-align: right;">6.9</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">01</td>
+<td style="text-align: right;">12</td>
+<td style="text-align: left;">Negative</td>
+<td style="text-align: right;">6.7</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">01</td>
+<td style="text-align: right;">13</td>
+<td style="text-align: left;">Negative</td>
+<td style="text-align: right;">6.7</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">01</td>
+<td style="text-align: right;">14</td>
+<td style="text-align: left;">Positive</td>
+<td style="text-align: right;">6.7</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</figure>
+</div>
+</div>
+<p>Then, we estimated the same statistical model (<a href="#eq-m1-1" class="quarto-xref">Equation&nbsp;1</a> - <a href="#eq-m1-3" class="quarto-xref">3</a>). We modeled the log-transformed reaction time of person <span class="math inline">\(j\)</span> on trial <span class="math inline">\(i\)</span> as a random draw from a normal distribution with mean <span class="math inline">\(\eta\)</span> (<em>eta</em>), which could differ between trials <span class="math inline">\(i\)</span> and individuals <span class="math inline">\(j\)</span>, and standard deviation <span class="math inline">\(\sigma\)</span> (<em>sigma</em>), which we assumed constant across individuals and trials as indicated by the lack of subscripts:</p>
+<p><span id="eq-m1-1"><span class="math display">\[
+\text{logRT}_{ij} \sim \operatorname{Normal}\left(\eta_{ij}, \sigma^2\right).
+\tag{1}\]</span></span></p>
+<p>(We recognize that there are better alternatives to modeling the log-transformed RTs as normal, but those are outside the scope of this manuscript.) Then, we specified a model of the mean of the logRT distribution (<span class="math inline">\(\eta_{ij}\)</span>) such that the regression coefficients captured our substantive questions:</p>
+<p><span id="eq-m1-2"><span class="math display">\[
+\eta_{ij} = \beta_0 + \gamma_{0j} + \left(\beta_1 + \gamma_{1j}\right)\text{V}_{ij}.
+\tag{2}\]</span></span></p>
+<p>This equation includes two sets of parameters: The first set contains <span class="math inline">\(\beta_0\)</span> (<em>beta</em>), the intercept, and <span class="math inline">\(\beta_1\)</span>, the slope or effect of valence (V). Parameters in this set do not have subscripts: In the frequentist tradition, they are considered constants—not modelled on covariates—and typically referred to as “fixed” parameters <span class="citation" data-cites="raudenbushHierarchicalLinearModels2002">(e.g. <a href="#ref-raudenbushHierarchicalLinearModels2002" role="doc-biblioref">Raudenbush &amp; Bryk, 2002</a>)</span>. The second set of parameters, <span class="math inline">\(\gamma_{0j}\)</span> (<em>gamma</em>) and <span class="math inline">\(\gamma_{1j}\)</span>, have the subscript <span class="math inline">\(j\)</span> to indicate that they are person-specific deviations from the average intercept and slope, respectively. That is, <span class="math inline">\(\beta_0 + \gamma_{01}\)</span> is the intercept (average reaction time) for person <span class="math inline">\(j=1\)</span>. In frequentist texts, these are typically called “random” parameters because they are modeled as varying randomly according to a specified distribution. Following standard multilevel modeling assumptions, we model <span class="math inline">\(\gamma_0\)</span> and <span class="math inline">\(\gamma_1\)</span> as multivariate normal distributed:</p>
+<p><span id="eq-m1-3"><span class="math display">\[
+\begin{bmatrix}
+  \gamma_0 \\ \gamma_1
+\end{bmatrix} \sim
+\operatorname{MVN}\left(
+  \begin{bmatrix} 0 \\ 0 \end{bmatrix},
+  \begin{pmatrix}
+    \tau_0 &amp; \\
+    \rho &amp;\tau_1
+  \end{pmatrix}
+\right).
+\tag{3}\]</span></span></p>
+<p>In this equation, we assume that the person-specific deviations <span class="math inline">\(\gamma_0\)</span> and <span class="math inline">\(\gamma_1\)</span> have means of zero (because the means are added to them in equation 1.2), standard deviations <span class="math inline">\(\tau\)</span> (<em>tau</em>), and a correlation <span class="math inline">\(\rho\)</span> (<em>rho</em>). Perhaps confusingly, <span class="math inline">\(\tau\)</span>s and <span class="math inline">\(\rho\)</span> are also sometimes called random effects because they describe random (co)variations of the person-specific effects. To be clear, despite this naming convention they are features of the population, not of any one group or individual.</p>
+<p>What these equations mean substantively is that the extent to which the effect of valence on logRT varies around the average effect (<span class="math inline">\(\beta_1\)</span>) is estimated by the standard deviation <span class="math inline">\(\tau_1\)</span>. <span class="math inline">\(\tau_0\)</span>, on the other hand, describes the standard deviation of the population of individuals’ average logRTs across negatively and positively valenced words (intercepts). Moreover, <span class="math inline">\(\rho\)</span> indicates the extent to which individuals’ average logRTs correlate with how much their logRTs are affected by valence.</p>
+<p>Finally, we contrast coded valence such that negative words were assigned -0.5, and positive words 0.5. This coding results in an intercept that corresponds to the average reaction time across negative and positive words, and a slope that reflects the difference in logRT between negative and positive words.</p>
+<p>With data shown in <a href="#tbl-dat1" class="quarto-xref">Table&nbsp;1</a>, we can estimate this model using standard (restricted) maximum likelihood methods as implemented in, for example, the R package lme4 <span class="citation" data-cites="batesFittingLinearMixedEffects2015 rcoreteamLanguageEnvironmentStatistical2023">(<a href="#ref-batesFittingLinearMixedEffects2015" role="doc-biblioref">Bates et al., 2015</a>; <a href="#ref-rcoreteamLanguageEnvironmentStatistical2023" role="doc-biblioref">R Core Team, 2024</a>)</span>.</p>
+<div class="cell">
+<div id="tbl-lmer" class="cell quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-lmer-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;2: Parameter estimates from Model 1 (ML).
+</figcaption>
+<div aria-describedby="tbl-lmer-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<table class="do-not-create-environment cell caption-top table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;">Parameter</th>
+<th style="text-align: left;">Coefficient</th>
+<th style="text-align: left;">SE</th>
+<th style="text-align: left;">95% CI</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><span class="math inline">\(\beta_0\)</span></td>
+<td style="text-align: left;">6.87</td>
+<td style="text-align: left;">0.02</td>
+<td style="text-align: left;">[6.82, 6.91]</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><span class="math inline">\(\beta_1\)</span></td>
+<td style="text-align: left;">-0.16</td>
+<td style="text-align: left;">0.02</td>
+<td style="text-align: left;">[-0.20, -0.12]</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><span class="math inline">\(\tau_0\)</span></td>
+<td style="text-align: left;">0.17</td>
+<td style="text-align: left;">0.02</td>
+<td style="text-align: left;">[0.13, 0.20]</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><span class="math inline">\(\tau_1\)</span></td>
+<td style="text-align: left;">0.12</td>
+<td style="text-align: left;">0.02</td>
+<td style="text-align: left;">[0.08, 0.16]</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><span class="math inline">\(\rho\)</span></td>
+<td style="text-align: left;">-0.07</td>
+<td style="text-align: left;">0.21</td>
+<td style="text-align: left;">[-0.45, 0.35]</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><span class="math inline">\(\sigma\)</span></td>
+<td style="text-align: left;">0.24</td>
+<td style="text-align: left;">0.01</td>
+<td style="text-align: left;">[0.24, 0.25]</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</figure>
+</div>
+</div>
+<p>We show a conventional summary of this model’s estimated parameters in <a href="#tbl-lmer" class="quarto-xref">Table&nbsp;2</a>. For the average person, the estimated effect of positive valence on logRT is -0.16 log seconds, with a 95% confidence interval (CI) extending from -0.20 to -0.12. The estimated standard deviation of valence effects in the population is 0.12 log seconds. The lme4 software package does not report a standard error or CI for (co)variance parameters by default, and we therefore calculated it by bootstrapping. The resulting 95% bootstrap CI of the valence effect’s standard deviation was [0.08, 0.16].</p>
+</section>
+<section id="heterogeneity-distribution-at-maximum-likelihood-estimate-of-beta_1-and-tau_1" class="level2">
+<h2 class="anchored" data-anchor-id="heterogeneity-distribution-at-maximum-likelihood-estimate-of-beta_1-and-tau_1">Heterogeneity distribution at maximum likelihood estimate of <span class="math inline">\(\beta_1\)</span> and <span class="math inline">\(\tau_1\)</span></h2>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-1" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="index_files/figure-html/fig-1-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1: Heterogeneity distribution of valence effects and various descriptions of their expected heterogeneity as estimated with Model 1. A. The normal density curve defined by the point estimates of the valence effect distribution’s mean (<span class="math inline">\(\beta_1\)</span>) and standard deviation (<span class="math inline">\(\tau_1\)</span>). Shaded areas represent areas under the normal curve within 1 (dark) and 2 (light) standard deviations of the mean. B. The 90% Heterogeneity Interval as represented by a line segment with arrows, and the dark shaded area. C. Proportion of negative valence effects in the population (dark). D. Proportion of valence effects in the population that are within the region of practical equivalence to zero (ROPE; dark).
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>Rows 2 and 4 in <a href="#tbl-lmer" class="quarto-xref">Table&nbsp;2</a> define the expected normal distribution of valence effects in the population, visualized in <a href="#fig-1" class="quarto-xref">Figure&nbsp;1</a> A. In other words, our point estimate of the distribution of valence effects is Normal(-0.16, 0.12<sup>2</sup>). However, this distribution is an incomplete description of heterogeneity for two reasons. First, it does not incorporate uncertainty in the two determinants of heterogeneity, that is <span class="math inline">\(\beta_1\)</span> and <span class="math inline">\(\tau_1\)</span>: If they are precisely estimated, i.e.&nbsp;when uncertainty regarding them is negligible, the distribution and any quantities calculated from it characterize the population well. On the other hand, if they are estimated with considerable uncertainty, the distribution or its transformations would not characterize the population well. We return to this key issue below. Second, the distribution or its parameters do not, for many purposes, communicate heterogeneity in clear and actionable terms. Below, we introduce several metrics that directly describe e.g.&nbsp;where a given proportion of the slopes are expected to fall.</p>
+<section id="interval-descriptors" class="level3">
+<h3 class="anchored" data-anchor-id="interval-descriptors">Interval descriptors</h3>
+<p>First, we can use the point estimates in <a href="#tbl-lmer" class="quarto-xref">Table&nbsp;2</a> to construct an expected <em>heterogeneity interval</em> that describes the range within which a certain percentage of the population’s slopes are expected to fall <span class="citation" data-cites="bolgerCausalProcessesPsychology2019">(<a href="#ref-bolgerCausalProcessesPsychology2019" role="doc-biblioref">Bolger et al., 2019</a>)</span>. To do so, we must first determine an appropriate percentage to describe: By convention, <span class="citation" data-cites="bolgerCausalProcessesPsychology2019">Bolger et al. (<a href="#ref-bolgerCausalProcessesPsychology2019" role="doc-biblioref">2019</a>)</span> and others have focused on the 95% heterogeneity interval (<span class="math inline">\(HI_{95}\)</span>). However, because there are already confusingly many quantities using the five percent cutoff, in this manuscript we focus on the 90% heterogeneity interval, and reserve 95% to describing uncertainties. The appropriate percentage to describe with a heterogeneity interval is determined by the substantive and communicative aims at hand; for our illustration 90% seemed reasonable.</p>
+<p>To calculate a heterogeneity interval, we first specify the desired probability limits. For a 90% interval, we use .05 and .95, which together define the central 90% of the distribution. Then, we pass those limits and the estimated mean and standard deviation to the normal quantile function <span class="math inline">\(\Phi^{-1}\)</span> (<em>phi</em>, <code>qnorm()</code> in R), to get the interval: <span class="math inline">\(HI_{90} = \Phi^{-1}([.05, .95], \beta_1, \tau_1) = \Phi^{-1}([.05, .95],\)</span> -0.16, 0.12) = [-0.36, 0.04]. In words, this function calculates the 0.05 and 0.95 quantiles of the normal distribution defined by the mean’s (<span class="math inline">\(\beta_1\)</span>) and standard deviation’s (<span class="math inline">\(\tau_1\)</span>) point estimates: We expect 90% of valence effects in the population to fall in the [-0.36, 0.04] interval. We illustrate this interval in <a href="#fig-1" class="quarto-xref">Figure&nbsp;1</a> B.</p>
+</section>
+<section id="proportion-descriptors" class="level3">
+<h3 class="anchored" data-anchor-id="proportion-descriptors">Proportion descriptors</h3>
+<p>The above HI summarizes where a given proportion of individuals’ effects in the population are. In contrast, some applications might find it more informative to summarize proportions of effects above or below some critical value, or within some critical range. For example, we might ask “What proportion of individuals in the population respond faster to positively valenced words?” In other words, we ask a question of <em>prevalence</em>: What proportion of the heterogeneity distribution is below zero? We label this quantity <span class="math inline">\(p^-\)</span> for proportion of population with negative effects.</p>
+<p>To answer, we pass zero (the critical value) and the estimated mean and standard deviation to the normal cumulative distribution function (<span class="math inline">\(\Phi\)</span>; <code>pnorm()</code> in R): <span class="math inline">\(p^- = \Phi(0, \beta_1, \tau_1) = \Phi(0,\)</span> -0.16, 0.12) = 90.4%. This number is the probability that a random slope from this population would take a negative value, or, in other words, the proportion of individuals in the population with negative valence effects. We illustrate this probability in <a href="#fig-1" class="quarto-xref">Figure&nbsp;1</a> C.</p>
+<p>However, using zero as a critical value might not be sufficiently informative, especially when theory allows specifying a smallest effect size of interest, or what is known as a region of practical equivalence <span class="citation" data-cites="anvariUsingAnchorbasedMethods2021 lakensEquivalenceTestingPsychological2018 kruschkeBayesianDataAnalysis2017 kruschkeDoingBayesianData2014">(ROPE, <a href="#ref-anvariUsingAnchorbasedMethods2021" role="doc-biblioref">Anvari &amp; Lakens, 2021</a>; <a href="#ref-kruschkeDoingBayesianData2014" role="doc-biblioref">Kruschke, 2014</a>; <a href="#ref-kruschkeBayesianDataAnalysis2017" role="doc-biblioref">Kruschke &amp; Liddell, 2017</a>; <a href="#ref-lakensEquivalenceTestingPsychological2018" role="doc-biblioref">Lakens et al., 2018</a>)</span>. In common applications, ROPE is used to statistically infer whether an estimated parameter, such as the effect of valence on logRT for the average person, is practically significant. But we can equally well use a theory-informed region of effect sizes to describe and make inferences about the heterogeneity distribution of this effect in the population.</p>
+<p>For example, let us imagine that a theory states that valence effects in the interval [-0.1, 0.1] are practically equivalent to zero. To calculate, we can again use the normal cumulative distribution function to calculate the proportion of individuals in the population whose valence effect falls within this interval or region of practical equivalence: <span class="math inline">\(p^{ROPE} = \Phi(0.1, \beta_1, \tau_1) - \Phi(-0.1, \beta_1, \tau_1)\)</span> = 29.6%. In words, 29.6% of the population is expected to have valence effects that are practically equivalent to zero. Note that this statement’s validity critically depends on the chosen interval’s theoretical validity. We visualize this probability in <a href="#fig-1" class="quarto-xref">Figure&nbsp;1</a> D.</p>
+</section>
+<section id="ratio-descriptors" class="level3">
+<h3 class="anchored" data-anchor-id="ratio-descriptors">Ratio descriptors</h3>
+<p>Although the interval and proportion descriptors describe where the population’s slopes are likely to fall, they do so in absolute terms such as logRT in the running example. A contrasting or <em>relative</em> way to describe heterogeneity is to express it as a ratio of the effect’s standard deviation to its mean. Such relative metrics are concise and can be useful especially when the absolute units are difficult to interpret, or when comparing heterogeneity across different populations or experimental conditions (see below). This ratio, expressed simply as the fraction <span class="math inline">\(\frac{\tau_1}{\beta_1}\)</span> is 0.77 in the current example.</p>
+<p><span class="citation" data-cites="bolgerCausalProcessesPsychology2019">(<a href="#ref-bolgerCausalProcessesPsychology2019" role="doc-biblioref">Bolger et al., 2019, p. 609</a>)</span> suggest as a rule of thumb that heterogeneity can be deemed noteworthy when the ratio of the standard deviation to the average effect is 0.25 or greater: A ratio greater than 1/4 implies a <span class="math inline">\(HI_{95}\)</span> whose limits extend to effects one-half and one-and-a-half times that of the average effect. With these data and model, the ratio <span class="math inline">\(\frac{\tau_1}{\beta_1}\)</span> is 0.77, suggesting that the degree of heterogeneity in valence effects is noteworthy. While this heuristic can sometimes be useful, we urge users to apply domain-specific knowledge when considering critical values or thresholds whenever possible.</p>
+</section>
+</section>
+<section id="missing-uncertainty" class="level2">
+<h2 class="anchored" data-anchor-id="missing-uncertainty">Missing uncertainty</h2>
+<p>The expected normal distribution of valence effects and its transformations (<a href="#fig-1" class="quarto-xref">Figure&nbsp;1</a>) ignore uncertainty inherent in the estimated parameters. That is, we calculated <span class="math inline">\(HI_{90}\)</span>, <span class="math inline">\(p^-\)</span>, and the other heterogeneity measures from the point estimates <span class="math inline">\(\beta_1\)</span> = -0.16 and <span class="math inline">\(\tau_1\)</span> = 0.12. We did not use any information about the precision, or uncertainty, with which these parameters were estimated. We have now arrived at the crux of the current work: How should we estimate and describe heterogeneity in psychological phenomena such that the fundamental uncertainty in the estimated parameters is retained?</p>
+</section>
+</section>
+<section id="incorporating-inferential-uncertainty-to-assessments-of-heterogeneity" class="level1">
+<h1>Incorporating inferential uncertainty to assessments of heterogeneity</h1>
+<p>Assessments of heterogeneity involve combining information about fixed and random effects; to fully incorporate inferential uncertainty then requires accounting for their joint uncertainties. Probabilistic, that is, Bayesian methods are uniquely able to address this challenge. Modern Bayesian methods, by obtaining draws from the joint posterior distribution of all model parameters presumed to underlie the observed data, allow incorporating posterior uncertainty in combinations of parameters such as the ones highlighted above <span class="citation" data-cites="gelmanBayesianDataAnalysis2013 kruschkeBayesianDataAnalysis2017 kruschkeDoingBayesianData2014 mcelreathStatisticalRethinkingBayesian2020">(<a href="#ref-gelmanBayesianDataAnalysis2013" role="doc-biblioref">Gelman et al., 2013</a>; <a href="#ref-kruschkeDoingBayesianData2014" role="doc-biblioref">Kruschke, 2014</a>; <a href="#ref-kruschkeBayesianDataAnalysis2017" role="doc-biblioref">Kruschke &amp; Liddell, 2017</a>; <a href="#ref-mcelreathStatisticalRethinkingBayesian2020" role="doc-biblioref">McElreath, 2020</a>)</span>. For typical scenarios, Bayesian models are as easy to use as their maximum likelihood counterparts <span class="citation" data-cites="burknerBrmsPackageBayesian2017 burknerAdvancedBayesianMultilevel2018">(<a href="#ref-burknerBrmsPackageBayesian2017" role="doc-biblioref">Bürkner, 2017</a>, <a href="#ref-burknerAdvancedBayesianMultilevel2018" role="doc-biblioref">2018</a>)</span>.</p>
+<p>The output of Bayesian computations is the multivariate posterior probability distribution of the model’s parameters. However, closed-form solutions are not available for multivariate posterior distributions of many important types of statistical models. Therefore, in practice modern Bayesian methods rely on algorithms that yield many random draws from the multivariate posterior distribution <span class="citation" data-cites="gelmanBayesianDataAnalysis2013 ravenzwaaijSimpleIntroductionMarkov2016">(<a href="#ref-gelmanBayesianDataAnalysis2013" role="doc-biblioref">Gelman et al., 2013</a>; <a href="#ref-ravenzwaaijSimpleIntroductionMarkov2016" role="doc-biblioref">Ravenzwaaij et al., 2016</a>)</span>. These draws can then be used to calculate, summarize, and visualize any desired quantity of the multivariate posterior such as means, variances, correlations, proportions above or below zero, and so on. <a href="#tbl-samples-1" class="quarto-xref">Table&nbsp;3</a> illustrates this, showing six random draws of the posteriors of <span class="math inline">\(\beta_1\)</span> and <span class="math inline">\(\tau_1\)</span> (rows). We then computed their ratio in the third column, which then represents (draws from) the ratio’s posterior distribution and can be summarized, visualized, etc.</p>
+<div class="cell">
+<div id="tbl-samples-1" class="cell quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-samples-1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;3: Random draws from <span class="math inline">\(\beta_1\)</span>, <span class="math inline">\(\tau_1\)</span>, and their ratio’s posterior.
+</figcaption>
+<div aria-describedby="tbl-samples-1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<table class="do-not-create-environment cell caption-top table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: right;"><span class="math inline">\(\beta_1\)</span></th>
+<th style="text-align: right;"><span class="math inline">\(\tau_1\)</span></th>
+<th style="text-align: right;"><span class="math inline">\(\frac{\tau_1}{\beta_1}\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">-0.14</td>
+<td style="text-align: right;">0.12</td>
+<td style="text-align: right;">-0.85</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">-0.18</td>
+<td style="text-align: right;">0.13</td>
+<td style="text-align: right;">-0.75</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">-0.18</td>
+<td style="text-align: right;">0.15</td>
+<td style="text-align: right;">-0.81</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">-0.17</td>
+<td style="text-align: right;">0.10</td>
+<td style="text-align: right;">-0.59</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">-0.14</td>
+<td style="text-align: right;">0.10</td>
+<td style="text-align: right;">-0.72</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">-0.17</td>
+<td style="text-align: right;">0.15</td>
+<td style="text-align: right;">-0.87</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</figure>
+</div>
+</div>
+<p>In practice, one obtains (for example) 4,000 samples from the posterior distribution using Markov Chain Monte Carlo algorithms <span class="citation" data-cites="standevelopmentteamStanModelingLanguage2023">(e.g. <a href="#ref-standevelopmentteamStanModelingLanguage2023" role="doc-biblioref">Stan Development Team, 2023</a>)</span> through accessible software <span class="citation" data-cites="burknerBrmsPackageBayesian2017">(e.g., <a href="#ref-burknerBrmsPackageBayesian2017" role="doc-biblioref">Bürkner, 2017</a>)</span>, and then summarizes them using familiar data processing techniques <span class="citation" data-cites="dplyr2023 rcoreteamLanguageEnvironmentStatistical2023">(<a href="#ref-rcoreteamLanguageEnvironmentStatistical2023" role="doc-biblioref">R Core Team, 2024</a>; e.g. <a href="#ref-dplyr2023" role="doc-biblioref">Wickham et al., 2023</a>)</span>. Here, we used the R package brms <span class="citation" data-cites="burknerBrmsPackageBayesian2017 burknerAdvancedBayesianMultilevel2018">(<a href="#ref-burknerBrmsPackageBayesian2017" role="doc-biblioref">Bürkner, 2017</a>, <a href="#ref-burknerAdvancedBayesianMultilevel2018" role="doc-biblioref">2018</a>)</span> to specify the model and then draw random samples from its posterior distribution. The MCMC estimation algorithm completed in about 5 seconds on a modern laptop. We then assessed the estimation algorithm convergence graphically and numerically, and model adequacy using a graphical posterior predictive check <span class="citation" data-cites="gelmanBayesianDataAnalysis2013">(<a href="#ref-gelmanBayesianDataAnalysis2013" role="doc-biblioref">Gelman et al., 2013</a>)</span>. (These, and other details, are presented in our supplementary online analyses.)</p>
+<p><a href="#tbl-fit-1" class="quarto-xref">Table&nbsp;4</a> shows summaries of Model 1’s population-level parameters’ (“fixed” parameters in the frequentist nomenclature) posterior distributions. The second and third columns show their means and standard deviations (which correspond to frequentist standard errors). Note that because we used brms’s default noninformative prior distributions, the posterior summaries are numerically very similar to the maximum likelihood estimates in <a href="#tbl-lmer" class="quarto-xref">Table&nbsp;2</a>.</p>
+<div class="cell">
+<div id="tbl-fit-1" class="cell quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-fit-1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;4: Parameter estimates from Model 1 (Bayes).
+</figcaption>
+<div aria-describedby="tbl-fit-1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<table class="do-not-create-environment cell caption-top table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;">Parameter</th>
+<th style="text-align: left;">Mean</th>
+<th style="text-align: left;">SD</th>
+<th style="text-align: left;">95% CI</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><span class="math inline">\(\beta_0\)</span></td>
+<td style="text-align: left;">6.87</td>
+<td style="text-align: left;">0.02</td>
+<td style="text-align: left;">[6.82, 6.91]</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><span class="math inline">\(\beta_1\)</span></td>
+<td style="text-align: left;">-0.16</td>
+<td style="text-align: left;">0.02</td>
+<td style="text-align: left;">[-0.20, -0.12]</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><span class="math inline">\(\tau_0\)</span></td>
+<td style="text-align: left;">0.17</td>
+<td style="text-align: left;">0.02</td>
+<td style="text-align: left;">[0.14, 0.21]</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><span class="math inline">\(\tau_1\)</span></td>
+<td style="text-align: left;">0.12</td>
+<td style="text-align: left;">0.02</td>
+<td style="text-align: left;">[0.08, 0.17]</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><span class="math inline">\(\rho\)</span></td>
+<td style="text-align: left;">-0.07</td>
+<td style="text-align: left;">0.19</td>
+<td style="text-align: left;">[-0.44, 0.31]</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><span class="math inline">\(\sigma\)</span></td>
+<td style="text-align: left;">0.25</td>
+<td style="text-align: left;">0.00</td>
+<td style="text-align: left;">[0.24, 0.26]</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</figure>
+</div>
+</div>
+<section id="heterogeneity-distribution" class="level2">
+<h2 class="anchored" data-anchor-id="heterogeneity-distribution">Heterogeneity distribution</h2>
+<p>Armed with the Bayesian draws (<a href="#tbl-fit-1" class="quarto-xref">Table&nbsp;4</a>), we can now return to the question of the distribution of valence effects in the population. We now have 4,000 samples from this heterogeneity distribution’s posterior distribution. Effectively, then, we have among other quantities 4,000 samples from the heterogeneity distribution’s posterior distribution. We first redraw the expected heterogeneity distribution from <a href="#fig-1" class="quarto-xref">Figure&nbsp;1</a> using the posterior mean values of <span class="math inline">\(\beta_1\)</span> and <span class="math inline">\(\tau_1\)</span> in <a href="#fig-2" class="quarto-xref">Figure&nbsp;2</a> A (thick dark blue curve). Superimposed on that normal density curve are heterogeneity distributions calculated from 100 random posterior draws of <span class="math inline">\(\beta_1\)</span> and <span class="math inline">\(\tau_1\)</span>. From these curves we can see that the true distribution of valence effects might well be less or more heterogeneous than is suggested by the expectation (point estimates).</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-2" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="index_files/figure-html/fig-2-1.png" class="img-fluid figure-img" width="518">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2: Bayesian estimates of the heterogeneity distribution of valence effects. A: Probability density function (PDF) curves. The thick line is the same expected PDF of valence effects from Figure 1. Thin lines show 100 PDFs calculated from random draws of <span class="math inline">\(\beta_1\)</span> and <span class="math inline">\(\tau_1\)</span> that collectively illustrate the uncertainty in the distribution’s location and spread. B: Cumulative density function (CDF) curves, annotated as A. C. Histogram of (draws from) the posterior distribution of <span class="math inline">\(p^-\)</span>, which correspond to CDF segments below zero: This value describes the proportion of individuals with negative valence effects on logRT. Point and interval represents the posterior mean and 95%CI. Solid and dotted vertical lines in A and B highlight x-axis values of 0, and -0.1 and 0.1, respectively.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>Some curves in <a href="#fig-2" class="quarto-xref">Figure&nbsp;2</a> A are further to the left (valence effect for the average person is more negative), and some further to the right (effect for the average person is more positive). Moreover, some curves are flatter and wider (effect varies more around the average in the population), and some are narrower and more peaked (effect varies less between individuals). The distribution of these curves represents our current knowledge about the heterogeneity distribution of valence effects in the population—given these data and this model. A sufficient description of heterogeneity therefore must include information about uncertainty in both the location (mean) and scale (standard deviation) parameters of the heterogeneity distribution.</p>
+<p>Depicting the heterogeneity distribution as a probability density function (PDF) curve has its drawbacks. First, it appears to us visually more challenging to read the degree of uncertainty from a PDF. Second, for many applications, the y-axis is not informative: We typically do not care that the probability density of the curve is (for example) 3.0 at some specific value of the valence effect.</p>
+<p>Therefore, in <a href="#fig-2" class="quarto-xref">Figure&nbsp;2</a> B we depict the heterogeneity distribution as <em>cumulative distribution</em> function (CDF) curves based on 100 random posterior draws, together with the mean CDF in a darker color. We believe the CDF is a useful visualization tool because the y-axis describes a directly interpretable quantity: The proportion of the population with valence effects below some specific value.</p>
+<section id="interval-descriptors-1" class="level3">
+<h3 class="anchored" data-anchor-id="interval-descriptors-1">Interval descriptors</h3>
+<p>Above, we described the heterogeneity interval as a range of values where a specific percentage of the population’s slopes are expected to fall (e.g.&nbsp;<span class="math inline">\(HI_{90}\)</span> for a 90% heterogeneity interval). However, a single interval cannot accommodate the uncertainty with which the underlying parameters are estimated. To carry uncertainty forward from model parameters to the <span class="math inline">\(HI_{90}\)</span>, we redo the calculations from above, but instead of using only the mean’s and standard deviation’s point estimates, we repeat the calculations for each of the 4,000 randomly sampled pairs of <span class="math inline">\(\beta_1\)</span> and <span class="math inline">\(\tau_1\)</span>. Consequently, we get 4,000 draws from the <span class="math inline">\(HI_{90}\)</span>s posterior distribution (<a href="#fig-intervals" class="quarto-xref">Figure&nbsp;3</a>).</p>
+<p>Summarizing a distribution of intervals entails some challenges, however, because an interval is defined by two quantities—the lower and upper bounds. The 95% most plausible lower bounds of <span class="math inline">\(HI_{90}\)</span> range between [-0.46, -0.28], whereas the 95% most credible upper bounds range between [-0.04, 0.13] (<a href="#fig-intervals" class="quarto-xref">Figure&nbsp;3</a> B). Thus, to adequately describe an estimated heterogeneity interval, researchers must communicate two separate uncertainty intervals: In words, we estimate that 90% of the population’s valence effects range from -0.36 [-0.46, -0.28] to 0.04 [-0.04, 0.13].</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-intervals" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-intervals-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="index_files/figure-html/fig-intervals-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-intervals-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;3: Bayesian estimates of the 90% heterogeneity interval of valence effects. A. Scatterplot of 4,000 posterior samples of the lower (x-axis) and upper (y-axis) limits of the <span class="math inline">\(HI_{90}\)</span>. B. Histograms of 4,000 samples of the HI90 lower (left) and upper (right) limits with their posterior means and 95%CIs as points and intervals. C. 100 random samples from the <span class="math inline">\(HI_{90}\)</span> posterior distribution, with the posterior mean heterogeneity interval superimposed in a darker shade of blue.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p><a href="#fig-intervals" class="quarto-xref">Figure&nbsp;3</a> further suggests that communicating the two uncertainty intervals of a heterogeneity interval is not only cumbersome but also ignores potential correlations between the HI endpoints’ posterior distributions (panel A). For these reasons, although the HI can be a useful summary, we occasionally favor <span class="citation" data-cites="vuorreAffectiveUpliftVideo2024">(e.g., <a href="#ref-vuorreAffectiveUpliftVideo2024" role="doc-biblioref">Vuorre et al., 2024</a>)</span> the scalar descriptors discussed below.</p>
+</section>
+<section id="proportion-descriptors-1" class="level3">
+<h3 class="anchored" data-anchor-id="proportion-descriptors-1">Proportion descriptors</h3>
+<p>A complementary description of heterogeneity is the proportion of the population whose effects fall above or below some critical value. For example, we can calculate proportions with negative and positive effects by using zero as the critical value. In this example, we ask “What proportion of individuals in the population endorse positive words faster than negative words?”</p>
+<p>To answer, we calculate <span class="math inline">\(p^- = \Phi(0, \beta_1, \tau_1)\)</span> for each posterior draw of <span class="math inline">\(\beta_1\)</span> and <span class="math inline">\(\tau_1\)</span>. We show 100 posterior draws of the CDF in <a href="#fig-2" class="quarto-xref">Figure&nbsp;2</a> B with a vertical line superimposed at zero. The y-axis value where the CDF crosses zero on the x-axis indicates the population proportion of negative valence effects (<span class="math inline">\(p^-\)</span>). We also show a histogram of all 4,000 posterior draws of that proportion in the top left margin of <a href="#fig-2" class="quarto-xref">Figure&nbsp;2</a> C, with its associated 95%CI. The model predicts the proportion of individuals in the population with negative valence effects to be approximately 89.9% (posterior mean), but with 95% confidence this value could be as low as 79.6% or as high as 98.2%. Stated differently, the model predicts that 10.1% [1.8%, 20.4%] of individuals in the population would show reversals of the valence effect.</p>
+<p>Moreover, if theory allows defining a range of parameter values that are practically equivalent to zero (ROPE), we can use the posterior distribution to quantify uncertainty in the proportion of individuals predicted to have such practically negligible effects. We added dotted vertical lines in <a href="#fig-2" class="quarto-xref">Figure&nbsp;2</a> to highlight the [-0.1, 0.1] interval, which serves as an example ROPE. Line segments within that interval represent proportions of the population whose valence effect is practically equivalent to zero (<span class="math inline">\(p^{ROPE}\)</span>). To quantify uncertainty in <span class="math inline">\(p^{ROPE}\)</span> we then aggregate the segments’ to a mean and a 95%CI: 29.0% [17.4%, 40.0%] of individuals in the population have a valence effect that is practically equivalent to zero. We note that the ROPE of [-0.1, 0.1] here was arbitrary and picked just to illustrate the example.</p>
+<p>So far, these examples have highlighted the importance of quantifying uncertainty in descriptions of heterogeneity. Had we only focused on the point estimates (posterior means), we might have misleadingly concluded that <span class="math inline">\(p^-\)</span> = 89.9% and <span class="math inline">\(p^{ROPE}\)</span> = 29.0%. However, with 95% confidence, these values might be as small as 79.6% and 17.4%, or as large as 98.2% and 40.0%, respectively.</p>
+</section>
+<section id="ratio-descriptors-1" class="level3">
+<h3 class="anchored" data-anchor-id="ratio-descriptors-1">Ratio descriptors</h3>
+<p>Finally, we can assess heterogeneity in relative terms by comparing the magnitude of the heterogeneity in valence effects (the standard deviation <span class="math inline">\(\tau_1\)</span>) to the magnitude of the average effect (the mean <span class="math inline">\(\beta_1\)</span>) by calculating the ratio <span class="math inline">\(\frac{\tau_1}{\beta_1}\)</span> (see <a href="#tbl-samples-1" class="quarto-xref">Table&nbsp;3</a>). <a href="#fig-ratio" class="quarto-xref">Figure&nbsp;4</a> shows 4,000 samples from the joint posterior distribution of the mean and standard deviation, from which we calculated 4,000 samples of the posterior distribution of <span class="math inline">\(\frac{\tau_1}{\beta_1}\)</span> (panel B). The ratio 0.79 [0.48, 1.21] suggests that the relative magnitude of heterogeneity is substantial, but might be as low as 0.48 or as great as 1.21, with 95% confidence. If we used the 1/4 rule of thumb suggested in <span class="citation" data-cites="bolgerCausalProcessesPsychology2019">Bolger et al. (<a href="#ref-bolgerCausalProcessesPsychology2019" role="doc-biblioref">2019</a>)</span>, with these results we could say <em>with confidence</em> that heterogeneity in valence effects is notable (the entire 95%CI exceeds 0.25).</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-ratio" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ratio-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="index_files/figure-html/fig-ratio-1.png" class="img-fluid figure-img" width="422">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ratio-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;4: Bivariate posterior of <span class="math inline">\(\beta_1\)</span>, <span class="math inline">\(\tau_1\)</span>, and their ratio. Panel A. 4,000 random draws from the posterior distribution of the valence effect distribution’s mean (<span class="math inline">\(\beta_1\)</span>) and standard deviation (<span class="math inline">\(\tau_1\)</span>). B. Histogram of 4,000 draws from the posterior distribution of the ratio of the valence distribution’s scale over its location <span class="math inline">\(\frac{\tau_1}{\beta_1}\)</span>, and its posterior mean and 95%CI.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>We have seen that—with these example data and this model—our uncertainty in the estimated heterogeneity metrics is substantial: Point estimates provide at best incomplete descriptions of our current state of knowledge regarding how valence effects vary between people in the population. We will next see that incorporating uncertainty is not only useful but critical when we turn from describing heterogeneity in one population to comparing its magnitude across multiple populations.</p>
+</section>
+</section>
+</section>
+<section id="comparing-heterogeneity-between-populations" class="level1">
+<h1>Comparing heterogeneity between populations</h1>
+<p>We now move beyond assessing heterogeneity in one population to comparing degrees of heterogeneity across multiple populations of study units. To illustrate, we reanalyze a dataset from <span class="citation" data-cites="mahVariabilitySubjectsFree2024">Mah &amp; Lindsay (<a href="#ref-mahVariabilitySubjectsFree2024" role="doc-biblioref">2024</a>)</span> addressing differences in between-person variability (heterogeneity) in memory performance between a free recall memory task and a cued recall memory task. In <span class="citation" data-cites="mahVariabilitySubjectsFree2024">Mah &amp; Lindsay (<a href="#ref-mahVariabilitySubjectsFree2024" role="doc-biblioref">2024</a>)</span>’s Experiment 3, 260 individuals studied a list of twenty target words. After a short break, they then either freely recalled as many of the target words as they could (Free recall group, N = 123) or recalled as many target words as they could when prompted with related cue words (Cued recall group, N = 137). Thus, the Free and Cued recall tasks had different groups of participants but the same target words. The metric of memory performance in this study was the proportion correct. We show a sample of these data in <a href="#tbl-dat2" class="quarto-xref">Table&nbsp;5</a>.</p>
+<p>With a preregistered Pitman-Morgan test, <span class="citation" data-cites="mahVariabilitySubjectsFree2024">Mah &amp; Lindsay (<a href="#ref-mahVariabilitySubjectsFree2024" role="doc-biblioref">2024</a>)</span> found that participants who completed the cued recall task were more heterogeneous in their memory performance—the proportion of target words correctly recalled—than those in the free recall group: The Cued:Free recall between-person memory performance variance ratio was 1.33 (with a [1.14, 1.54] 95% bootstrap interval). <span class="citation" data-cites="mahVariabilitySubjectsFree2024">Mah &amp; Lindsay (<a href="#ref-mahVariabilitySubjectsFree2024" role="doc-biblioref">2024</a>)</span>, across three experiments, confirmed this result by comparing models that did and did not allow for distinct between-person variabilities in each group.</p>
+<div class="cell">
+<div id="tbl-dat2" class="cell quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-dat2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;5: Six rows of example dataset 2 (Mah &amp; Lindsay, 2023; Exp 3).
+</figcaption>
+<div aria-describedby="tbl-dat2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<table class="do-not-create-environment cell caption-top table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;">Person</th>
+<th style="text-align: left;">Task</th>
+<th style="text-align: left;">Target</th>
+<th style="text-align: right;">Accuracy</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">9</td>
+<td style="text-align: left;">Free</td>
+<td style="text-align: left;">bread</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">9</td>
+<td style="text-align: left;">Free</td>
+<td style="text-align: left;">chair</td>
+<td style="text-align: right;">1</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">9</td>
+<td style="text-align: left;">Free</td>
+<td style="text-align: left;">fruit</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">1</td>
+<td style="text-align: left;">Cued</td>
+<td style="text-align: left;">bread</td>
+<td style="text-align: right;">1</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">1</td>
+<td style="text-align: left;">Cued</td>
+<td style="text-align: left;">chair</td>
+<td style="text-align: right;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">1</td>
+<td style="text-align: left;">Cued</td>
+<td style="text-align: left;">fruit</td>
+<td style="text-align: right;">1</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</figure>
+</div>
+</div>
+<p>Let us now see how our earlier descriptions of heterogeneity can be usefully extended to group differences. We ask three questions about differences in heterogeneity: (1) To what extent is memory performance more variable <em>between people</em> in the cued recall task compared to the free recall task? (2) To what extent is memory performance more variable <em>between target words</em> in cued-versus-free recall tasks? And (3) How consistent is target word heterogeneity across the two tasks: Are target words associated with good memory performance in cued recall experiments the same words that are associated with good memory performance in free recall experiments?</p>
+<p>To answer these questions, we model the <span class="math inline">\(i\)</span>th total recall accuracy in 1 to 5200, of person <span class="math inline">\(j\)</span> in 1 to 260, word <span class="math inline">\(k\)</span> in 1 to 20, and task <span class="math inline">\(m\)</span> in {F (free recall), C (cued recall)} as Bernoulli distributed, where the probability of an accurate answer is determined by the rate parameter <span class="math inline">\(\pi\)</span>. As is common with generalized linear models, we model the rate parameter through a nonlinear link function. In this example, we use the cumulative normal density function (<span class="math inline">\(\Phi\)</span>, or “probit”), but other link functions are also available, such as the common logit. Consequently, it is the “linear predictor” <span class="math inline">\(\eta\)</span> that we then model as a linear combination of the predictors. We write this model as</p>
+<p><span id="eq-m2-1"><span class="math display">\[
+\begin{align*}
+\text{Accuracy}_{ijkm} &amp;\sim \operatorname{Bernoulli}\left(\pi_{jkm}\right) \\
+\pi_{jkm} &amp;= \Phi\left(\eta_{jkm}\right) \\
+\eta_{jkm} &amp;= \beta_{m} + \gamma_{jm} + \delta_{km} \\
+\gamma_{[m:F]} &amp;\sim
+  \operatorname{Normal}\left(0, \tau_{\gamma_{[m:F]}} \right) \\
+\gamma_{[m:C]} &amp;\sim
+  \operatorname{Normal}\left(0, \tau_{\gamma_{[m:C]}} \right) \\
+\begin{bmatrix}
+  \delta_{[m:F]} \\ \delta_{[m:C]}
+\end{bmatrix} &amp;\sim
+  \operatorname{MVN}\left(
+  \begin{bmatrix} 0 \\ 0 \end{bmatrix},
+  \begin{pmatrix}
+    \tau_{\delta_{[m:F]}} &amp; \\
+    \rho_\delta &amp;\tau_{\delta_{[m:C]}}
+  \end{pmatrix}
+\right).
+\end{align*}
+\tag{4}\]</span></span></p>
+<p>This Model 2 (<a href="#eq-m2-1" class="quarto-xref">Equation&nbsp;4</a>) of memory performance is similar to our Model 1 of valence effects above, but contains two sources of heterogeneity (persons, whose parameters we represent with <span class="math inline">\(\gamma\)</span>, and target words, whose parameters we write with <span class="math inline">\(\delta\)</span>). In addition, instead of coding the task type (free recall vs.&nbsp;cued recall) using predictor coding schemes such as contrast or dummy coding, we have index-coded task using subscripts <span class="math inline">\(_{m:F}\)</span> to stand for Free recall parameters, and <span class="math inline">\(_{m:C}\)</span> for parameters pertaining to the Cued recall task. This reparameterization allows quantifying heterogeneity in memory performance separately for the two tasks, rather than for (if using contrast coding) the average task and their difference.</p>
+<p>Note also that we model <span class="math inline">\(\gamma\)</span> using two independent normal distributions, and <span class="math inline">\(\delta\)</span> with a multivariate normal distribution. Because different persons participated in the two tasks, we cannot assess whether participant-specific abilities are correlated across the tasks. But we can assess this for target items, which were common across the tasks.</p>
+<p>We estimated Model 2 exactly as Model 1, by taking 4,000 random draws from its posterior distribution <span class="citation" data-cites="burknerBrmsPackageBayesian2017">(<a href="#ref-burknerBrmsPackageBayesian2017" role="doc-biblioref">Bürkner, 2017</a>)</span>. We then confirmed graphically and numerically that the estimation algorithm had converged, and that the model performed adequately using a graphical posterior predictive check <span class="citation" data-cites="gelmanBayesianDataAnalysis2013">(<a href="#ref-gelmanBayesianDataAnalysis2013" role="doc-biblioref">Gelman et al., 2013</a>)</span>. We summarise the model’s posterior distribution in <a href="#tbl-fit-2" class="quarto-xref">Table&nbsp;6</a>.</p>
+<div class="cell">
+<div id="tbl-fit-2" class="cell quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-fit-2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;6: Parameter estimates from Model 2.
+</figcaption>
+<div aria-describedby="tbl-fit-2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<table class="do-not-create-environment cell caption-top table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;">Parameter</th>
+<th style="text-align: left;">Mean</th>
+<th style="text-align: left;">SD</th>
+<th style="text-align: left;">95% CI</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><span class="math inline">\(\beta_{m:F}\)</span></td>
+<td style="text-align: left;">-0.15</td>
+<td style="text-align: left;">0.075</td>
+<td style="text-align: left;">[-0.29, 0.00]</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><span class="math inline">\(\beta_{m:C}\)</span></td>
+<td style="text-align: left;">0.27</td>
+<td style="text-align: left;">0.117</td>
+<td style="text-align: left;">[0.04, 0.50]</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><span class="math inline">\(\tau_{\gamma_{m:F}}\)</span></td>
+<td style="text-align: left;">0.37</td>
+<td style="text-align: left;">0.041</td>
+<td style="text-align: left;">[0.29, 0.46]</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><span class="math inline">\(\tau_{\gamma_{m:C}}\)</span></td>
+<td style="text-align: left;">0.67</td>
+<td style="text-align: left;">0.055</td>
+<td style="text-align: left;">[0.57, 0.79]</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><span class="math inline">\(\tau_{\delta_{m:F}}\)</span></td>
+<td style="text-align: left;">0.29</td>
+<td style="text-align: left;">0.058</td>
+<td style="text-align: left;">[0.19, 0.42]</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><span class="math inline">\(\tau_{\delta_{m:C}}\)</span></td>
+<td style="text-align: left;">0.43</td>
+<td style="text-align: left;">0.083</td>
+<td style="text-align: left;">[0.30, 0.62]</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><span class="math inline">\(\rho_\delta\)</span></td>
+<td style="text-align: left;">0.57</td>
+<td style="text-align: left;">0.188</td>
+<td style="text-align: left;">[0.12, 0.86]</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</figure>
+</div>
+</div>
+<section id="comparing-between-person-heterogeneity-across-tasks" class="level2">
+<h2 class="anchored" data-anchor-id="comparing-between-person-heterogeneity-across-tasks">Comparing between-person heterogeneity across tasks</h2>
+<p>Descriptively, we reproduced <span class="citation" data-cites="mahVariabilitySubjectsFree2024">Mah &amp; Lindsay (<a href="#ref-mahVariabilitySubjectsFree2024" role="doc-biblioref">2024</a>)</span>‘s finding that participants’ memory performance was more heterogeneous in the cued recall task than in the free recall task (rows 3 and 4 in <a href="#tbl-fit-2" class="quarto-xref">Table&nbsp;6</a>). We show the relevant estimated quantities, and the implied heterogeneity distributions in <a href="#fig-2-person" class="quarto-xref">Figure&nbsp;5</a>.</p>
+<p>The top panel of <a href="#fig-2-person" class="quarto-xref">Figure&nbsp;5</a> A illustrates the posterior distributions of memory performance for the average person in the free and cued recall tasks, and their difference (cued - free recall): While recall performance was -0.15 [-0.29, 0.00] and 0.27 [0.04, 0.50] probits in the free and cued recall conditions, respectively, the corresponding probabilities were 0.44 [0.39, 0.50] and 0.61 [0.52, 0.69]. Notice that the model’s parameters refer to probits (standard normal deviates, or “z-scores”) because of the link function we used. Therefore, for example zero translates to 50% accuracy.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-2-person" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-2-person-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="index_files/figure-html/fig-2-person-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-2-person-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;5: Estimated between-person heterogeneity in memory performance in Free recall and Cued recall tasks from Model 2. A. Histograms of 4,000 posterior draws from the model parameters and their transformations, with points and intervals showing posterior means and 95%CIs. Differences are calculated as Cued - Free recall. <span class="math inline">\(p^+\)</span> indicates the proportion of the population whose proportion correct is predicted to be above 50%. Heterogeneity ratio indicates standard deviations divided with their respective means (we truncated this axis at [-7, 7] for clarity. B. Probability density (top) and cumulative distribution functions (bottom) of the two groups’ heterogeneity distributions (green: free recall, red: cued recall). The densities, points, and intervals on the left y-axis of the bottom panel indicate approximate posterior densities, with means and 95%CIs, of the proportions of the populations with memory performance above 0.5.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>More importantly, the second row in <a href="#fig-2-person" class="quarto-xref">Figure&nbsp;5</a> A describes the posterior distributions of the between-person standard deviations in memory ability in the free and cued recall tasks, and their difference (cued - free recall). The standard deviation was 0.30 [0.16, 0.43] probits greater in the cued recall task (ratio: 1.82 [1.38, 2.37]).</p>
+<p>The third row of <a href="#fig-2-person" class="quarto-xref">Figure&nbsp;5</a> A shows the estimated proportions of individuals whose memory performance exceeded 50% (<span class="math inline">\(p^+\)</span>), and their difference. The model estimates the proportion of individuals who recall over 50% of items to be 0.31 [0.15, 0.46] greater in the cued than in the free recall task. Note that this quantity refers to population proportions and is not a z-score.</p>
+<p>Perhaps surprisingly, even though the absolute measures of heterogeneity differed greatly between the two recall tasks, the bottom row of <a href="#fig-2-person" class="quarto-xref">Figure&nbsp;5</a> A shows that the degree of relative heterogeneity is virtually identical across the two tasks. This heterogeneity ratio’s mathematical equivalent is commonly known as the coefficient of variation (CV), which is used frequently in many areas of psychological research, such as psychophysics. In those areas, a common finding is that while there might be experimental effects on an individual’s response distribution’s mean or dispersion, the CV frequently remains stable across conditions (disperion tends to grow larger with increased stimulus strength, for example). Our use of the heterogeneity ratio in this example calls to mind those applications and findings regarding the coefficient of variation.</p>
+<p>Moreover, we truncated the Heterogeneity ratio panel’s x-axis at [-7, 7] because ratios of two normal distributions with zero means are Cauchy distributed. Sampling from a Cauchy distribution frequently returns extreme draws because of the distribution’s thick tails. Consequently, posterior draws of <span class="math inline">\(\frac{\tau}{\beta}\)</span> can approximate a Cauchy-distribution and therefore exhibit frequent extreme values. These extreme values would obscure the bulk of the distribution if the axis was not truncated. More colloquially, near-zero means will necessarily lead to infinite ratios, and consequently this coefficient can be very sensitive to small changes in the mean value. The difference in ratios is very uncertain for the same reason.</p>
+<p>We also depict the heterogeneity distribution’s posterior distribution as a PDF and a CDF in <a href="#fig-2-person" class="quarto-xref">Figure&nbsp;5</a> B. Unlike in <a href="#fig-2" class="quarto-xref">Figure&nbsp;2</a> where we drew random draws of the functions’ posteriors as thin lines, to reduce overplotting <a href="#fig-2-person" class="quarto-xref">Figure&nbsp;5</a> instead aggregates the posteriors to means (dark line) and 95% credibility ribbons (light areas). These figures allow for concise and complementary descriptions of (differences in) heterogeneity in the two tasks. In other words, they allow visually comparing the population distributions of memory performance across the cued and free-recall tasks.</p>
+<p>First, we see that the majority of the free recall group’s CDF (green) is to the left of zero (50% recall), indicating that the majority of this population is predicted to recall less than half of items. This information is described in more detail in the small posterior densities and point-intervals on the left y-axis: The model predicts above-50% performance only for a proportion of 0.35 [0.21, 0.50] of the population. Second, we see that the slope of the cued recall CDF (red) is less steep and to the right to that of the free recall CDF: The between-person distribution of memory abilities is more dispersed in the cued than in the free recall task, and 0.65 [0.52, 0.78] individuals in that group are predicted to perform above 50%.</p>
+<p>Finally, we turn to the heterogeneity interval (HI). The <span class="math inline">\(HI_{90}\)</span>’s lower bound in the free recall task is -0.76 [-0.96, -0.57], and -0.83 [-1.13, -0.55] in the cued recall task. While this 5th percentile of the heterogeneity distribution was not credibly different across the two tasks (Cued - Free recall; -0.07 [-0.39, 0.24]), the 95th percentiles differed at the 95% credibility level (the Cued recall upper <span class="math inline">\(HI_90\)</span> limit was 0.91 [0.60, 1.23] probits greater). Studying <a href="#fig-2-person" class="quarto-xref">Figure&nbsp;5</a> B closely makes another implication of the different standard deviations clear: While the average person likely has greater memory performance in the cued recall task, the model predicts that there are also more individuals with very poor performances in the cued recall condition.</p>
+</section>
+<section id="comparing-between-target-heterogeneity-across-tasks" class="level2">
+<h2 class="anchored" data-anchor-id="comparing-between-target-heterogeneity-across-tasks">Comparing between-target heterogeneity across tasks</h2>
+<p>Between-person heterogeneity is typically the more theoretically important phenomenon for psychologists than differences in model parameters between other randomly sampled study units, such as stimuli. However, examining heterogeneity in other sampled units can be both theoretically and methodologically important <span class="citation" data-cites="juddTreatingStimuliRandom2012 juddExperimentsMoreOne2017">(<a href="#ref-juddTreatingStimuliRandom2012" role="doc-biblioref">Judd et al., 2012</a>, <a href="#ref-juddExperimentsMoreOne2017" role="doc-biblioref">2017</a>)</span>. We next turn to our second and third questions regarding potential differences and consistencies in between-target word heterogeneity.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div id="fig-2-target" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-2-target-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="index_files/figure-html/fig-2-target-1.png" class="img-fluid figure-img" width="710">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-2-target-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;6: Heterogeneity between target words in memory performance in Free recall and Cued recall tasks from Model 2. A. Histograms of 4,000 posterior draws from the model parameters and their transformations, with points and intervals showing posterior means and 95%CIs. Differences calculated as Cued - Free recall. B. Probability density (top) and cumulative distribution functions (bottom) of the two tasks’ heterogeneity distributions (green: free recall, red: cued recall). The densities, points, and intervals on the left y-axis of the bottom panel indicate approximate posterior densities, with means and 95%CIs, of the proportions of the populations with memory performance above chance. C. Posterior mean (dark), and 100 posterior draws (light) of the correlation between target words’ proportions correct in the free (x-axis) and cued recall (y-axis) tasks. Ellipses indicate the 90th percentile of the bivariate normal distribution.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>The results regarding differences in heterogeneity across target words’ proportions correct were similar to those as observed regarding heterogeneity in people’s memory performances. <a href="#fig-2-target" class="quarto-xref">Figure&nbsp;6</a> A shows that heterogeneity (standard deviations) in memory performance was greater when words appeared in the cued recall task. The interpretation of this difference is quantitatively similar to that observed about people above: Both people and target words exhibit greater memory performance variability in the cued recall than in the free recall task. However, because <span class="citation" data-cites="mahVariabilitySubjectsFree2024">Mah &amp; Lindsay (<a href="#ref-mahVariabilitySubjectsFree2024" role="doc-biblioref">2024</a>)</span> used the same target words across the two tasks, this interpretation is subtly more complex: This difference holds even when the exact same units—target words, in this example—are used in the two different tasks.</p>
+<p>Moreover, we observe similar differences in between-target word heterogeneity between the two tasks as we did above regarding between-person heterogeneity: The model predicts a greater proportion of words to elicit greater than 50% accurate recall in the cued recall than in the free recall task. Yet, the ratio of the heterogeneity distribution’s standard deviation to its mean again appeared very similar across the two tasks.</p>
+<p>The design of <span class="citation" data-cites="mahVariabilitySubjectsFree2024">Mah &amp; Lindsay (<a href="#ref-mahVariabilitySubjectsFree2024" role="doc-biblioref">2024</a>)</span>‘s study and our analysis of the dataset afforded an additional piece of information: Because the same target words were used across the two tasks, we could examine the consistency of target words’ heterogeneity across the two tasks (question (3)). There was a clear positive correlation between target words’ rates of correct responses across the free and cued recall tasks (bottom panel of <a href="#fig-2-target" class="quarto-xref">Figure&nbsp;6</a> A and C). The posterior mean and 95%CI of this correlation was 0.57 [0.12, 0.86].</p>
+<p>This correlation’s substantive interpretation is that words that are likely better recalled in the free recall task are also likely to be those that are better recalled in the cued recall task. (<span class="citation" data-cites="bolgerCausalProcessesPsychology2019">Bolger et al. (<a href="#ref-bolgerCausalProcessesPsychology2019" role="doc-biblioref">2019</a>)</span> found a conceptually similar result regarding valence effects’ stability across time but within individuals: Individuals whose valence effect was stronger at Time 1 were also those whose valence effect was likely to be stronger at Time 2, one week later.) For example, the tools presented here would facilitate seeking for theoretically interesting conditions where this consistency is violated.</p>
+<p>Our study of Model 2’s results might indicate exciting new avenues for this line of inquiry. One explanation for the between-task difference in between-person heterogeneity is that participants might adopt different recall strategies in the two tasks <span class="citation" data-cites="mahVariabilitySubjectsFree2024">(<a href="#ref-mahVariabilitySubjectsFree2024" role="doc-biblioref">Mah &amp; Lindsay, 2024</a>)</span>. Our additional results suggest that such a mechanism may not be a complete account of differences in memory performance heterogeneity: Target words are presumably invariant regarding memory strategies, yet we find that accuracy is more heterogeneous across target words in cued than in the free recall task (<a href="#fig-2-target" class="quarto-xref">Figure&nbsp;6</a> A). Second, we observed across both people and target words that the ratio of the between-unit standard deviation to the average effect was nearly identical across the free and cued recall tasks. Finally, given that we operationalized the stability of item difficulties as a correlation across tasks, it might be theoretically important to look for sets of stimuli where this positive correlation did not occur.</p>
+</section>
+</section>
+<section id="discussion" class="level1">
+<h1>Discussion</h1>
+<p>In the current work, we illustrated the use of practical descriptors of heterogeneity with examples drawn from social and cognitive psychology. Our aim was to incrementally build on the work of <span class="citation" data-cites="bolgerCausalProcessesPsychology2019">Bolger et al. (<a href="#ref-bolgerCausalProcessesPsychology2019" role="doc-biblioref">2019</a>)</span> and others—who have described the importance and available methods for examining heterogeneity in causal effects—by describing how it is both critically important and practically feasible to incorporate uncertainty in analyses and descriptions of heterogeneity. Our currently proposed methods incorporate uncertainty into both modelling of and inferences about heterogeneity.</p>
+<p>Although prior work on developing metrics of heterogeneity, and placing experimental effect sizes in context of person-specific effects exists, it has largely ignored estimation uncertainty and thus remained purely descriptive. For example, <span class="citation" data-cites="gricePersonsEffectSizes2020">Grice et al. (<a href="#ref-gricePersonsEffectSizes2020" role="doc-biblioref">2020</a>)</span> describe a method whereby analysts count the number of individuals whose point estimate of an effect is concordant with a hypothesis. But such counting ignores estimation uncertainty in both the person-specific effects and variability among them. By accounting for these uncertainties, the methods described here go beyond description and allow inference to be drawn regarding populations and individuals with confidence. Moreover, counting individuals’ parameters provides a description of individuals in the sample, rather than of the population, which was our focus.</p>
+<p>Second <span class="citation" data-cites="schuetze2024">(<a href="#ref-schuetze2024" role="doc-biblioref">Schuetze &amp; Hippel, 2024, p. 3</a>)</span> suggest that “past efforts to identify heterogeneous effects have yielded a disproportionate number of disappointing, uninterpretable, and non-replicable findings”, and suggest low power as one potential antecedent. While perhaps an overstatement, one reason for why previous investigations of heterogeneity may have been suboptimal indeed relates to statistical power: By not duly incorporating and reporting on the uncertainty with which heterogeneity is estimated, investigations are more suspect for reporting substantial heterogeneity where it may not truly exist.</p>
+<p>Finally, <span class="citation" data-cites="bolgerCausalProcessesPsychology2019">Bolger et al. (<a href="#ref-bolgerCausalProcessesPsychology2019" role="doc-biblioref">2019</a>)</span> provided an extensive discussion of how heterogeneity can be estimated for causal effects in psychology. We directly built on that work to illustrate the benefits and how such descriptions can and should include representations of uncertainty.</p>
+<p>We emphasized throughout that a probabilistic (Bayesian) approach is well-positioned to answer the needs of researchers interested in heterogeneity. Bayesian methods allow carrying uncertainty forward from model parameters to descriptors of heterogeneity and beyond. The resulting metrics are useful because they not only convey analysts’ expectations regarding heterogeneity, but more fully convey their states of knowledge regarding heterogeneity, including degrees of certainty. In addition, probabilistic modelling, by returning a matrix of samples from the posterior distribution, enables practically straightforward solutions whereby analysts can use familiar data wrangling techniques to easily compare various heterogeneity descriptors across groups. However, some methods described here could be implemented with e.g.&nbsp;joint bootstrap methods, but in our view those require additional practical steps—bootstrapping, for one—and might therefore be less practical.</p>
+<p>We believe that psychology, broadly speaking, is methodologically and theoretically ripe for incorporating effect heterogeneity into substantive theories <span class="citation" data-cites="bolgerCausalProcessesPsychology2019">(<a href="#ref-bolgerCausalProcessesPsychology2019" role="doc-biblioref">Bolger et al., 2019</a>)</span>. To do so, descriptions of heterogeneity must include measures of uncertainty, and we hope the techniques illustrated here help researchers do so.</p>
+<section id="limitations" class="level2">
+<h2 class="anchored" data-anchor-id="limitations">Limitations</h2>
+<p>In our example analyses, we have brushed many important modelling decisions under the rug in order to focus on the main topic of heterogeneity. First, in the first example, we analyzed reaction times by simply log-transforming reaction times. More informative analyses of RTs would make use of models that make more realistic assumptions about the data generating process underlying reaction time responses, but here we necessarily excluded this complication for reasons of brevity.</p>
+<p>Our exposition and interpretation of heterogeneity relies on a critical assumption in line with standard practices in multilevel and generalized linear mixed modelling; that of (multivariate) normality of the unit-level (person, item, etc) parameters. Assuming that random effects are normally distributed is a computationally and conceptually useful fiction, and we recognize that it is unlikely to hold exactly in real psychological phenomena. Haaf, Rouder, and colleagues have explored alternatives to continuous normal distributions of random effects <span class="citation" data-cites="haafDevelopingConstraintBayesian2017 haafDonAccountingVariability2019">(e.g., <a href="#ref-haafDevelopingConstraintBayesian2017" role="doc-biblioref">Haaf &amp; Rouder, 2017</a>, <a href="#ref-haafDonAccountingVariability2019" role="doc-biblioref">2019</a>)</span>.</p>
+</section>
+<section id="conclusion" class="level2">
+<h2 class="anchored" data-anchor-id="conclusion">Conclusion</h2>
+<p>We hope that the conceptual, computational, and graphical tools that we have discussed here prove useful to researchers interested in better understanding heterogeneity in psychological phenomena.</p>
+</section>
+</section>
+<section id="disclosures" class="level1">
+<h1>Disclosures</h1>
+<section id="data-and-code-availability" class="level2">
+<h2 class="anchored" data-anchor-id="data-and-code-availability">Data and code availability</h2>
+<p>The online analysis supplement is readable at https://mvuorre.github.io/heterogeneity-uncertainty. Our materials are available at GitHub (https://github.com/mvuorre/heterogeneity-uncertainty) and the OSF (https://osf.io/yp2gq/). We reused openly available datasets from <span class="citation" data-cites="bolgerCausalProcessesPsychology2019">Bolger et al. (<a href="#ref-bolgerCausalProcessesPsychology2019" role="doc-biblioref">2019</a>)</span> and <span class="citation" data-cites="mahVariabilitySubjectsFree2024">Mah &amp; Lindsay (<a href="#ref-mahVariabilitySubjectsFree2024" role="doc-biblioref">2024</a>)</span>.</p>
+</section>
+<section id="author-contributions" class="level2">
+<h2 class="anchored" data-anchor-id="author-contributions">Author contributions</h2>
+<!-- https://casrai.org/credit/ -->
+<p>Conceptualization: MV, NB<br>
+Formal Analysis: MV<br>
+Methodology: MV, NB, MK<br>
+Project Administration: MV<br>
+Software: MV, MK<br>
+Visualization: MV, MK, NB<br>
+Writing – Original Draft: MV<br>
+Writing – Review &amp; Editing: MV, NB, MK</p>
+</section>
+<section id="competing-interests" class="level2">
+<h2 class="anchored" data-anchor-id="competing-interests">Competing interests</h2>
+<p>The author(s) declare no competing interests.</p>
+<!-- Format references better in non-html formats -->
+<!-- Material after this only appears in html output -->
+
+</section>
+</section>
+
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" data-line-spacing="2" role="list">
+<div id="ref-anvariUsingAnchorbasedMethods2021" class="csl-entry" role="listitem">
+Anvari, F., &amp; Lakens, D. (2021). Using anchor-based methods to determine the smallest effect size of interest. <em>Journal of Experimental Social Psychology</em>, <em>96</em>, 104159. <a href="https://doi.org/10.1016/j.jesp.2021.104159">https://doi.org/10.1016/j.jesp.2021.104159</a>
+</div>
+<div id="ref-bartosFairCoinsTend2023" class="csl-entry" role="listitem">
+Bartoš, F., Sarafoglou, A., Godmann, H. R., Sahrani, A., Leunk, D. K., Gui, P. Y., Voss, D., Ullah, K., Zoubek, M. J., Nippold, F., Aust, F., Vieira, F. F., Islam, C.-G., Zoubek, A. J., Shabani, S., Petter, J., Roos, I. B., Finnemann, A., Lob, A. B., … Wagenmakers, E.-J. (2023, October 6). <em>Fair coins tend to land on the same side they started: <span>Evidence</span> from 350,757 <span>Flips</span></em>. <a href="https://doi.org/10.48550/arXiv.2310.04153">https://doi.org/10.48550/arXiv.2310.04153</a>
+</div>
+<div id="ref-batesFittingLinearMixedEffects2015" class="csl-entry" role="listitem">
+Bates, D. M., Mächler, M., Bolker, B. M., &amp; Walker, S. (2015). Fitting <span>Linear Mixed-Effects Models Using</span> Lme4. <em>Journal of Statistical Software</em>, <em>67</em>(1), 1–48. <a href="https://doi.org/10.18637/jss.v067.i01">https://doi.org/10.18637/jss.v067.i01</a>
+</div>
+<div id="ref-beck2022" class="csl-entry" role="listitem">
+Beck, E. D., &amp; Jackson, J. J. (2022). Personalized Prediction of Behaviors and Experiences: An Idiographic Person<span></span>Situation Test. <em>Psychological Science</em>, 09567976221093307. <a href="https://doi.org/10.1177/09567976221093307">https://doi.org/10.1177/09567976221093307</a>
+</div>
+<div id="ref-beyensEffectSocialMedia2020" class="csl-entry" role="listitem">
+Beyens, I., Pouwels, J. L., van Driel, I. I., Keijsers, L., &amp; Valkenburg, P. M. (2020). The effect of social media on well-being differs from adolescent to adolescent. <em>Scientific Reports</em>, <em>10</em>(1, 1), 10763. <a href="https://doi.org/10.1038/s41598-020-67727-7">https://doi.org/10.1038/s41598-020-67727-7</a>
+</div>
+<div id="ref-bolgerCausalProcessesPsychology2019" class="csl-entry" role="listitem">
+Bolger, N., Zee, K. S., Rossignac-Milon, M., &amp; Hassin, R. R. (2019). Causal processes in psychology are heterogeneous. <em>Journal of Experimental Psychology: General</em>, <em>148</em>(4), 601–618. <a href="https://doi.org/10.1037/xge0000558">https://doi.org/10.1037/xge0000558</a>
+</div>
+<div id="ref-brandCausalEffectHeterogeneity2013" class="csl-entry" role="listitem">
+Brand, J. E., &amp; Thomas, J. S. (2013). Causal <span>Effect Heterogeneity</span>. In S. L. Morgan (Ed.), <em>Handbook of <span>Causal Analysis</span> for <span>Social Research</span></em> (pp. 189–213). <span>Springer Netherlands</span>. <a href="https://doi.org/10.1007/978-94-007-6094-3_11">https://doi.org/10.1007/978-94-007-6094-3_11</a>
+</div>
+<div id="ref-burknerBrmsPackageBayesian2017" class="csl-entry" role="listitem">
+Bürkner, P.-C. (2017). Brms: <span>An R Package</span> for <span>Bayesian Multilevel Models Using Stan</span>. <em>Journal of Statistical Software</em>, <em>80</em>(1), 1–28. <a href="https://doi.org/10.18637/jss.v080.i01">https://doi.org/10.18637/jss.v080.i01</a>
+</div>
+<div id="ref-burknerAdvancedBayesianMultilevel2018" class="csl-entry" role="listitem">
+Bürkner, P.-C. (2018). Advanced <span>Bayesian Multilevel Modeling</span> with the <span>R Package</span> brms. <em>The R Journal</em>, <em>10</em>(1), 395–411. <a href="https://journal.r-project.org/archive/2018/RJ-2018-017/index.html">https://journal.r-project.org/archive/2018/RJ-2018-017/index.html</a>
+</div>
+<div id="ref-gelmanBayesianDataAnalysis2013" class="csl-entry" role="listitem">
+Gelman, A., Carlin, J. B., Stern, H. S., Dunson, D. B., Vehtari, A., &amp; Rubin, D. B. (2013). <em>Bayesian <span>Data Analysis</span>, <span>Third Edition</span></em>. <span>Chapman and Hall/CRC</span>.
+</div>
+<div id="ref-gelmanDataAnalysisUsing2007" class="csl-entry" role="listitem">
+Gelman, A., &amp; Hill, J. (2007). <em>Data <span>Analysis Using Regression</span> and <span>Multilevel</span>/<span>Hierarchical Models</span></em>. <span>Cambridge University Press</span>.
+</div>
+<div id="ref-gricePersonsEffectSizes2020" class="csl-entry" role="listitem">
+Grice, J. W., Medellin, E., Jones, I., Horvath, S., McDaniel, H., O’lansen, C., &amp; Baker, M. (2020). Persons as <span>Effect Sizes</span>. <em>Advances in Methods and Practices in Psychological Science</em>, <em>3</em>(4), 443–455. <a href="https://doi.org/10.1177/2515245920922982">https://doi.org/10.1177/2515245920922982</a>
+</div>
+<div id="ref-haafDevelopingConstraintBayesian2017" class="csl-entry" role="listitem">
+Haaf, J. M., &amp; Rouder, J. N. (2017). Developing constraint in bayesian mixed models. <em>Psychological Methods</em>, <em>22</em>(4), 779–798. <a href="https://doi.org/10.1037/met0000156">https://doi.org/10.1037/met0000156</a>
+</div>
+<div id="ref-haafDonAccountingVariability2019" class="csl-entry" role="listitem">
+Haaf, J. M., &amp; Rouder, J. N. (2019). Some do and some don’t? <span>Accounting</span> for variability of individual difference structures. <em>Psychonomic Bulletin &amp; Review</em>, <em>26</em>(3), 772–789. <a href="https://doi.org/10.3758/s13423-018-1522-x">https://doi.org/10.3758/s13423-018-1522-x</a>
+</div>
+<div id="ref-juddTreatingStimuliRandom2012" class="csl-entry" role="listitem">
+Judd, C. M., Westfall, J., &amp; Kenny, D. A. (2012). Treating stimuli as a random factor in social psychology: <span>A</span> new and comprehensive solution to a pervasive but largely ignored problem. <em>Journal of Personality and Social Psychology</em>, <em>103</em>(1), 54–69. <a href="https://doi.org/10.1037/a0028347">https://doi.org/10.1037/a0028347</a>
+</div>
+<div id="ref-juddExperimentsMoreOne2017" class="csl-entry" role="listitem">
+Judd, C. M., Westfall, J., &amp; Kenny, D. A. (2017). Experiments with <span>More Than One Random Factor</span>: <span>Designs</span>, <span>Analytic Models</span>, and <span>Statistical Power</span>. <em>Annual Review of Psychology</em>, <em>68</em>(1), 601–625. <a href="https://doi.org/10.1146/annurev-psych-122414-033702">https://doi.org/10.1146/annurev-psych-122414-033702</a>
+</div>
+<div id="ref-kruschkeDoingBayesianData2014" class="csl-entry" role="listitem">
+Kruschke, J. K. (2014). <em>Doing <span>Bayesian Data Analysis</span>: <span>A Tutorial Introduction</span> with <span>R</span></em> (2nd Edition). <span>Academic Press</span>.
+</div>
+<div id="ref-kruschkeBayesianDataAnalysis2017" class="csl-entry" role="listitem">
+Kruschke, J. K., &amp; Liddell, T. M. (2017). Bayesian data analysis for newcomers. <em>Psychonomic Bulletin &amp; Review</em>, 1–23. <a href="https://doi.org/10.3758/s13423-017-1272-1">https://doi.org/10.3758/s13423-017-1272-1</a>
+</div>
+<div id="ref-lakensEquivalenceTestingPsychological2018" class="csl-entry" role="listitem">
+Lakens, D., Scheel, A. M., &amp; Isager, P. M. (2018). Equivalence <span>Testing</span> for <span>Psychological Research</span>: <span>A Tutorial</span>. <em>Advances in Methods and Practices in Psychological Science</em>, <em>1</em>(2), 259–269. <a href="https://doi.org/10.1177/2515245918770963">https://doi.org/10.1177/2515245918770963</a>
+</div>
+<div id="ref-mahVariabilitySubjectsFree2024" class="csl-entry" role="listitem">
+Mah, E. Y., &amp; Lindsay, D. S. (2024). Variability across subjects in free recall versus cued recall. <em>Memory &amp; Cognition</em>, <em>52</em>(1), 23–40. <a href="https://doi.org/10.3758/s13421-023-01440-4">https://doi.org/10.3758/s13421-023-01440-4</a>
+</div>
+<div id="ref-mcelreathStatisticalRethinkingBayesian2020" class="csl-entry" role="listitem">
+McElreath, R. (2020). <em>Statistical rethinking: A <span>Bayesian</span> course with examples in <span>R</span> and <span>Stan</span></em> (2nd ed.). <span>Taylor and Francis, CRC Press</span>.
+</div>
+<div id="ref-rcoreteamLanguageEnvironmentStatistical2023" class="csl-entry" role="listitem">
+R Core Team. (2024). <em>R: <span>A Language</span> and <span>Environment</span> for <span>Statistical Computing</span>. <span>Version</span> 4.4.0</em> (Version 4.4.0) [Computer software]. <span>R Foundation for Statistical Computing</span>. <a href="https://www.R-project.org/">https://www.R-project.org/</a>
+</div>
+<div id="ref-raudenbushHierarchicalLinearModels2002" class="csl-entry" role="listitem">
+Raudenbush, S. W., &amp; Bryk, A. S. (2002). <em>Hierarchical <span>Linear Models</span>: <span>Applications</span> and <span>Data Analysis Methods</span></em>. <span>SAGE</span>. <a href="https://books.google.com?id=uyCV0CNGDLQC">https://books.google.com?id=uyCV0CNGDLQC</a>
+</div>
+<div id="ref-ravenzwaaijSimpleIntroductionMarkov2016" class="csl-entry" role="listitem">
+Ravenzwaaij, D. van, Cassey, P., &amp; Brown, S. D. (2016). A simple introduction to <span>Markov Chain Monte</span> sampling. <em>Psychonomic Bulletin &amp; Review</em>, 1–12. <a href="https://doi.org/10.3758/s13423-016-1015-8">https://doi.org/10.3758/s13423-016-1015-8</a>
+</div>
+<div id="ref-richters2021" class="csl-entry" role="listitem">
+Richters, J. E. (2021). Incredible utility: The lost causes and causal debris of psychological science. <em>Basic and Applied Social Psychology</em>, <em>43</em>(6), 366–405. <a href="https://doi.org/10.1080/01973533.2021.1979003">https://doi.org/10.1080/01973533.2021.1979003</a>
+</div>
+<div id="ref-scholerInflatingDeflatingSelf2014" class="csl-entry" role="listitem">
+Scholer, A. A., Ozaki, Y., &amp; Higgins, E. T. (2014). Inflating and deflating the self: <span>Sustaining</span> motivational concerns through self-evaluation. <em>Journal of Experimental Social Psychology</em>, <em>51</em>, 60–73. <a href="https://doi.org/10.1016/j.jesp.2013.11.008">https://doi.org/10.1016/j.jesp.2013.11.008</a>
+</div>
+<div id="ref-schuetze2024" class="csl-entry" role="listitem">
+Schuetze, B. A., &amp; Hippel, P. von. (2024). <em>How not to fool ourselves about heterogeneity of treatment effects</em>. <a href="https://doi.org/10.31234/osf.io/zg8hv">https://doi.org/10.31234/osf.io/zg8hv</a>
+</div>
+<div id="ref-standevelopmentteamStanModelingLanguage2023" class="csl-entry" role="listitem">
+Stan Development Team. (2023). <em>Stan <span>Modeling Language Users Guide</span> and <span>Reference Manual</span>, version 2.33</em> (Version 2.30) [Computer software]. <a href="https://mc-stan.org">https://mc-stan.org</a>
+</div>
+<div id="ref-vuorreAffectiveUpliftVideo2024" class="csl-entry" role="listitem">
+Vuorre, M., Ballou, N., Hakman, T., Magnusson, K., &amp; Przybylski, A. K. (2024). Affective <span>Uplift During Video Game Play</span>: <span>A Naturalistic Case Study</span>. <em>Games: Research and Practice</em>, 3659464. <a href="https://doi.org/10.1145/3659464">https://doi.org/10.1145/3659464</a>
+</div>
+<div id="ref-vuorreThreeObjectionsNovel2022" class="csl-entry" role="listitem">
+Vuorre, M., Johannes, N., &amp; Przybylski, A. K. (2022, July 15). <em>Three objections to a novel paradigm in social media effects research</em>. <a href="https://doi.org/10.31234/osf.io/dpuya">https://doi.org/10.31234/osf.io/dpuya</a>
+</div>
+<div id="ref-dplyr2023" class="csl-entry" role="listitem">
+Wickham, H., François, R., Henry, L., Müller, K., &amp; Vaughan, D. (2023). <em>Dplyr: A grammar of data manipulation</em>. <a href="https://CRAN.R-project.org/package=dplyr">https://CRAN.R-project.org/package=dplyr</a>
+</div>
+</div></section></div></main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    // For code content inside modals, clipBoardJS needs to be initialized with a container option
+    // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
