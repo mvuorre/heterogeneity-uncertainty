@@ -1,0 +1,38 @@
+project:
+  title: "Heterogeneity & uncertainty"
+  render:
+    - index.qmd
+  output-dir: docs
+
+site-url: https://mvuorre.github.io/heterogeneity-uncertainty
+repo-url: https://github.com/mvuorre/heterogeneity-uncertainty
+osf-url: https://osf.io/yp2gq/
+preprint-url: https://
+
+format:
+  preprint-typst:
+    output-file: ms.pdf
+    fontsize: 11pt
+    mainfont: Libertinus Serif
+  html:
+    toc: true
+    fontsize: 14pt
+    mainfont: Fira Sans
+    other-links: 
+      - text: Preprint (PsyArXiv)
+        href: https://
+        icon: file-pdf
+      - text: Online supplement
+        href: https://mvuorre.github.io/heterogeneity-uncertainty
+        icon: globe2
+      - text: GitHub Repository
+        href: https://osf.io/yp2gq/
+        icon: github
+      - text: OSF Repository
+        href: https://github.com/mvuorre/heterogeneity-uncertainty
+        icon: archive
+  preprint-docx:
+    output-file: ms.docx
+
+execute:
+  freeze: auto

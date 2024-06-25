@@ -1,20 +1,14 @@
-SOURCE = ms.qmd
+SOURCE = index.qmd
 
-all: renv pdf docx
+all: renv docs
 
 renv:
 	Rscript -e "renv::restore()"
 
-pdf: $(SOURCE)
-	quarto render $< --to apaquarto-pdf \
-	--output ms.pdf \
-	-M documentmode:doc
-
-docx: $(SOURCE)
-	quarto render $< --to apaquarto-docx \
-	--output ms.docx
+docs: $(SOURCE) _quarto.yml
+	quarto render
 
 clean:
-	rm -rf ms_cache ms_files ms.pdf ms.docx
+	rm -rf *_cache *_files *.pdf *.docx docs
 
 .PHONY: renv clean
