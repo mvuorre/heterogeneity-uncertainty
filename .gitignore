@@ -9,6 +9,8 @@
 *_cache/
 *_files/
 !docs/*_files/
+!docs/*.pdf
+!docs/*.docx
 /data/
 /models/
 
