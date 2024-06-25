@@ -17,4 +17,4 @@ Or you can use R / RStudio:
 
 1. Make sure the project root is the current working directory (i.e. activate the `heterogeneity-uncertainty.Rproj` R Studio project)
 2. Recreate the R environment using renv: <https://cloud.r-project.org/web/packages/renv/index.html>
-3. "knit" the `ms.Rmd` manuscript source R Markdown file (e.g. R: `rmarkdown::render('ms.Rmd')`).
+3. Render the document by clicking the "Render" button.
