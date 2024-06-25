@@ -8,6 +8,7 @@
 *.docx
 *_cache/
 *_files/
+!docs/*_files/
 /data/
 /models/
 
