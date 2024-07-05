@@ -35,7 +35,7 @@ bibliography: bibliography.bib
 citeproc: true
 csl: apa.csl
 editor_options: 
-  chunk_output_type: inline
+  chunk_output_type: console
 ---
 
 ```{r}
@@ -303,7 +303,7 @@ ratio_low <- number(abs(sd1n_low / mu1n_low), .01)
 #| label: fig-1
 #| fig-height: 2
 #| fig-width: 7
-#| fig-cap: Heterogeneity distribution of valence effects and various descriptions of their expected heterogeneity as estimated with Model 1. A. The normal density curve defined by the point estimates of the valence effect distribution's mean ($\beta_1$) and standard deviation ($\tau_1$). Shaded areas represent areas under the normal curve within 1 (dark) and 2 (light) standard deviations of the mean. B. The 90\% Heterogeneity Interval as represented by a line segment with arrows, and the blue shaded area. C. Proportion of negative valence effects in the population (blue). D. Proportion of valence effects in the population that are within the region of practical equivalence to zero (ROPE; blue).
+#| fig-cap: Heterogeneity distribution of valence effects and various descriptions of their expected heterogeneity as estimated with Model 1. **A.** The normal density curve defined by the point estimates of the valence effect distribution's mean ($\beta_1$) and standard deviation ($\tau_1$). Shaded areas represent areas under the normal curve within 1 (dark) and 2 (light) standard deviations of the mean. **B.** The 90\% Heterogeneity Interval as represented by a line segment with arrows, and the blue shaded area. **C.** Proportion of negative valence effects in the population (blue). **D.** Proportion of valence effects in the population that are within the region of practical equivalence to zero (ROPE; blue).
 
 # annotation definitions
 valence_dist_color = "gray25"
@@ -320,8 +320,21 @@ fig_1 <- ggplot() +
   coord_cartesian(xlim = c(-0.55, 0.25)) +
   theme(
     axis.title.y = element_blank(),
-    axis.title.x = element_text(lineheight = rel(0.5))
-  ) 
+    axis.title.x = element_text(lineheight = rel(0.5)),
+    plot.title.position = "plot"
+  ) +
+  scale_y_continuous(
+    expand = expansion(c(0.0, 0.05))
+  ) +
+  labs(
+    y = "Density",
+    x = "Valence effect"
+  ) +
+  theme(
+    axis.text.y = element_blank(),
+    axis.ticks.y = element_blank(),
+    legend.position = "none"
+  )
 
 d1 <- dist_normal(mu1n, sd1n) |>
   mean_qi(.width = c(.66, .9))
@@ -359,12 +372,13 @@ fig_1_params <- fig_1 +
     arrow = arrowhead()
   ) +
   scale_fill_manual(values = c("grey90", "grey80"), na.value = "white") +
-  theme(axis.title.y = element_text(angle = 90)) 
+  labs(subtitle = "A. Heterogeneity distribution") +
+  theme(axis.title.y = element_text(angle = 90))
 
 fig_1_descriptors <- fig_1 +
   scale_fill_manual(values = c("grey90", alpha(desc_color, 0.45)), na.value = "white")
 
-fig_1_hi <- fig_1_descriptors +
+fig_1_interval <- fig_1_descriptors +
   stat_slab(
     aes(fill = after_stat(level)),
     .width = c(.90, 1),
@@ -376,16 +390,20 @@ fig_1_hi <- fig_1_descriptors +
     label = TeX("$HI_{90}$"),
     x = mu1n, y = .175,
     size = 3,
-    parse = TRUE
+    parse = TRUE,
+    color = desc_color_dark
   ) +
   annotate(
     "segment",
     x = d1$.lower[2], xend = d1$.upper[2], y = .1, yend = .1,
     linewidth = .35,
-    arrow = arrowhead(ends = "both")
-  ) 
+    arrow = arrowhead(ends = "both"),
+    color = desc_color_dark
+  ) +
+  labs(subtitle = "B. Heterogeneity interval")
 
-fig_1_p_neg <- fig_1_descriptors +
+
+fig_1_pneg <- fig_1_descriptors +
   stat_slab(
     aes(fill = after_stat(x < 0)),
     p_limits = c(.000001, .999999),
@@ -396,10 +414,12 @@ fig_1_p_neg <- fig_1_descriptors +
     label = TeX("$p^-$"),
     x = mu1n, y = .175,
     size = 3,
-    parse = TRUE
-  )
+    parse = TRUE,
+    color = desc_color_dark
+  ) +
+  labs(subtitle = "C. Proportion negative")
 
-fig_1_p_rope <- fig_1_descriptors +
+fig_1_prope <- fig_1_descriptors +
   stat_slab(
     aes(fill = after_stat(between(x, -.1, .1))),
     p_limits = c(.000001, .999999),
@@ -410,23 +430,12 @@ fig_1_p_rope <- fig_1_descriptors +
     label = TeX("$p^{ROPE}$"),
     x = 0.0, y = 0.5, hjust = 0,
     size = 3.5,
-    parse = TRUE
-  )
+    parse = TRUE,
+    color = desc_color_dark
+  ) +
+  labs(subtitle = "D. Proportion in ROPE")
 
-(fig_1_params | fig_1_hi | fig_1_p_neg | fig_1_p_rope) &
-  scale_y_continuous(
-    expand = expansion(c(0.0, 0.05))
-  ) &
-  labs(
-    y = "Density",
-    x = "Valence effect"
-  ) &
-  theme(
-    axis.text.y = element_blank(),
-    axis.ticks.y = element_blank(),
-    legend.position = "none"
-  ) &
-  plot_annotation(tag_levels = "A")
+fig_1_params | fig_1_interval | fig_1_pneg | fig_1_prope
 ```
 
 Rows 2 and 4 in @tbl-lmer define the expected normal distribution of valence effects in the population, visualized in @fig-1 A. In other words, our point estimate of the distribution of valence effects is Normal(`r mu1[1]`, `r sd1[1]`^2^). However, this distribution is an incomplete description of heterogeneity for two reasons. First, it does not incorporate uncertainty in the two determinants of heterogeneity, that is $\beta_1$ and $\tau_1$: If they are precisely estimated, i.e. when uncertainty regarding them is negligible, the distribution and any quantities calculated from it characterize the population well. On the other hand, if they are estimated with considerable uncertainty, the distribution or its transformations would not characterize the population well. We return to this key issue below. Second, the distribution or its parameters do not, for many purposes, communicate heterogeneity in clear and actionable terms. Below, we introduce several metrics that directly describe e.g. where a given proportion of the slopes are expected to fall.
@@ -436,14 +445,14 @@ Rows 2 and 4 in @tbl-lmer define the expected normal distribution of valence eff
 First, we can use the point estimates in @tbl-lmer to construct an expected *heterogeneity interval* that describes the range within which a certain percentage of the population's slopes are expected to fall [@bolgerCausalProcessesPsychology2019]. To do so, we must first determine an appropriate percentage to describe: By convention, @bolgerCausalProcessesPsychology2019 and others have focused on the 95% heterogeneity interval ($HI_{95}$). However, because there are already confusingly many quantities using the five percent cutoff, in this manuscript we focus on the 90% heterogeneity interval, and reserve 95% to describing uncertainties. The appropriate percentage to describe with a heterogeneity interval is determined by the substantive and communicative aims at hand; for our illustration 90% seemed reasonable.
 
 ```{r}
-#| label: fig-hi-point
-#| fig-width: 2.7
+#| label: fig-ml-interval
+#| fig-width: 4.5
 #| fig-height: 2.2
-#| fig-cap: "Construction of point estimates of the limits of the heterogeneity interval. To construct a $\\pi%$ heterogeneity interval, $HI_\\pi$, we use the inverse cumulative distribution function (CDF) of the heterogeneity distribution, $\\Phi^{-1}$. When $\\pi = 0.90$, we have $HI_90 = \\Phi^{-1}\\left((1 \\pm \\pi)/2 | \\beta_1, \\tau_1 \\right) = \\Phi^{-1}\\left([0.05, 0.95] | \\beta_1, \\tau_1 \\right)$."
+#| fig-cap: "Construction of point estimates of the limits of the heterogeneity interval. **A.** While $HI_{90}$ can be depicted on the probability density function (PDF), **B.** its construction is easier to depict on the cumulative distribution function (CDF), $\\Phi(x; \\beta_1, \\tau_1)$. To construct a 90% heterogeneity interval, we pass 0.05 and 0.95 to the inverse of the CDF: $HI_{90} = \\Phi^{-1}\\left([0.05, 0.95]; \\beta_1, \\tau_1 \\right)$."
 
 # Shared Y axis
 scale_y_01 <- scale_y_continuous(
-  breaks = breaks_extended(7),
+  breaks = c(0, 0.5, 1),
   expand = expansion(c(0.005, 0.005)),
   limits = c(0, 1)
 )
@@ -459,7 +468,7 @@ scale_x_valence <- \(..., breaks = extended_breaks()) scale_x_continuous(
 )
 
 # ML estimate of CDF
-p_ml_cdf <-
+fig_ml_cdf <-
   ggplot() +
   aes(xdist = dist_ml) +
   stat_slab(
@@ -469,19 +478,21 @@ p_ml_cdf <-
     color = valence_dist_color,
     fill = NA
   ) +
-  geom_vline(
-    xintercept = 0, 
-    linewidth = .25,
-    color = zero_color,
-    linetype = "dashed"
+  geom_text(
+    aes(x = I(1), y = 0.97),
+    label = expression(bold(Phi)),
+    vjust = 1,
+    hjust = 1,
+    family = "serif"
   ) +
   theme(legend.position = "none") +
   scale_y_01 +
   xlab("Valence effect") +
-  ylab(quote(Pr("Valence effect" <= italic(x))))
+  ylab(quote(Pr("Valence effect" <= italic(x)))) +
+  theme(plot.title.position = "plot")
 
 # construction of HI_90 on the CDF
-p_ml_cdf_hi <- p_ml_cdf +
+fig_ml_cdf_interval <- fig_ml_cdf +
   geom_segment(
     aes(x = I(0), xend = quantile(dist_ml, 0.05), y = 0.05, yend = 0.05),
     color = desc_color
@@ -523,25 +534,39 @@ p_ml_cdf_hi <- p_ml_cdf +
     size = 2.5
   ) +
   scale_x_valence() +
-  coord_cartesian(clip = "off", ylim = c(0,1)) 
+  coord_cartesian(clip = "off", ylim = c(0,1)) +
+  labs(subtitle = TeX("B. $HI_{90}$ on the CDF"))
 
-p_ml_cdf_hi
+(
+  (fig_1_interval + labs(subtitle = TeX("A. $HI_{90}$ on the PDF"))) +
+  fig_ml_cdf_interval
+) &
+  theme(axis.title.y = element_text(angle = 90))
 ```
 
-To calculate a heterogeneity interval, we first specify the desired probability limits. For a 90% interval, we use .05 and .95, which together define the central 90% of the distribution. Then, we pass those limits and the estimated mean and standard deviation to the normal quantile function $\Phi^{-1}$ (*phi*, `qnorm()` in R), to get the interval: $HI_{90} = \Phi^{-1}([.05, .95] | \beta_1, \tau_1) = \Phi^{-1}([.05, .95] | $ `r mu1[1]`, `r sd1[1]`) = [`r hi90`]. In words, this function calculates the 0.05 and 0.95 quantiles of the normal distribution defined by the mean's ($\beta_1$) and standard deviation's ($\tau_1$) point estimates: We expect 90% of valence effects in the population to fall in the [`r hi90`] interval. We illustrate this interval in @fig-1 B and its construction in @fig-hi-point.
+To calculate a heterogeneity interval, we first specify the desired probability limits: 
+for a $\pi\%$ interval, we use the limits $(1 \pm \pi)/2$. Thus, for a 90% interval, we use 0.05 and 0.95, which together define the central 90% of the distribution. Then, we pass those limits and the estimated mean and standard deviation to the normal quantile function $\Phi^{-1}$ (*phi*, `qnorm()` in R), to get the interval: $HI_{90} = \Phi^{-1}([.05, .95]; \beta_1, \tau_1) = \Phi^{-1}([.05, .95];$ `r mu1[1]`, `r sd1[1]`) = [`r hi90`]. In words, this function calculates the 0.05 and 0.95 quantiles of the normal distribution defined by the point estimates of the mean ($\beta_1$) and standard deviation ($\tau_1$): We expect 90% of valence effects in the population to fall in the [`r hi90`] interval. We illustrate this interval in @fig-ml-interval.
 
 ### Proportion descriptors
 
 The above HI summarizes where a given proportion of individuals' effects in the population are. In contrast, some applications might find it more informative to summarize proportions of effects above or below some critical value, or within some critical range. For example, we might ask "What proportion of individuals in the population respond faster to positively valenced words?" In other words, we ask a question of *prevalence*: What proportion of the heterogeneity distribution is below zero? We label this quantity $p^-$ for proportion of population with negative effects.
 
 ```{r}
-#| label: fig-p-neg-point
-#| fig-width: 2.7
+#| label: fig-ml-pneg
+#| fig-width: 4.5
 #| fig-height: 2.2
-#| fig-cap: "Construction of the point estimate of $p^{-1}$, the proportion of individuals in the population with negative effects. To construct $p^{-1}$, we pass 0 to the cumulative distribution function (CDF) of the heterogeneity distribution."
+#| fig-cap: "Construction of the point estimate of the proportion of negative effects. **A.** While $p^{-}$ can be depicted on the probability density function (PDF), **B.** its construction is easier to depict on the cumulative distribution function (CDF): $p^{-} = \\Phi(0; \\beta_1, \\tau_1)$."
+
+zero_line = geom_vline(
+  xintercept = 0,
+  linetype = "22",
+  color = zero_color,
+  alpha = 0.25
+)
 
 # construction of p^- on the CDF
-p_ml_cdf_p_neg <- p_ml_cdf +
+fig_ml_cdf_pneg <- fig_ml_cdf +
+  zero_line +
   geom_segment(
     aes(x = 0, xend = 0, y = 0, yend = cdf(dist_ml, 0)),
     color = desc_color
@@ -555,29 +580,111 @@ p_ml_cdf_p_neg <- p_ml_cdf +
     x = 0, y = I(0),
     label = "0", 
     color = desc_color, 
-    vjust = 1.3, 
+    vjust = 1.35, 
     fontface = "bold", 
-    size = 3.5
+    size = 3
   ) +
   geom_text( 
     aes(x = I(0), y = cdf(dist_ml, 0)),
-    label = expression(bolditalic(p ^ "−")), 
+    label = expression(bold(p ^ "−")), 
     color = desc_color, 
-    hjust = 1.2, 
+    hjust = 1.2,
+    vjust = 0.6,
     fontface = "bold", 
-    size = 3.5
+    size = 3
   ) +
   scale_x_valence(breaks = c(-0.4, -0.2, 0.2)) +
-  coord_cartesian(clip = "off", ylim = c(0,1)) 
+  coord_cartesian(clip = "off", ylim = c(0,1)) +
+  labs(subtitle = TeX("B. $p^-$ on the CDF"))
 
-p_ml_cdf_p_neg
+(
+  (fig_1_pneg + zero_line + labs(subtitle = TeX("A. $p^-$ on the PDF"))) +
+  fig_ml_cdf_pneg
+) &
+  theme(axis.title.y = element_text(angle = 90))
 ```
 
-To answer, we pass zero (the critical value) and the estimated mean and standard deviation to the normal cumulative distribution function ($\Phi$; `pnorm()` in R): $p^- = Pr(\textrm{Valence effect} \le 0) = \Phi(0 | \beta_1, \tau_1) = \Phi(0 | $ `r mu1[1]`, `r sd1[1]`) = `r p_less_zero`. This number is the probability that a random slope from this population would take a negative value, or, in other words, the proportion of individuals in the population with negative valence effects. We illustrate this probability in @fig-1 C and its construction using the CDF in @fig-p-neg-point.
+To answer, we pass zero (the critical value) and the estimated mean and standard deviation to the normal cumulative distribution function ($\Phi$; `pnorm()` in R): 
+$p^{-} = Pr(\textrm{Valence effect} \le 0) = \Phi(0; \beta_1, \tau_1) = \Phi(0;$ `r mu1[1]`, `r sd1[1]`) = `r p_less_zero`. This number is the probability that a random slope from this population would take a negative value, or, in other words, the proportion of individuals in the population with negative valence effects. We illustrate this probability in @fig-1 C and its construction using the CDF in @fig-ml-pneg.
 
 However, using zero as a critical value might not be sufficiently informative, especially when theory allows specifying a smallest effect size of interest, or what is known as a region of practical equivalence [ROPE, @anvariUsingAnchorbasedMethods2021; @lakensEquivalenceTestingPsychological2018; @kruschkeBayesianDataAnalysis2017; @kruschkeDoingBayesianData2014]. In common applications, ROPE is used to statistically infer whether an estimated parameter, such as the effect of valence on logRT for the average person, is practically significant. But we can equally well use a theory-informed region of effect sizes to describe and make inferences about the heterogeneity distribution of this effect in the population.
 
-For example, let us imagine that a theory states that valence effects in the interval [-0.1, 0.1] are practically equivalent to zero. To calculate, we can again use the normal cumulative distribution function to calculate the proportion of individuals in the population whose valence effect falls within this interval or region of practical equivalence: $p^{ROPE} = Pr(-0.1 \le \textrm{Valence effect} \le 0.1) = \Phi(0.1 | \beta_1, \tau_1) - \Phi(-0.1 | \beta_1, \tau_1)$ = `r p_rope`. In words, `r p_rope` of the population is expected to have valence effects that are practically equivalent to zero. Note that this statement's validity critically depends on the chosen interval's theoretical validity. We visualize this probability in @fig-1 D.
+```{r}
+#| label: fig-ml-prope
+#| fig-width: 4.5
+#| fig-height: 2.2
+#| fig-cap: "Construction of the point estimate of the proportion of effects in the ROPE. **A.** While $p^{ROPE}$ can be depicted on the probability density function (PDF), **B.** its construction is easier to depict on the cumulative distribution function (CDF): $p^{ROPE} = \\Phi(\\epsilon; \\beta_1, \\tau_1) - \\Phi(- \\epsilon; \\beta_1, \\tau_1)$."
+
+rope_line = geom_vline(
+  xintercept = c(-0.1, 0.1),
+  linetype = "22",
+  color = zero_color,
+  alpha = 0.25
+)
+
+# construction of p^- on the CDF
+fig_ml_cdf_prope <- fig_ml_cdf +
+  rope_line +
+  geom_segment(
+    aes(x = -0.1, xend = -0.1, y = 0, yend = cdf(dist_ml, -0.1)),
+    color = desc_color
+  ) +
+  geom_segment(
+    aes(x = -0.1, xend = I(0), y = cdf(dist_ml, -0.1)),
+    color = desc_color,
+    arrow = arrowhead()
+  ) + 
+  geom_segment(
+    aes(x = 0.1, xend = 0.1, y = 0, yend = cdf(dist_ml, 0.1)),
+    color = desc_color
+  ) +
+  geom_segment(
+    aes(x = 0.1, xend = I(0), y = cdf(dist_ml, 0.1)),
+    color = desc_color,
+    arrow = arrowhead()
+  ) + 
+  geom_segment(
+    aes(x = I(0.09), xend = I(0.09), y = cdf(dist_ml, -0.1), yend = cdf(dist_ml, 0.1)),
+    color = desc_color,
+    arrow = arrowhead(ends = "both")
+  ) +
+  annotate("text", 
+    x = -0.1, y = I(0),
+    label = "−ε",
+    color = desc_color, 
+    vjust = 1.35, 
+    fontface = "bold", 
+    size = 3
+  ) +
+  annotate("text", 
+    x = 0.1, y = I(0),
+    label = "+ε", 
+    color = desc_color, 
+    vjust = 1.35, 
+    fontface = "bold", 
+    size = 3
+  ) +
+  geom_text( 
+    aes(x = I(0.12), y = mean(cdf(dist_ml, c(-0.1, 0.1))[[1]])),
+    label = expression(bold(p ^ "ROPE")), 
+    color = desc_color, 
+    hjust = 0,
+    vjust = 0.6,
+    fontface = "bold", 
+    size = 3
+  ) +
+  scale_x_valence() +
+  coord_cartesian(clip = "off", ylim = c(0,1)) +
+  labs(subtitle = TeX("B. $p^{ROPE}$ on the CDF"))
+
+(
+  (fig_1_prope + rope_line + labs(subtitle = TeX("A. $p^{ROPE}$ on the PDF"))) +
+  fig_ml_cdf_prope
+) &
+  theme(axis.title.y = element_text(angle = 90))
+```
+
+For example, let us imagine that a theory states that valence effects in the interval [-0.1, 0.1] are practically equivalent to zero. To calculate, we can again use the normal cumulative distribution function to calculate the proportion of individuals in the population whose valence effect falls within this interval or region of practical equivalence: $p^{ROPE} = Pr(-0.1 \le \textrm{Valence effect} \le 0.1) = \Phi(0.1; \beta_1, \tau_1) - \Phi(-0.1; \beta_1, \tau_1)$ = `r p_rope`. In words, `r p_rope` of the population is expected to have valence effects that are practically equivalent to zero. Note that this statement's validity critically depends on the chosen interval's theoretical validity. We visualize this probability in @fig-ml-prope.
 
 ### Ratio descriptors
 
@@ -658,7 +765,9 @@ fit_1 |>
 
 ## Heterogeneity distribution
 
-Armed with the Bayesian draws (@tbl-fit-1), we can now return to the question of the distribution of valence effects in the population. We now have 4,000 samples from this heterogeneity distribution's posterior distribution. Effectively, then, we have among other quantities 4,000 samples from the heterogeneity distribution's posterior distribution. We first redraw the expected heterogeneity distribution from @fig-1 using the posterior mean values of $\beta_1$ and $\tau_1$ in @fig-2 A (thick dark blue curve). Superimposed on that normal density curve are heterogeneity distributions calculated from 100 random posterior draws of $\beta_1$ and $\tau_1$. From these curves we can see that the true distribution of valence effects might well be less or more heterogeneous than is suggested by the expectation (point estimates).
+Armed with the joint Bayesian posterior distribution of all model parameters (@tbl-fit-1), we can now return to the question of the distribution of valence effects in the population. We now have 4,000 draws from the posterior distribution of the heterogeneity distribution. Within each draw from the posterior distribution, we can perform any calculation we did previously on only the point estimate of the heterogeneity distribution. 
+
+We first recompute the expected heterogeneity distribution from @fig-1 using the posterior mean values of $\beta_1$ and $\tau_1$ in @fig-2 A (thick black curve). Superimposed on that normal density curve are heterogeneity distributions calculated from 100 random posterior draws of $\beta_1$ and $\tau_1$. From these curves we can see that the true distribution of valence effects might well be less or more heterogeneous than is suggested by the expectation (point estimates). We can perform the same exercise on the CDF as well (@fig-2 B).
 
 ```{r}
 #| label: calc-dfs
@@ -718,9 +827,9 @@ coef(fit_lmer)$person |>
 
 ```{r}
 #| label: fig-2
-#| fig-width: 5.4
+#| fig-width: 4.5
 #| fig-height: 2.2
-#| fig-cap: "Bayesian estimates of the heterogeneity distribution of valence effects. A: Probability density function (PDF) curves. The thick line is the same expected PDF of valence effects from Figure 1. Thin lines show 100 PDFs calculated from random draws of $\\beta_1$ and $\\tau_1$ that collectively illustrate the uncertainty in the distribution's location and spread. B: Cumulative distribution function (CDF) curves, annotated as in A. The blue lines show the calculation of the point estimate of $p^- = Pr(\\textrm{Valence effect} \\le 0)$, the proportion of individuals with negative valence effects on logRT, using the mean CDF of valence effects."
+#| fig-cap: "Uncertainty in Bayesian estimates of the heterogeneity distribution of valence effects. **A.** Probability density function (PDF) curves. The thick line is the same expected PDF of valence effects from @fig-1. Thin lines show 100 PDFs calculated from random draws of $\\beta_1$ and $\\tau_1$ that collectively illustrate the uncertainty in the distribution's location and spread. **B.** Cumulative distribution function (CDF) curves, annotated as in A."
 
 # Posterior samples of pdf and cdf curves
 p_samples <- post1_density_mean |>
@@ -737,20 +846,11 @@ p_samples <- post1_density_mean |>
     linewidth = .8,
     col = valence_dist_color
   ) +
-  geom_vline(
-    xintercept = 0, 
-    linewidth = .25,
-    color = zero_color,
-    linetype = "dashed"
-  ) +
-  theme(legend.position = "none") +
-  xlab("Valence effect")
-
-p_cdf_samples <- p_samples +
-  aes(y = cdf) +
-  scale_x_valence() +
-  scale_y_01 +
-  ylab(quote(Pr("Valence effect" <= italic(x)))) 
+  xlab("Valence effect") +
+  theme(
+    legend.position = "none",
+    plot.title.position = "plot"
+  )
 
 p_pdf_samples <- p_samples +
   aes(y = pdf) +
@@ -759,10 +859,17 @@ p_pdf_samples <- p_samples +
     breaks = extended_breaks(7),
     expand = expansion(c(0.005, 0.005)),
   ) +
-  ylab("Probability density") 
+  ylab("Probability density") +
+  labs(subtitle = "A. Uncertainty in the PDF")
 
-p_pdf_samples + p_cdf_samples +
-  plot_annotation(tag_levels = "A")
+p_cdf_samples <- p_samples +
+  aes(y = cdf) +
+  scale_x_valence() +
+  scale_y_01 +
+  ylab(quote(Pr("Valence effect" <= italic(x)))) +
+  labs(subtitle = "B. Uncertainty in the CDF")
+
+p_pdf_samples + p_cdf_samples
 ```
 
 Some curves in @fig-2 A are further to the left (valence effect for the average person is more negative), and some further to the right (effect for the average person is more positive). Moreover, some curves are flatter and wider (effect varies more around the average in the population), and some are narrower and more peaked (effect varies less between individuals). The distribution of these curves represents our current knowledge about the heterogeneity distribution of valence effects in the population---given these data and this model. A sufficient description of heterogeneity therefore must include information about uncertainty in both the location (mean) and scale (standard deviation) parameters of the heterogeneity distribution.
@@ -789,110 +896,13 @@ p1s <- p1n |>
   )
 ```
 
-Above, we described the heterogeneity interval as a range of values where a specific percentage of the population's slopes are expected to fall (e.g. $HI_{90}$ for a 90% heterogeneity interval). However, a single interval cannot accommodate the uncertainty with which the underlying parameters are estimated. To carry uncertainty forward from model parameters to the $HI_{90}$, we redo the calculations from above, but instead of using only the mean's and standard deviation's point estimates, we repeat the calculations for each of the 4,000 randomly sampled pairs of $\beta_1$ and $\tau_1$. Consequently, we get 4,000 draws from the $HI_{90}$s posterior distribution (@fig-intervals).
-
-Summarizing a distribution of intervals entails some challenges, however, because an interval is defined by two quantities---the lower and upper bounds. The 95% most plausible lower bounds of $HI_{90}$ range between `r p1s$l`, whereas the 95% most credible upper bounds range between `r p1s$u` (@fig-intervals B). Thus, to adequately describe an estimated heterogeneity interval, researchers must communicate two separate uncertainty intervals: In words, we estimate that 90% of the population's valence effects range from `r paste(p1s$hi_low, p1s$l)` to `r paste(p1s$hi_high, p1s$u)`.
+Above, we described the heterogeneity interval as a range of values where a specific percentage of the population's slopes are expected to fall (e.g. $HI_{90}$ for a 90% heterogeneity interval). However, a single interval cannot accommodate the uncertainty with which the underlying parameters are estimated. To carry uncertainty forward from model parameters to the $HI_{90}$, we redo the calculations from above, but instead of using only the mean's and standard deviation's point estimates, we repeat the calculations for each of the 4,000 randomly sampled pairs of $\beta_1$ and $\tau_1$. Consequently, we get 4,000 draws from the posterior distribution of $HI_{90}$ (@fig-cdfs-intervals).
 
 ```{r}
-#| label: fig-intervals
-#| fig-height: 2.4
-#| fig-cap: Bayesian estimates of the 90% heterogeneity interval of valence effects. A. Scatterplot of 4,000 posterior samples of the lower (x-axis) and upper (y-axis) limits of the $HI_{90}$. B. Histograms of 4,000 samples of the HI90 lower (left) and upper (right) limits with their posterior means and 95%CIs as points and intervals. C. 100 random samples from the $HI_{90}$ posterior distribution, with the posterior mean heterogeneity interval superimposed in a darker shade of blue.
-
-p1 <- post1 |>
-  mutate(
-    hi_low = b_valence1 + qnorm(0.05) * sd_person__valence1,
-    hi_high = b_valence1 + qnorm(0.95) * sd_person__valence1
-  ) |>
-  ggplot(aes(hi_low, hi_high)) +
-  labs(x = "HI90 lower limit", y = "HI90 upper limit") +
-  geom_point(
-    alpha = .25,
-    shape = 1,
-    size = 0.75,
-    col = "dodgerblue1"
-  ) +
-  theme(aspect.ratio = 1)
-
-p2 <- post1 |>
-  mutate(
-    hi_low = b_valence1 + qnorm(0.05) * sd_person__valence1,
-    hi_high = b_valence1 + qnorm(0.95) * sd_person__valence1
-  ) |>
-  select(hi_low, hi_high) |>
-  pivot_longer(everything()) |>
-  ggplot(aes(value, group = name)) +
-  scale_y_continuous(
-    expand = expansion(c(0, 0.1))
-  ) +
-  scale_x_continuous(
-    "Valence effect"
-  ) +
-  stat_histinterval(
-    breaks = 100,
-    fill = alpha("dodgerblue1", .33),
-    color = "dodgerblue4",
-    .width = c(.95),
-    justification = .01
-  ) +
-theme(
-    axis.title.y = element_blank(),
-    axis.text.y = element_blank(),
-    axis.ticks.y = element_blank()
-  )
-
-p3 <- post1_density_samples |> 
-  distinct(
-    .draw, 
-    b_valence1, 
-    sd_person__valence1
-) |>
-  arrange(b_valence1) |>
-  mutate(i = 1:n()) |>
-  mutate(
-    dist = dist_normal(b_valence1, sd_person__valence1)
-  ) |>
-  ggplot() +
-  scale_x_continuous(
-    "Valence effect",
-    expand = expansion(0.025),
-    breaks = extended_breaks()
-  ) +
-  scale_y_continuous(
-    expand = expansion(0.025)
-  ) +
-  labs(y = "Posterior draw") +
-  stat_pointinterval(
-    aes(xdist = dist, y = i),
-    .width = .9,
-    interval_size_range = c(.15, .3),
-    alpha = .5,
-    color = "dodgerblue1"
-  ) +
-  geom_pointinterval(
-    data = post1 |>
-      summarise(
-        across(c(b_valence1, sd_person__valence1), mean)
-      ) |>
-      mutate(
-        hi_low = b_valence1 + qnorm(0.05) * sd_person__valence1,
-        hi_high = b_valence1 + qnorm(0.95) * sd_person__valence1
-      ),
-    aes(y = 50, x = b_valence1, xmin = hi_low, xmax = hi_high),
-    color = "dodgerblue4"
-  )
-
-(p1 | p2 | p3) +
-  plot_annotation(tag_levels = "A")
-```
-
-@fig-intervals further suggests that communicating the two uncertainty intervals of a heterogeneity interval is not only cumbersome but also ignores potential correlations between the HI endpoints' posterior distributions (panel A). For these reasons, although the HI can be a useful summary, we occasionally favor [e.g., @vuorreAffectiveUpliftVideo2024] the scalar descriptors discussed below.
-
-
-```{r}
-#| label: fig-hi-samples
-#| fig-width: 2.7
+#| label: fig-cdfs-intervals
+#| fig-width: 2.5
 #| fig-height: 2.2
-#| fig-cap: "Bayesian derivation of the posterior distribution for the lower and upper limits of the heterogeneity interval. Thin gray lines show 100 CDFs of the distribution of valence effects calculated from random draws of $\\beta_1$ and $\\tau_1$, as in @fig-2 B. Blue lines show the calculation of the posterior distribution of $HI_{90} = \\left[\\Phi^{-1}(0.05 | \\beta_1, \\tau_1), \\Phi^{-1}(0.95 | \\beta_1, \\tau_1)\\right]$, which is also depicted as marginal histograms. Compare to the point estimate of the same interval endpoints in @fig-hi-point."
+#| fig-cap: "Uncertainty in the limits of the lower and upper limits of the heterogeneity interval (compare to the point estimates in @fig-ml-interval B). Thin gray lines show 100 CDFs of the heterogeneity distribution calculated from random draws of $\\beta_1$ and $\\tau_1$, as in @fig-2 B. Blue lines show the calculation of the posterior distribution of $HI_{90} = \\Phi^{-1}([0.05, 0.95]; \\beta_1, \\tau_1)$, which is also depicted as marginal histograms. Point estimates and intervals represent the posterior mean and 95\\%CI."
 
 # Add summaries of CDF < 0 to CDF curves as inset plots
 p_cdf_intervals <- p_cdf_samples +
@@ -956,71 +966,118 @@ p_cdf_intervals <- p_cdf_samples +
   ) +
   scale_x_valence() +
   scale_y_continuous(
-    breaks = breaks_extended(7),
+    breaks = c(0, 0.5, 1),
     expand = expansion(0)
   ) +
-  coord_cartesian(clip = "off", ylim = c(0,1)) 
+  coord_cartesian(clip = "off", ylim = c(0,1)) +
+  theme(plot.title.position = "panel") +
+  labs(subtitle = TeX("Uncertainty in the limits of $HI_{90}$"))
 
 p_cdf_intervals
 ```
 
+Summarizing a distribution of intervals entails some challenges, however, because an interval is defined by two quantities---the lower and upper bounds. The 95% most plausible lower bounds of $HI_{90}$ range between `r p1s$l`, whereas the 95% most credible upper bounds range between `r p1s$u` (marginal histograms in @fig-cdfs-intervals, or @fig-intervals B). Thus, to adequately describe an estimated heterogeneity interval, researchers must communicate two separate uncertainty intervals: In words, we estimate that 90% of the population's valence effects range from `r paste(p1s$hi_low, p1s$l)` to `r paste(p1s$hi_high, p1s$u)`.
 
 ```{r}
-#| label: fig-rope-densities
+#| label: fig-intervals
 #| fig-width: 5.4
-#| fig-height: 2.8
-#| fig-cap: "Bayesian derivation of the posterior distribution for $p^{ROPE}$."
+#| fig-height: 2.7
+#| fig-cap: Correlation in Bayesian estimates of the 90% heterogeneity interval of valence effects. **A.** Scatterplot of 4,000 posterior draws of the lower (x-axis) and upper (y-axis) limits of $HI_{90}$. **B.** Histograms of 4,000 draws of the $HI_{90}$ lower (left) and upper (right) limits with their posterior means and 95% CIs as points and intervals. **C.** 100 random draws from the posterior distribution of $HI_{90}$, with the posterior mean heterogeneity interval superimposed in a darker shade of blue.
 
-post1_samples_rope <- post1_samples |> 
-  slice_head(n = 25) 
-
-p_rope_densities <- post1_samples_rope |> 
-  ggplot() + 
-  stat_slab(
-    aes(y = factor(.draw), xdist = dist_valence, fill = after_stat(-0.1 < x & x < 0.1)),
-    color = valence_dist_samples_color,
-    alpha = 0.5,
-    scale = 2.5,
-    linewidth = 0.5
+p1 <- post1 |>
+  mutate(
+    hi_low = b_valence1 + qnorm(0.05) * sd_person__valence1,
+    hi_high = b_valence1 + qnorm(0.95) * sd_person__valence1
+  ) |>
+  ggplot(aes(hi_low, hi_high)) +
+  labs(x = TeX("$HI_{90}$ lower limit"), y = TeX("$HI_{90}$ upper limit")) +
+  geom_point(
+    alpha = .25,
+    shape = 1,
+    size = 0.75,
+    col = desc_color
   ) +
-  geom_vline(xintercept = c(-0.1, 0.1), zero_color, alpha = 0.1, linetype = "22") +
-  scale_fill_manual(values = c("TRUE" = desc_color, "FALSE" = alpha(valence_dist_samples_color, 0.3))) +
-  guides(fill = "none") +
-  coord_cartesian(clip = "off") +
+  theme(
+    aspect.ratio = 1,
+    plot.title.position = "plot"
+  ) +
+  labs(subtitle = TeX("A. Correlation in the limits of $HI_{90}$"))
+
+p2 <- post1 |>
+  mutate(
+    hi_low = b_valence1 + qnorm(0.05) * sd_person__valence1,
+    hi_high = b_valence1 + qnorm(0.95) * sd_person__valence1
+  ) |>
+  select(hi_low, hi_high) |>
+  pivot_longer(everything()) |>
+  ggplot(aes(value, group = name)) +
+  scale_y_continuous(
+    expand = expansion(c(0, 0.1))
+  ) +
   scale_x_valence() +
-  scale_y_discrete(labels = NULL) +
-  theme(axis.ticks.y = element_blank()) +
-  ylab("Posterior draw") +
-  xlab("Valence effect")
-
-p_rope_props <- post1_samples_rope |> 
-  slice_head(n = 30) |> 
-  ggplot() + 
-  aes(y = factor(.draw), x = cdf(dist_valence, 0.1) - cdf(dist_valence, -0.1)) + 
-  geom_segment(aes(xend = 0, yend = factor(.draw)), color = desc_color) + 
-  geom_point(color = desc_color, size = 0.75) + 
-  scale_x_continuous(limits = c(0,1), expand = expansion(0)) +
-  scale_y_discrete(labels = NULL) +
-  theme(axis.ticks.y = element_blank()) +
-  ylab(NULL) +
-  xlab(quote(italic(p)^italic(ROPE))) +
   stat_histinterval(
-    aes(x = cdf(dist_valence, 0.1) - cdf(dist_valence, -0.1)),
-    y = 0.1,
-    data = post1,
-    breaks = 50,
-    fill = alpha(desc_color, 0.35),
+    breaks = 100,
+    fill = alpha(desc_color, .33),
     color = desc_color_dark,
-    side = "bottom",
-    .width = .95,
-    scale = 1,
-    height = 3
+    .width = c(.95),
+    justification = .01
   ) +
-  coord_cartesian(clip = "off", ylim = c(0.7, nrow(post1_samples_rope)))
-  
+  theme(
+    axis.title.y = element_blank(),
+    axis.text.y = element_blank(),
+    axis.ticks.y = element_blank(),
+    plot.title.position = "plot"
+  ) +
+  coord_cartesian(clip = "off") +
+  xlab(NULL) +
+  labs(subtitle = TeX("B. Uncertainty in the limits of $HI_{90}$"))
 
-p_rope_densities + p_rope_props + plot_annotation(tag_levels = "A")
+p3 <- post1_density_samples |> 
+  distinct(
+    .draw, 
+    b_valence1, 
+    sd_person__valence1
+) |>
+  arrange(b_valence1) |>
+  mutate(i = 1:n()) |>
+  mutate(
+    dist = dist_normal(b_valence1, sd_person__valence1)
+  ) |>
+  ggplot() +
+  scale_x_valence("Valence effect") +
+  scale_y_continuous(
+    expand = expansion(0.025),
+    labels = NULL
+  ) +
+  labs(y = "Posterior draw") +
+  stat_pointinterval(
+    aes(xdist = dist, y = i),
+    .width = .9,
+    interval_size_range = c(.15, .3),
+    alpha = .5,
+    color = desc_color
+  ) +
+  geom_pointinterval(
+    data = post1 |>
+      summarise(
+        across(c(b_valence1, sd_person__valence1), mean)
+      ) |>
+      mutate(
+        hi_low = b_valence1 + qnorm(0.05) * sd_person__valence1,
+        hi_high = b_valence1 + qnorm(0.95) * sd_person__valence1
+      ),
+    aes(y = 50, x = b_valence1, xmin = hi_low, xmax = hi_high),
+    color = desc_color_dark
+  ) +
+  theme(plot.title.position = "plot", axis.ticks.y = element_blank()) +
+  labs(subtitle = TeX("C. 100 draws from the distribution of $HI_{90}$"))
+
+p1 + 
+((p2 + p3) + plot_layout(heights = c(0.3, 0.7)))
+  # plot_annotation(tag_levels = "A")
 ```
+
+@fig-intervals further suggests that communicating the two uncertainty intervals of a heterogeneity interval is not only cumbersome but also ignores potential correlations between the posterior distributions of the HI endpoints (panel A). For these reasons, although the HI can be a useful summary, we occasionally favor [e.g., @vuorreAffectiveUpliftVideo2024] the scalar descriptors discussed below.
 
 
 ### Proportion descriptors
@@ -1028,10 +1085,11 @@ p_rope_densities + p_rope_props + plot_annotation(tag_levels = "A")
 A complementary description of heterogeneity is the proportion of the population whose effects fall above or below some critical value. For example, we can calculate proportions with negative and positive effects by using zero as the critical value. In this example, we ask "What proportion of individuals in the population endorse positive words faster than negative words?"
 
 ```{r}
-#| label: fig-p-neg
-#| fig-width: 2.7
+#| label: fig-cdfs-pneg
+#| fig-width: 2.5
 #| fig-height: 2.2
-#| fig-cap: "Bayesian derivation of the posterior distribution of $p^- = Pr(\\textrm{Valence effect} \\le 0)$, the proportion of individuals with negative valence effects on logRT. Thin gray lines show 100 CDFs of the distribution of valence effects calculated from random draws of $\\beta_1$ and $\\tau_1$, as in @fig-2 B. Blue lines show the calculation of the posterior distribution of $p^-$, which is also depicted as a marginal histogram at the top left. The point estimate and interval represents the posterior mean and 95\\%CI. Compare to the point estimate of $p^-$ in @fig-2 B."
+#| fig-cap: "Uncertainty in the proportion of negative effects (compare to the point estimate in @fig-ml-pneg B). Thin gray lines show 100 CDFs of the heterogeneity distribution calculated from random draws of $\\beta_1$ and $\\tau_1$, as in @fig-2 B. Blue lines show the calculation of the posterior distribution of $p^-$, which is also depicted as a marginal histogram at the top left. The point estimate and interval represents the posterior mean and 95\\%CI."
+
 
 # Add summaries of CDF < 0 to CDF curves as inset plots
 p_cdf_samples_with_p_neg <- p_cdf_samples +
@@ -1064,21 +1122,23 @@ p_cdf_samples_with_p_neg <- p_cdf_samples +
     x = 0, y = I(0), 
     label = "0", 
     color = desc_color, 
-    vjust = 1.3, 
+    vjust = 1.35, 
     fontface = "bold", 
-    size = 3.5
+    size = 3
   ) +
   geom_text( 
     aes(x = I(0), y = cdf(dist_valence, 0)),
     data = post1_mean,
-    label = expression(bolditalic(p ^ "−")), 
+    label = expression(bold(p ^ "−")), 
     color = desc_color, 
-    hjust = 1.4, 
+    hjust = 1.5, 
     fontface = "bold", 
-    size = 3.5
+    size = 3
   ) +
   scale_x_valence(breaks = c(-0.4, -0.2, 0.2)) +
-  coord_cartesian(clip = "off")
+  coord_cartesian(clip = "off") +
+  theme(plot.title.position = "panel") +
+  labs(subtitle = TeX("Uncertainty in $p^{-}"))
 
 p_cdf_samples_with_p_neg
 ```
@@ -1111,9 +1171,94 @@ tmp <- post1 |>
   )
 ```
 
-To answer, we calculate $p^- = Pr(\textrm{Valence effect} \le 0) = \Phi(0 | \beta_1, \tau_1)$ for each posterior draw of $\beta_1$ and $\tau_1$. We show 100 posterior draws of the CDF in @fig-p-neg with a vertical line superimposed at zero. The y-axis value where the CDF crosses zero on the x-axis indicates the population proportion of negative valence effects ($p^-$). We also show a histogram of all 4,000 posterior draws of that proportion in the top left margin of @fig-p-neg, with its associated 95%CI. The model predicts the proportion of individuals in the population with negative valence effects to be approximately `r percent(as.numeric(tmp$pd), .1)` (posterior mean), but with 95% confidence this value could be as low as `r percent(as.numeric(tmp$pd.lower), .1)` or as high as `r percent(as.numeric(tmp$pd.upper), .1)`. Stated differently, the model predicts that `r tmp$pd_r_n` of individuals in the population would show reversals of the valence effect.
+To answer, we calculate $p^- = Pr(\textrm{Valence effect} \le 0) = \Phi(0; \beta_1, \tau_1)$ for each posterior draw of $\beta_1$ and $\tau_1$. We show 100 posterior draws of the CDF in @fig-cdfs-pneg with a vertical line superimposed at zero. The y-axis value where the CDF crosses zero on the x-axis indicates the population proportion of negative valence effects ($p^-$). We also show a histogram of all 4,000 posterior draws of that proportion in the top left margin of @fig-cdfs-pneg, with its associated 95%CI. The model predicts the proportion of individuals in the population with negative valence effects to be approximately `r percent(as.numeric(tmp$pd), .1)` (posterior mean), but with 95% confidence this value could be as low as `r percent(as.numeric(tmp$pd.lower), .1)` or as high as `r percent(as.numeric(tmp$pd.upper), .1)`. Stated differently, the model predicts that `r tmp$pd_r_n` of individuals in the population would show reversals of the valence effect.
 
-Moreover, if theory allows defining a range of parameter values that are practically equivalent to zero (ROPE), we can use the posterior distribution to quantify uncertainty in the proportion of individuals predicted to have such practically negligible effects. We added dotted vertical lines in @fig-2 to highlight the [-0.1, 0.1] interval, which serves as an example ROPE. Line segments within that interval represent proportions of the population whose valence effect is practically equivalent to zero ($p^{ROPE}$). To quantify uncertainty in $p^{ROPE}$ we then aggregate the segments' to a mean and a 95%CI: `r tmp$rope_r` of individuals in the population have a valence effect that is practically equivalent to zero. We note that the ROPE of [-0.1, 0.1] here was arbitrary and picked just to illustrate the example.
+
+
+```{r}
+#| label: fig-pdfs-rope
+#| fig-width: 4.6
+#| fig-height: 2.4
+#| fig-cap: "Uncertainty in the proportion of effects in the ROPE (compare to the point estimate in @fig-ml-prope). **A.** 25 PDFs of heterogeneity distributions drawn from the joint distribution of $\\beta_1$ and $\\tau_1$. In each PDF, the area under the curve within the ROPE of $[-0.1, 0.1]$ is highlighted in blue. **B.** Line segments and points show the size of the area in the ROPE for each corresponding PDF in A. Marginal histogram (bottom) shows the posterior distribution of $p^{ROPE}$ calculated from all 4,000 draws from the joint distribution of $\\beta_1$ and $\\tau_1$. The point estimate and interval represents the posterior mean and 95\\%CI."
+
+rope_n <- 25
+
+post1_samples_rope <- post1_samples |> 
+  slice_head(n = rope_n) 
+
+p_rope_densities <- post1_samples_rope |> 
+  ggplot() + 
+  stat_slab(
+    aes(y = factor(.draw), xdist = dist_valence, fill = after_stat(-0.1 < x & x < 0.1)),
+    color = valence_dist_samples_color,
+    alpha = 0.5,
+    scale = 2.5,
+    linewidth = 0.5
+  ) +
+  annotate("text", 
+    x = -0.1, y = I(0),
+    label = "−ε",
+    color = desc_color, 
+    vjust = 1.15, 
+    fontface = "bold", 
+    size = 3
+  ) +
+  annotate("text", 
+    x = 0.1, y = I(0),
+    label = "+ε", 
+    color = desc_color, 
+    vjust = 1.15, 
+    fontface = "bold", 
+    size = 3
+  ) +
+  geom_vline(xintercept = c(-0.1, 0.1), zero_color, alpha = 0.1, linetype = "22") +
+  scale_fill_manual(values = c("TRUE" = desc_color, "FALSE" = alpha(valence_dist_samples_color, 0.3))) +
+  guides(fill = "none") +
+  coord_cartesian(clip = "off") +
+  scale_x_valence() +
+  scale_y_discrete(labels = NULL) +
+  theme(
+    axis.ticks.y = element_blank(),
+    plot.title.position = "plot"
+  ) +
+  ylab("Posterior draw") +
+  xlab("Valence effect") +
+  labs(subtitle = "A. PDFs of heterogeneity distributions")
+
+p_rope_props <- post1_samples_rope |> 
+  slice_head(n = 30) |> 
+  ggplot() + 
+  aes(y = factor(.draw), x = cdf(dist_valence, 0.1) - cdf(dist_valence, -0.1)) + 
+  geom_segment(aes(xend = 0, yend = factor(.draw)), color = desc_color) + 
+  geom_point(color = desc_color, size = 0.75) + 
+  scale_x_continuous(limits = c(0,1), expand = expansion(0)) +
+  scale_y_discrete(labels = NULL) +
+  theme(
+    axis.ticks.y = element_blank(),
+    plot.title.position = "plot"
+  ) +
+  ylab(NULL) +
+  xlab(TeX("$p^{ROPE}$")) +
+  labs(subtitle = TeX("B. Uncertainty in $p^{ROPE}$")) +
+  stat_histinterval(
+    aes(x = cdf(dist_valence, 0.1) - cdf(dist_valence, -0.1)),
+    y = 0.1,
+    data = post1,
+    breaks = 50,
+    fill = alpha(desc_color, 0.35),
+    color = desc_color_dark,
+    side = "bottom",
+    .width = .95,
+    scale = 1,
+    height = 3
+  ) +
+  coord_cartesian(clip = "off", ylim = c(0.7, nrow(post1_samples_rope)))
+  
+
+p_rope_densities + p_rope_props
+```
+
+Moreover, if theory allows defining a range of parameter values that are practically equivalent to zero (ROPE), we can use the posterior distribution to quantify uncertainty in the proportion of individuals predicted to have such practically negligible effects. Dotted vertical lines in @fig-pdfs-rope A highlight the [-0.1, 0.1] interval, which serves as an example ROPE. The area under the PDF within that interval represent the proportion of the population whose valence effect is practically equivalent to zero ($p^{ROPE}$), and each line in @fig-pdfs-rope B depicts the corresponding area under the curve from @fig-pdfs-rope A. To quantify uncertainty in $p^{ROPE}$ we then aggregate these values to a mean and a 95%CI: `r tmp$rope_r` of individuals in the population have a valence effect that is practically equivalent to zero. We note that the ROPE of [-0.1, 0.1] here was arbitrary and picked just to illustrate the example.
 
 So far, these examples have highlighted the importance of quantifying uncertainty in descriptions of heterogeneity. Had we only focused on the point estimates (posterior means), we might have misleadingly concluded that $p^-$ = `r percent(tmp$pd, .1)` and $p^{ROPE}$ = `r percent(tmp$rope, .1)`. However, with 95% confidence, these values might be as small as `r percent(tmp$pd.lower, .1)` and `r percent(tmp$rope.lower, .1)`, or as large as `r percent(tmp$pd.upper, .1)` and `r percent(tmp$rope.upper, .1)`, respectively.
 
