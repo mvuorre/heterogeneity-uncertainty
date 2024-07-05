@@ -442,13 +442,13 @@ Rows 2 and 4 in @tbl-lmer define the expected normal distribution of valence eff
 
 ### Interval descriptors
 
-First, we can use the point estimates in @tbl-lmer to construct an expected *heterogeneity interval* that describes the range within which a certain percentage of the population's slopes are expected to fall [@bolgerCausalProcessesPsychology2019]. To do so, we must first determine an appropriate percentage to describe: By convention, @bolgerCausalProcessesPsychology2019 and others have focused on the 95% heterogeneity interval ($HI_{95}$). However, because there are already confusingly many quantities using the five percent cutoff, in this manuscript we focus on the 90% heterogeneity interval, and reserve 95% to describing uncertainties. The appropriate percentage to describe with a heterogeneity interval is determined by the substantive and communicative aims at hand; for our illustration 90% seemed reasonable.
+First, we can use the point estimates in @tbl-lmer to construct an expected *heterogeneity interval* that describes the range within which a certain percentage of the population's slopes are expected to fall [@bolgerCausalProcessesPsychology2019]. To do so, we must first determine an appropriate percentage to describe: By convention, @bolgerCausalProcessesPsychology2019 and others have focused on the 95% heterogeneity interval ($\textit{HI}_{95}$). However, because there are already confusingly many quantities using the five percent cutoff, in this manuscript we focus on the 90% heterogeneity interval, and reserve 95% to describing uncertainties. The appropriate percentage to describe with a heterogeneity interval is determined by the substantive and communicative aims at hand; for our illustration 90% seemed reasonable.
 
 ```{r}
 #| label: fig-ml-interval
 #| fig-width: 4.5
 #| fig-height: 2.2
-#| fig-cap: "Construction of point estimates of the limits of the heterogeneity interval. **A.** While $HI_{90}$ can be depicted on the probability density function (PDF), **B.** its construction is easier to depict on the cumulative distribution function (CDF), $\\Phi(x; \\beta_1, \\tau_1)$. To construct a 90% heterogeneity interval, we pass 0.05 and 0.95 to the inverse of the CDF: $HI_{90} = \\Phi^{-1}\\left([0.05, 0.95]; \\beta_1, \\tau_1 \\right)$."
+#| fig-cap: "Construction of point estimates of the limits of the heterogeneity interval. **A.** While $\\textit{HI}_{90}$ can be depicted on the probability density function (PDF), **B.** its construction is easier to depict on the cumulative distribution function (CDF), $\\Phi(x; \\beta_1, \\tau_1)$. To construct a 90% heterogeneity interval, we pass 0.05 and 0.95 to the inverse of the CDF: $\\textit{HI}_{90} = \\Phi^{-1}\\left([0.05, 0.95]; \\beta_1, \\tau_1 \\right)$."
 
 # Shared Y axis
 scale_y_01 <- scale_y_continuous(
@@ -545,7 +545,7 @@ fig_ml_cdf_interval <- fig_ml_cdf +
 ```
 
 To calculate a heterogeneity interval, we first specify the desired probability limits: 
-for a $\pi\%$ interval, we use the limits $(1 \pm \pi)/2$. Thus, for a 90% interval, we use 0.05 and 0.95, which together define the central 90% of the distribution. Then, we pass those limits and the estimated mean and standard deviation to the normal quantile function $\Phi^{-1}$ (*phi*, `qnorm()` in R), to get the interval: $HI_{90} = \Phi^{-1}([.05, .95]; \beta_1, \tau_1) = \Phi^{-1}([.05, .95];$ `r mu1[1]`, `r sd1[1]`) = [`r hi90`]. In words, this function calculates the 0.05 and 0.95 quantiles of the normal distribution defined by the point estimates of the mean ($\beta_1$) and standard deviation ($\tau_1$): We expect 90% of valence effects in the population to fall in the [`r hi90`] interval. We illustrate this interval in @fig-ml-interval.
+for a $\pi\%$ interval, we use the limits $(1 \pm \pi)/2$. Thus, for a 90% interval, we use 0.05 and 0.95, which together define the central 90% of the distribution. Then, we pass those limits and the estimated mean and standard deviation to the normal quantile function $\Phi^{-1}$ (*phi*, `qnorm()` in R), to get the interval: $\textit{HI}_{90} = \Phi^{-1}([.05, .95]; \beta_1, \tau_1) = \Phi^{-1}([.05, .95];$ `r mu1[1]`, `r sd1[1]`) = [`r hi90`]. In words, this function calculates the 0.05 and 0.95 quantiles of the normal distribution defined by the point estimates of the mean ($\beta_1$) and standard deviation ($\tau_1$): We expect 90% of valence effects in the population to fall in the [`r hi90`] interval. We illustrate this interval in @fig-ml-interval.
 
 ### Proportion descriptors
 
@@ -690,11 +690,11 @@ For example, let us imagine that a theory states that valence effects in the int
 
 Although the interval and proportion descriptors describe where the population's slopes are likely to fall, they do so in absolute terms such as logRT in the running example. A contrasting or *relative* way to describe heterogeneity is to express it as a ratio of the effect's standard deviation to its mean. Such relative metrics are concise and can be useful especially when the absolute units are difficult to interpret, or when comparing heterogeneity across different populations or experimental conditions (see below). This ratio, expressed simply as the fraction $\frac{\tau_1}{\beta_1}$ is `r ratio` in the current example.
 
-[@bolgerCausalProcessesPsychology2019, p.609] suggest as a rule of thumb that heterogeneity can be deemed noteworthy when the ratio of the standard deviation to the average effect is 0.25 or greater: A ratio greater than 1/4 implies a $HI_{95}$ whose limits extend to effects one-half and one-and-a-half times that of the average effect. With these data and model, the ratio $\frac{\tau_1}{\beta_1}$ is `r ratio`, suggesting that the degree of heterogeneity in valence effects is noteworthy. While this heuristic can sometimes be useful, we urge users to apply domain-specific knowledge when considering critical values or thresholds whenever possible.
+[@bolgerCausalProcessesPsychology2019, p.609] suggest as a rule of thumb that heterogeneity can be deemed noteworthy when the ratio of the standard deviation to the average effect is 0.25 or greater: A ratio greater than 1/4 implies a $\textit{HI}_{95}$ whose limits extend to effects one-half and one-and-a-half times that of the average effect. With these data and model, the ratio $\frac{\tau_1}{\beta_1}$ is `r ratio`, suggesting that the degree of heterogeneity in valence effects is noteworthy. While this heuristic can sometimes be useful, we urge users to apply domain-specific knowledge when considering critical values or thresholds whenever possible.
 
 ## Missing uncertainty
 
-The expected normal distribution of valence effects and its transformations (@fig-1) ignore uncertainty inherent in the estimated parameters. That is, we calculated $HI_{90}$, $p^-$, and the other heterogeneity measures from the point estimates $\beta_1$ = `r mu1[1]` and $\tau_1$ = `r sd1[1]`. We did not use any information about the precision, or uncertainty, with which these parameters were estimated. We have now arrived at the crux of the current work: How should we estimate and describe heterogeneity in psychological phenomena such that the fundamental uncertainty in the estimated parameters is retained?
+The expected normal distribution of valence effects and its transformations (@fig-1) ignore uncertainty inherent in the estimated parameters. That is, we calculated $\textit{HI}_{90}$, $p^-$, and the other heterogeneity measures from the point estimates $\beta_1$ = `r mu1[1]` and $\tau_1$ = `r sd1[1]`. We did not use any information about the precision, or uncertainty, with which these parameters were estimated. We have now arrived at the crux of the current work: How should we estimate and describe heterogeneity in psychological phenomena such that the fundamental uncertainty in the estimated parameters is retained?
 
 # Incorporating inferential uncertainty to assessments of heterogeneity
 
@@ -896,13 +896,13 @@ p1s <- p1n |>
   )
 ```
 
-Above, we described the heterogeneity interval as a range of values where a specific percentage of the population's slopes are expected to fall (e.g. $HI_{90}$ for a 90% heterogeneity interval). However, a single interval cannot accommodate the uncertainty with which the underlying parameters are estimated. To carry uncertainty forward from model parameters to the $HI_{90}$, we redo the calculations from above, but instead of using only the mean's and standard deviation's point estimates, we repeat the calculations for each of the 4,000 randomly sampled pairs of $\beta_1$ and $\tau_1$. Consequently, we get 4,000 draws from the posterior distribution of $HI_{90}$ (@fig-cdfs-intervals).
+Above, we described the heterogeneity interval as a range of values where a specific percentage of the population's slopes are expected to fall (e.g. $\textit{HI}_{90}$ for a 90% heterogeneity interval). However, a single interval cannot accommodate the uncertainty with which the underlying parameters are estimated. To carry uncertainty forward from model parameters to the $\textit{HI}_{90}$, we redo the calculations from above, but instead of using only the mean's and standard deviation's point estimates, we repeat the calculations for each of the 4,000 randomly sampled pairs of $\beta_1$ and $\tau_1$. Consequently, we get 4,000 draws from the posterior distribution of $\textit{HI}_{90}$ (@fig-cdfs-intervals).
 
 ```{r}
 #| label: fig-cdfs-intervals
 #| fig-width: 2.5
 #| fig-height: 2.2
-#| fig-cap: "Uncertainty in the limits of the lower and upper limits of the heterogeneity interval (compare to the point estimates in @fig-ml-interval B). Thin gray lines show 100 CDFs of the heterogeneity distribution calculated from random draws of $\\beta_1$ and $\\tau_1$, as in @fig-2 B. Blue lines show the calculation of the posterior distribution of $HI_{90} = \\Phi^{-1}([0.05, 0.95]; \\beta_1, \\tau_1)$, which is also depicted as marginal histograms. Point estimates and intervals represent the posterior mean and 95\\%CI."
+#| fig-cap: "Uncertainty in the limits of the lower and upper limits of the heterogeneity interval (compare to the point estimates in @fig-ml-interval B). Thin gray lines show 100 CDFs of the heterogeneity distribution calculated from random draws of $\\beta_1$ and $\\tau_1$, as in @fig-2 B. Blue lines show the calculation of the posterior distribution of $\\textit{HI}_{90} = \\Phi^{-1}([0.05, 0.95]; \\beta_1, \\tau_1)$, which is also depicted as marginal histograms. Point estimates and intervals represent the posterior mean and 95\\%CI."
 
 # Add summaries of CDF < 0 to CDF curves as inset plots
 p_cdf_intervals <- p_cdf_samples +
@@ -976,13 +976,13 @@ p_cdf_intervals <- p_cdf_samples +
 p_cdf_intervals
 ```
 
-Summarizing a distribution of intervals entails some challenges, however, because an interval is defined by two quantities---the lower and upper bounds. The 95% most plausible lower bounds of $HI_{90}$ range between `r p1s$l`, whereas the 95% most credible upper bounds range between `r p1s$u` (marginal histograms in @fig-cdfs-intervals, or @fig-intervals B). Thus, to adequately describe an estimated heterogeneity interval, researchers must communicate two separate uncertainty intervals: In words, we estimate that 90% of the population's valence effects range from `r paste(p1s$hi_low, p1s$l)` to `r paste(p1s$hi_high, p1s$u)`.
+Summarizing a distribution of intervals entails some challenges, however, because an interval is defined by two quantities---the lower and upper bounds. The 95% most plausible lower bounds of $\textit{HI}_{90}$ range between `r p1s$l`, whereas the 95% most credible upper bounds range between `r p1s$u` (marginal histograms in @fig-cdfs-intervals, or @fig-intervals B). Thus, to adequately describe an estimated heterogeneity interval, researchers must communicate two separate uncertainty intervals: In words, we estimate that 90% of the population's valence effects range from `r paste(p1s$hi_low, p1s$l)` to `r paste(p1s$hi_high, p1s$u)`.
 
 ```{r}
 #| label: fig-intervals
 #| fig-width: 5.4
 #| fig-height: 2.7
-#| fig-cap: Correlation in Bayesian estimates of the 90% heterogeneity interval of valence effects. **A.** Scatterplot of 4,000 posterior draws of the lower (x-axis) and upper (y-axis) limits of $HI_{90}$. **B.** Histograms of 4,000 draws of the $HI_{90}$ lower (left) and upper (right) limits with their posterior means and 95% CIs as points and intervals. **C.** 100 random draws from the posterior distribution of $HI_{90}$, with the posterior mean heterogeneity interval superimposed in a darker shade of blue.
+#| fig-cap: Correlation in Bayesian estimates of the 90% heterogeneity interval of valence effects. **A.** Scatterplot of 4,000 posterior draws of the lower (x-axis) and upper (y-axis) limits of $\textit{HI}_{90}$. **B.** Histograms of 4,000 draws of the $\textit{HI}_{90}$ lower (left) and upper (right) limits with their posterior means and 95% CIs as points and intervals. **C.** 100 random draws from the posterior distribution of $\textit{HI}_{90}$, with the posterior mean heterogeneity interval superimposed in a darker shade of blue.
 
 p1 <- post1 |>
   mutate(
@@ -1250,7 +1250,7 @@ p_rope_props <- post1_samples_rope |>
     side = "bottom",
     .width = .95,
     scale = 1,
-    height = 3
+    height = 4
   ) +
   coord_cartesian(clip = "off", ylim = c(0.7, nrow(post1_samples_rope)))
   
@@ -1718,7 +1718,7 @@ We also depict the heterogeneity distribution's posterior distribution as a PDF 
 
 First, we see that the majority of the free recall group's CDF (green) is to the left of zero (50% recall), indicating that the majority of this population is predicted to recall less than half of items. This information is described in more detail in the small posterior densities and point-intervals on the left y-axis: The model predicts above-50% performance only for a proportion of `r post2_sum$x[post2_sum$variable=="pd_person_free"]` of the population. Second, we see that the slope of the cued recall CDF (red) is less steep and to the right to that of the free recall CDF: The between-person distribution of memory abilities is more dispersed in the cued than in the free recall task, and `r post2_sum$x[post2_sum$variable=="pd_person_cued"]` individuals in that group are predicted to perform above 50%.
 
-Finally, we turn to the heterogeneity interval (HI). The $HI_{90}$'s lower bound in the free recall task is `r post2_sum$x[post2_sum$variable=="hi_low_free"]`, and `r post2_sum$x[post2_sum$variable=="hi_low_cued"]` in the cued recall task. While this 5th percentile of the heterogeneity distribution was not credibly different across the two tasks (Cued - Free recall; `r post2_sum$x[post2_sum$variable=="hi_low_difference"]`), the 95th percentiles differed at the 95% credibility level (the Cued recall upper $HI_90$ limit was `r post2_sum$x[post2_sum$variable=="hi_high_difference"]` probits greater). Studying @fig-2-person B closely makes another implication of the different standard deviations clear: While the average person likely has greater memory performance in the cued recall task, the model predicts that there are also more individuals with very poor performances in the cued recall condition.
+Finally, we turn to the heterogeneity interval (HI). The $\textit{HI}_{90}$'s lower bound in the free recall task is `r post2_sum$x[post2_sum$variable=="hi_low_free"]`, and `r post2_sum$x[post2_sum$variable=="hi_low_cued"]` in the cued recall task. While this 5th percentile of the heterogeneity distribution was not credibly different across the two tasks (Cued - Free recall; `r post2_sum$x[post2_sum$variable=="hi_low_difference"]`), the 95th percentiles differed at the 95% credibility level (the Cued recall upper $\textit{HI}_{90}$ limit was `r post2_sum$x[post2_sum$variable=="hi_high_difference"]` probits greater). Studying @fig-2-person B closely makes another implication of the different standard deviations clear: While the average person likely has greater memory performance in the cued recall task, the model predicts that there are also more individuals with very poor performances in the cued recall condition.
 
 ## Comparing between-target heterogeneity across tasks
 
