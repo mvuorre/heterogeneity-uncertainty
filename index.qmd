@@ -34,8 +34,6 @@ authornote: |
 bibliography: bibliography.bib
 citeproc: true
 csl: apa.csl
-editor_options: 
-  chunk_output_type: console
 ---
 
 ```{r}
