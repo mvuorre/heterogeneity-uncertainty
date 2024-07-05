@@ -1190,8 +1190,8 @@ p_rope_densities <- post1_samples_rope |>
   ggplot() + 
   stat_slab(
     aes(y = factor(.draw), xdist = dist_valence, fill = after_stat(-0.1 < x & x < 0.1)),
-    color = valence_dist_samples_color,
-    alpha = 0.5,
+    color = "gray90",
+    # alpha = 0.5,
     scale = 2.5,
     linewidth = 0.5
   ) +
@@ -1212,7 +1212,7 @@ p_rope_densities <- post1_samples_rope |>
     size = 3
   ) +
   geom_vline(xintercept = c(-0.1, 0.1), zero_color, alpha = 0.1, linetype = "22") +
-  scale_fill_manual(values = c("TRUE" = desc_color, "FALSE" = alpha(valence_dist_samples_color, 0.3))) +
+  scale_fill_manual(values = c("TRUE" = colorspace::lighten(desc_color, 0.35, space = "HLS"), "FALSE" = "gray75")) +
   guides(fill = "none") +
   coord_cartesian(clip = "off") +
   scale_x_valence() +
