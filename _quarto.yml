@@ -14,11 +14,12 @@ format:
     output-file: ms.pdf
     fontsize: 11pt
     mainfont: Libertinus Serif
+    section-numbering: "1."
   html:
     toc: true
     fontsize: 14pt
     mainfont: Fira Sans
-    other-links: 
+    other-links:
       - text: Preprint (PsyArXiv)
         href: https://
         icon: file-pdf
