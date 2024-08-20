@@ -9,6 +9,6 @@ docs: $(SOURCE) _quarto.yml
 	quarto render
 
 clean:
-	rm -rf *_cache *_files *.pdf *.docx docs
+	rm -rf *_cache *_files _freeze *.pdf *.docx docs
 
 .PHONY: renv clean
