@@ -1773,7 +1773,7 @@ tmp_target_dist <- bind_rows(
 #| fig-cap: "Heterogeneity between target words in memory performance in Free recall and Cued recall tasks from Model 2. **A**. Histograms of 4,000 posterior draws from the model parameters and their transformations, with points and intervals showing posterior means and 95\\%CIs. Differences calculated as Cued - Free recall. **B**. Probability density (top) and cumulative distribution functions (bottom) of the two tasks' heterogeneity distributions (green: free recall, red: cued recall). The densities, points, and intervals on the left y-axis of the bottom panel indicate approximate posterior densities, with means and 95\\%CIs, of the proportions of the populations with memory performance above chance. Densities, points, and intervals on the x-axis of the bottom panel indicate approximate posterior densities, with means and 95%CIs, of the 90\\% heterogeneity interval's lower (left) and upper (right) bounds. **C**. Posterior mean (dark), and 100 posterior draws (light) of the correlation between target words' proportions correct in the free (x-axis) and cued recall (y-axis) tasks. Ellipses indicate the 90th percentile of the bivariate normal distribution. Small black circles are estimated parameters for target words in the sample (posterior means of $\\gamma$)."
 
 p2_pars_target <- post2 |> 
-  select(contains("target")) |> 
+  select(contains("target"), -sd_target_ratio) |> 
   rename_with(
     ~str_to_lower(.) |> 
       str_remove("target_") |> 
@@ -1792,7 +1792,11 @@ p2_pars_target <- post2 |>
       levels = c("free", "cued", "difference", "free_cued"),
       labels = c("Free", "Cued", "Difference", "Correlation")
     ) |> fct_rev(),
-    value = if_else(type == "Heterogeneity ratio" & abs(value) > 5, NaN, value)
+    value = if_else(
+      type == "Heterogeneity ratio" & abs(value) > 5, 
+      NaN, 
+      value
+    )
   ) |> 
   ggplot(aes(value, group, color = group, fill = group)) +
   scale_color_manual(
@@ -1824,7 +1828,10 @@ p2_pars_target <- post2 |>
 
 p2_cdf_target <- tmp_target |> 
   ggplot(aes(x = x)) +
-  aes(y = cdf, ymin = cdf.lower, ymax = cdf.upper, col = Task, fill = Task) +
+  aes(
+    y = cdf, ymin = cdf.lower, ymax = cdf.upper, 
+    col = Task, fill = Task
+  ) +
   scale_color_brewer(
     "Recall task",
     palette = "Dark2",
