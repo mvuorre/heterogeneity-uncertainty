@@ -44,7 +44,6 @@ csl: apa.csl
 library(janitor)
 library(scales)
 library(ellipse)
-library(tinytable)
 library(cmdstanr)
 library(readxl)
 library(lme4)
@@ -94,7 +93,7 @@ theme_set(
 dir.create("models", FALSE)
 options(
   brms.backend = Sys.getenv("BRMS_BACKEND", "rstan"), 
-  brms.threads = as.numeric(Sys.getenv("MAX_CORES"), 1),
+  brms.threads = as.numeric(Sys.getenv("BRMS_THREADS"), 1),
   mc.cores = as.numeric(Sys.getenv("MAX_CORES"), 4)
 )
 ```
@@ -710,7 +709,6 @@ fit_1 <- brm(
   rt ~ 1 + valence + (1 + valence | person),
   data = dat,
   file = "models/brm-fit-1",
-  control = list(adapt_delta = .95)
 )
 
 post1 <- as_draws_df(
@@ -731,6 +729,32 @@ pb <- mcmc_plot(fit_1, type = "rhat_hist") +
   scale_x_continuous(labels = ~number(., .001))
 pc <- pp_check(fit_1)
 pb | pc
+```
+
+```{r include = is_html}
+post1 |> 
+  head() |> 
+  as_tibble() |> 
+  select(-contains(".")) |> 
+  select(2, 4, 7) |> 
+  mutate(
+    hi90 = str_glue(
+      "[{number(quantile(dist_valence, .05), .01)}, ",
+      "{number(quantile(dist_valence, .95), .01)}]"
+      ),
+    pp = cdf(dist_valence, 0),
+    prope = cdf(dist_valence, .1) - cdf(dist_valence, -.1),
+    ratio = sd_person__valence1 / b_valence1
+  ) |> 
+  mutate(dist_valence = as.character(dist_valence)) |> 
+  # setNames(c(m1_parnames, "$p(\\beta_1)$")) |> 
+  setNames(
+    c(
+      m1_parnames[c(2, 4)], 
+      "$p(\\beta_1)$", "$HI_{90}$", "$p^+$", "$p^{ROPE}$", "$\\frac{\\tau_1}{\\beta_1}$"
+    )
+  ) |> 
+  kable(digits = 2)
 ```
 
 The output of Bayesian computations is the multivariate posterior probability distribution of the model's parameters. However, closed-form solutions are not available for multivariate posterior distributions of many important types of statistical models. Therefore, in practice modern Bayesian methods rely on algorithms that yield many random draws from the multivariate posterior distribution [@gelmanBayesianDataAnalysis2013; @ravenzwaaijSimpleIntroductionMarkov2016]. These draws can then be used to calculate, summarize, and visualize any desired quantity of the multivariate posterior such as means, variances, correlations, proportions above or below zero, and so on. @tbl-samples-1 illustrates this, showing six random draws of the posteriors of $\beta_1$ and $\tau_1$ (rows). We then computed their ratio in the third column, which then represents (draws from) the ratio's posterior distribution and can be summarized, visualized, etc.
@@ -1768,7 +1792,7 @@ tmp_target_dist <- bind_rows(
 
 ```{r}
 #| label: fig-2-target
-#| fig-height: 4
+#| fig-height: 3.6
 #| fig-width: 7.4
 #| fig-cap: "Heterogeneity between target words in memory performance in Free recall and Cued recall tasks from Model 2. **A**. Histograms of 4,000 posterior draws from the model parameters and their transformations, with points and intervals showing posterior means and 95\\%CIs. Differences calculated as Cued - Free recall. **B**. Probability density (top) and cumulative distribution functions (bottom) of the two tasks' heterogeneity distributions (green: free recall, red: cued recall). The densities, points, and intervals on the left y-axis of the bottom panel indicate approximate posterior densities, with means and 95\\%CIs, of the proportions of the populations with memory performance above chance. Densities, points, and intervals on the x-axis of the bottom panel indicate approximate posterior densities, with means and 95%CIs, of the 90\\% heterogeneity interval's lower (left) and upper (right) bounds. **C**. Posterior mean (dark), and 100 posterior draws (light) of the correlation between target words' proportions correct in the free (x-axis) and cued recall (y-axis) tasks. Ellipses indicate the 90th percentile of the bivariate normal distribution. Small black circles are estimated parameters for target words in the sample (posterior means of $\\gamma$)."
 
@@ -2095,7 +2119,7 @@ The author(s) declare no competing interests.
 
 <!-- HTML format automatically adds "References" in an appendix. -->
 ::: {.content-hidden when-format="html"}
-# References
+# References {.unnumbered}
 
 :::{.refs}
 :::
