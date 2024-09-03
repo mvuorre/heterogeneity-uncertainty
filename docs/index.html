@@ -237,6 +237,8 @@ window.Quarto = {
 <h1>Review of heterogeneity</h1>
 <p>To begin our exposition, we reproduce the analyses presented in <span class="citation" data-cites="bolgerCausalProcessesPsychology2019">Bolger et al. (<a href="#ref-bolgerCausalProcessesPsychology2019" role="doc-biblioref">2019</a>)</span>. In their study, which replicated findings first presented in <span class="citation" data-cites="scholerInflatingDeflatingSelf2014">Scholer et al. (<a href="#ref-scholerInflatingDeflatingSelf2014" role="doc-biblioref">2014</a>)</span>, 62 participants saw twenty positively and twenty negatively valenced words, and judged whether each word was self-descriptive or not. Because most people are typically motivated to view themselves positively, <span class="citation" data-cites="bolgerCausalProcessesPsychology2019">Bolger et al. (<a href="#ref-bolgerCausalProcessesPsychology2019" role="doc-biblioref">2019</a>)</span> predicted that responses to positively valenced words would be faster than to negatively valenced words <span class="citation" data-cites="scholerInflatingDeflatingSelf2014">(<a href="#ref-scholerInflatingDeflatingSelf2014" role="doc-biblioref">Scholer et al., 2014</a>)</span>.</p>
 <div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">dir.create</span>(<span class="st">"data"</span>, <span class="cn">FALSE</span>)</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Load, save, &amp; clean example data from Bolger et al. (2019)</span></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>path <span class="ot">&lt;-</span> <span class="st">"data/bolger-etal.zip"</span></span>
@@ -271,16 +273,20 @@ window.Quarto = {
 <span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(person, trial)</span>
 <span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a><span class="fu">contrasts</span>(dat<span class="sc">$</span>valence) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="sc">-</span><span class="fl">0.5</span>, <span class="fl">0.5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 </div>
 <section id="model-1" class="level2">
 <h2 class="anchored" data-anchor-id="model-1">Model 1</h2>
 <p>In this section, we replicate <span class="citation" data-cites="bolgerCausalProcessesPsychology2019">Bolger et al. (<a href="#ref-bolgerCausalProcessesPsychology2019" role="doc-biblioref">2019</a>)</span>’s analysis, using their openly available data. We first wrangled the data as in <span class="citation" data-cites="bolgerCausalProcessesPsychology2019">Bolger et al. (<a href="#ref-bolgerCausalProcessesPsychology2019" role="doc-biblioref">2019</a>)</span>, which led to a sample of 1,321 trials from 59 participants that were endorsed as self-descriptive. Our online analysis supplement (<a href="https://osf.io/yp2gq" class="uri">https://osf.io/yp2gq</a>) includes the complete code to reproduce this manuscript and computations therein. We show a sample of these data in <a href="#tbl-dat1" class="quarto-xref">Table&nbsp;1</a>.</p>
 <div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>dat <span class="sc">|&gt;</span></span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">head</span>() <span class="sc">|&gt;</span></span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="st">`</span><span class="at">log(Reaction time)</span><span class="st">`</span> <span class="ot">=</span> rt) <span class="sc">|&gt;</span> </span>
 <span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename_with</span>(<span class="sc">~</span><span class="fu">str_to_sentence</span>(.x)) <span class="sc">|&gt;</span> </span>
 <span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 <div id="tbl-dat1" class="cell quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-dat1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -367,12 +373,17 @@ Table&nbsp;1: First six rows of example dataset 1 <span class="citation" data-ci
 <p>Finally, we contrast coded valence such that negative words were assigned -0.5, and positive words 0.5. This coding results in an intercept that corresponds to the average reaction time across negative and positive words, and a slope that reflects the difference in logRT between negative and positive words.</p>
 <p>With data shown in <a href="#tbl-dat1" class="quarto-xref">Table&nbsp;1</a>, we can estimate this model using standard (restricted) maximum likelihood methods as implemented in, for example, the R package lme4 <span class="citation" data-cites="batesFittingLinearMixedEffects2015 rcoreteamLanguageEnvironmentStatistical2023">(<a href="#ref-batesFittingLinearMixedEffects2015" role="doc-biblioref">Bates et al., 2015</a>; <a href="#ref-rcoreteamLanguageEnvironmentStatistical2023" role="doc-biblioref">R Core Team, 2024</a>)</span>.</p>
 <div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>fit_lmer <span class="ot">&lt;-</span> <span class="fu">lmer</span>(</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  rt <span class="sc">~</span> <span class="dv">1</span> <span class="sc">+</span> valence <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">+</span> valence <span class="sc">|</span> person),</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> dat</span>
 <span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 </div>
 <div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Create a table of coefficients</span></span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>tab_1 <span class="ot">&lt;-</span> <span class="fu">model_parameters</span>(fit_lmer, <span class="at">effects =</span> <span class="st">"all"</span>) <span class="sc">|&gt;</span></span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tibble</span>() <span class="sc">|&gt;</span></span>
@@ -417,8 +428,11 @@ Table&nbsp;1: First six rows of example dataset 1 <span class="citation" data-ci
 <span id="cb4-42"><a href="#cb4-42" aria-hidden="true" tabindex="-1"></a>)</span>
 <span id="cb4-43"><a href="#cb4-43" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb4-44"><a href="#cb4-44" aria-hidden="true" tabindex="-1"></a>dist_ml <span class="ot">&lt;-</span> <span class="fu">dist_normal</span>(mu1n, sd1n)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 </div>
 <div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>tab_1 <span class="sc">|&gt;</span></span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="fu">across</span>(<span class="fu">where</span>(is.numeric), <span class="sc">~</span><span class="fu">number</span>(.x, .<span class="dv">01</span>))),</span>
@@ -429,6 +443,7 @@ Table&nbsp;1: First six rows of example dataset 1 <span class="citation" data-ci
 <span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>    Parameter, Coefficient, SE, <span class="st">`</span><span class="at">95% CI</span><span class="st">`</span></span>
 <span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
 <span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 <div id="tbl-lmer" class="cell quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-lmer-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -494,6 +509,8 @@ Table&nbsp;2: Parameter estimates from Model 1 (ML).
 <section id="heterogeneity-distribution-at-maximum-likelihood-estimate-of-beta_1-and-tau_1" class="level2">
 <h2 class="anchored" data-anchor-id="heterogeneity-distribution-at-maximum-likelihood-estimate-of-beta_1-and-tau_1">Heterogeneity distribution at maximum likelihood estimate of <span class="math inline">\(\beta_1\)</span> and <span class="math inline">\(\tau_1\)</span></h2>
 <div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Heterogeneity interval</span></span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>hi90_num <span class="ot">&lt;-</span> <span class="fu">qnorm</span>(<span class="fu">c</span>(<span class="fl">0.05</span>, .<span class="dv">95</span>), mu1n, sd1n)</span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>hi90 <span class="ot">&lt;-</span> <span class="fu">paste</span>(</span>
@@ -511,8 +528,11 @@ Table&nbsp;2: Parameter estimates from Model 1 (ML).
 <span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Ratio</span></span>
 <span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>ratio <span class="ot">&lt;-</span> <span class="fu">number</span>(<span class="fu">abs</span>(sd1n <span class="sc">/</span> mu1n), .<span class="dv">01</span>)</span>
 <span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>ratio_low <span class="ot">&lt;-</span> <span class="fu">number</span>(<span class="fu">abs</span>(sd1n_low <span class="sc">/</span> mu1n_low), .<span class="dv">01</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 </div>
 <div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># annotation definitions</span></span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>valence_dist_color <span class="ot">&lt;-</span> <span class="st">"gray25"</span></span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>valence_dist_samples_color <span class="ot">&lt;-</span> <span class="st">"gray65"</span></span>
@@ -645,6 +665,7 @@ Table&nbsp;2: Parameter estimates from Model 1 (ML).
 <span id="cb7-130"><a href="#cb7-130" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb7-131"><a href="#cb7-131" aria-hidden="true" tabindex="-1"></a>(fig_1_params <span class="sc">|</span> fig_1_interval <span class="sc">|</span> fig_1_pneg <span class="sc">|</span> fig_1_prope) <span class="sc">+</span></span>
 <span id="cb7-132"><a href="#cb7-132" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot_annotation</span>(<span class="at">tag_levels =</span> <span class="st">"A"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 <div class="cell-output-display">
 <div id="fig-1" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
@@ -664,6 +685,8 @@ Figure&nbsp;1: Heterogeneity distribution of valence effects and various descrip
 <h2 class="anchored" data-anchor-id="interval-descriptors">Interval descriptors</h2>
 <p>First, we can use the point estimates in <a href="#tbl-lmer" class="quarto-xref">Table&nbsp;2</a> to construct an expected <em>heterogeneity interval</em> that describes the range within which a certain percentage of the population’s slopes are expected to fall <span class="citation" data-cites="bolgerCausalProcessesPsychology2019">(<a href="#ref-bolgerCausalProcessesPsychology2019" role="doc-biblioref">Bolger et al., 2019</a>)</span>. To do so, we must first determine an appropriate percentage to describe: By convention, <span class="citation" data-cites="bolgerCausalProcessesPsychology2019">Bolger et al. (<a href="#ref-bolgerCausalProcessesPsychology2019" role="doc-biblioref">2019</a>)</span> and others have focused on the 95% heterogeneity interval (<span class="math inline">\(\textit{HI}_{95}\)</span>). However, because there are already confusingly many quantities using the five percent cutoff, in this manuscript we focus on 90% heterogeneity interval, and reserve 95% to descriptions of uncertainty, such as confidence or credibility intervals. (The appropriate percentage to describe with a heterogeneity interval is determined by the substantive and communicative aims at hand; for our illustration 90% seemed reasonable.)</p>
 <div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Shared Y axis</span></span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>scale_y_01 <span class="ot">&lt;-</span> <span class="fu">scale_y_continuous</span>(</span>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">breaks =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="fl">0.5</span>, <span class="dv">1</span>),</span>
@@ -761,6 +784,7 @@ Figure&nbsp;1: Heterogeneity distribution of valence effects and various descrip
 <span id="cb8-95"><a href="#cb8-95" aria-hidden="true" tabindex="-1"></a>(fig_1_interval <span class="sc">|</span> fig_ml_cdf_interval) <span class="sc">&amp;</span></span>
 <span id="cb8-96"><a href="#cb8-96" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.title.y =</span> <span class="fu">element_text</span>(<span class="at">angle =</span> <span class="dv">90</span>)) <span class="sc">&amp;</span></span>
 <span id="cb8-97"><a href="#cb8-97" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot_annotation</span>(<span class="at">tag_levels =</span> <span class="st">"A"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 <div class="cell-output-display">
 <div id="fig-ml-interval" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
@@ -780,6 +804,8 @@ Figure&nbsp;2: Construction of point estimates of the limits of the heterogeneit
 <h2 class="anchored" data-anchor-id="proportion-descriptors">Proportion descriptors</h2>
 <p>The above HI summarizes where a given proportion of individuals’ effects in the population are. In contrast, some applications might find it more informative to summarize proportions of effects above or below some critical value, or within some critical range. For example, we might ask “What proportion of individuals in the population endorse faster to positively valenced words?” In other words, we ask a question of <em>prevalence</em>: What proportion of the heterogeneity distribution is below zero? We label this quantity <span class="math inline">\(p^-\)</span> for proportion of population with negative effects.</p>
 <div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>zero_line <span class="ot">&lt;-</span> <span class="fu">geom_vline</span>(</span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">xintercept =</span> <span class="dv">0</span>,</span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">linetype =</span> <span class="st">"22"</span>,</span>
@@ -823,6 +849,7 @@ Figure&nbsp;2: Construction of point estimates of the limits of the heterogeneit
 <span id="cb9-41"><a href="#cb9-41" aria-hidden="true" tabindex="-1"></a>((fig_1_pneg <span class="sc">+</span> zero_line) <span class="sc">+</span> fig_ml_cdf_pneg) <span class="sc">&amp;</span></span>
 <span id="cb9-42"><a href="#cb9-42" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.title.y =</span> <span class="fu">element_text</span>(<span class="at">angle =</span> <span class="dv">90</span>)) <span class="sc">&amp;</span></span>
 <span id="cb9-43"><a href="#cb9-43" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot_annotation</span>(<span class="at">tag_levels =</span> <span class="st">"A"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 <div class="cell-output-display">
 <div id="fig-ml-pneg" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
@@ -839,6 +866,8 @@ Figure&nbsp;3: Construction of the point estimate of the proportion of negative 
 <p>To answer, we pass zero (the critical value) and the estimated mean and standard deviation to the normal cumulative distribution function (<span class="math inline">\(\Phi\)</span>; <code>pnorm()</code> in R): <span class="math inline">\(p^{-} = Pr(\textrm{Valence effect} \le 0) = \Phi(0; \beta_1, \tau_1) = \Phi(0;\)</span> -0.16, 0.12) = 90.4%. This number is the probability that a random slope from this population would take a negative value, or, in other words, the proportion of individuals in the population who are expected to endorse positive words faster than negative words. We illustrate this probability and its construction using the CDF in <a href="#fig-ml-pneg" class="quarto-xref">Figure&nbsp;3</a>.</p>
 <p>However, using zero as a critical value might not be sufficiently informative, especially when theory allows specifying a smallest effect size of interest, or what is known as a region of practical equivalence <span class="citation" data-cites="anvariUsingAnchorbasedMethods2021 lakensEquivalenceTestingPsychological2018 kruschkeBayesianDataAnalysis2017 kruschkeDoingBayesianData2014">(ROPE, <a href="#ref-anvariUsingAnchorbasedMethods2021" role="doc-biblioref">Anvari &amp; Lakens, 2021</a>; <a href="#ref-kruschkeDoingBayesianData2014" role="doc-biblioref">Kruschke, 2014</a>; <a href="#ref-kruschkeBayesianDataAnalysis2017" role="doc-biblioref">Kruschke &amp; Liddell, 2017</a>; <a href="#ref-lakensEquivalenceTestingPsychological2018" role="doc-biblioref">Lakens et al., 2018</a>)</span>. In common applications, ROPE is used to statistically infer whether an estimated parameter, such as the effect of valence on logRT for the average person, is practically significant. But we can equally well use a theory-informed region of effect sizes to describe and make inferences about the heterogeneity distribution of this effect in the population.</p>
 <div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>rope_line <span class="ot">&lt;-</span> <span class="fu">geom_vline</span>(</span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">xintercept =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="fl">0.1</span>, <span class="fl">0.1</span>),</span>
 <span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">linetype =</span> <span class="st">"22"</span>,</span>
@@ -906,6 +935,7 @@ Figure&nbsp;3: Construction of the point estimate of the proportion of negative 
 <span id="cb10-65"><a href="#cb10-65" aria-hidden="true" tabindex="-1"></a>((fig_1_prope <span class="sc">+</span> rope_line) <span class="sc">+</span> fig_ml_cdf_prope) <span class="sc">&amp;</span></span>
 <span id="cb10-66"><a href="#cb10-66" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.title.y =</span> <span class="fu">element_text</span>(<span class="at">angle =</span> <span class="dv">90</span>)) <span class="sc">&amp;</span></span>
 <span id="cb10-67"><a href="#cb10-67" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot_annotation</span>(<span class="at">tag_levels =</span> <span class="st">"A"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 <div class="cell-output-display">
 <div id="fig-ml-prope" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
@@ -935,6 +965,8 @@ Figure&nbsp;4: Construction of the point estimate of the proportion of effects i
 <h1>Incorporating inferential uncertainty to assessments of heterogeneity</h1>
 <p>Assessments of heterogeneity involve combining information about fixed and random effects; to fully incorporate inferential uncertainty then requires accounting for their joint uncertainties. Bayesian computational methods are uniquely able to address this challenge. Modern Bayesian methods, by obtaining draws from the joint posterior distribution of all model parameters presumed to underlie the observed data, allow incorporating posterior uncertainty in combinations of parameters such as the ones highlighted above <span class="citation" data-cites="gelmanBayesianDataAnalysis2013 kruschkeBayesianDataAnalysis2017 kruschkeDoingBayesianData2014 mcelreathStatisticalRethinkingBayesian2020">(<a href="#ref-gelmanBayesianDataAnalysis2013" role="doc-biblioref">Gelman et al., 2013</a>; <a href="#ref-kruschkeDoingBayesianData2014" role="doc-biblioref">Kruschke, 2014</a>; <a href="#ref-kruschkeBayesianDataAnalysis2017" role="doc-biblioref">Kruschke &amp; Liddell, 2017</a>; <a href="#ref-mcelreathStatisticalRethinkingBayesian2020" role="doc-biblioref">McElreath, 2020</a>)</span>. For typical scenarios, Bayesian models are as easy to use as their maximum likelihood counterparts <span class="citation" data-cites="burknerBrmsPackageBayesian2017 burknerAdvancedBayesianMultilevel2018">(<a href="#ref-burknerBrmsPackageBayesian2017" role="doc-biblioref">Bürkner, 2017</a>, <a href="#ref-burknerAdvancedBayesianMultilevel2018" role="doc-biblioref">2018</a>)</span>.</p>
 <div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>fit_1 <span class="ot">&lt;-</span> <span class="fu">brm</span>(</span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  rt <span class="sc">~</span> <span class="dv">1</span> <span class="sc">+</span> valence <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">+</span> valence <span class="sc">|</span> person),</span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> dat,</span>
@@ -947,13 +979,17 @@ Figure&nbsp;4: Construction of the point estimate of the proportion of effects i
 <span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">regex =</span> <span class="cn">TRUE</span></span>
 <span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>) <span class="sc">|&gt;</span></span>
 <span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">dist_valence =</span> <span class="fu">dist_normal</span>(b_valence1, sd_person__valence1))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 </div>
 <div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Quick model checking</span></span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>pb <span class="ot">&lt;-</span> <span class="fu">mcmc_plot</span>(fit_1, <span class="at">type =</span> <span class="st">"rhat_hist"</span>) <span class="sc">+</span> </span>
 <span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_x_continuous</span>(<span class="at">labels =</span> <span class="sc">~</span><span class="fu">number</span>(., .<span class="dv">001</span>))</span>
 <span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>pc <span class="ot">&lt;-</span> <span class="fu">pp_check</span>(fit_1)</span>
 <span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>pb <span class="sc">|</span> pc</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
@@ -964,6 +1000,8 @@ Figure&nbsp;4: Construction of the point estimate of the proportion of effects i
 </div>
 </div>
 <div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>post1 <span class="sc">|&gt;</span> </span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">head</span>() <span class="sc">|&gt;</span> </span>
 <span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as_tibble</span>() <span class="sc">|&gt;</span> </span>
@@ -987,6 +1025,7 @@ Figure&nbsp;4: Construction of the point estimate of the proportion of effects i
 <span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a>    )</span>
 <span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span> </span>
 <span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable</span>(<span class="at">digits =</span> <span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
 <colgroup>
@@ -1070,12 +1109,15 @@ Figure&nbsp;4: Construction of the point estimate of the proportion of effects i
 </div>
 <p>The output of Bayesian computations is the multivariate posterior probability distribution of the model’s parameters. However, closed-form solutions are not available for multivariate posterior distributions of many important types of statistical models. Therefore, in practice modern Bayesian methods rely on algorithms that yield many random draws from the multivariate posterior distribution <span class="citation" data-cites="gelmanBayesianDataAnalysis2013 ravenzwaaijSimpleIntroductionMarkov2016">(<a href="#ref-gelmanBayesianDataAnalysis2013" role="doc-biblioref">Gelman et al., 2013</a>; <a href="#ref-ravenzwaaijSimpleIntroductionMarkov2016" role="doc-biblioref">Ravenzwaaij et al., 2016</a>)</span>. These draws can then be used to calculate, summarize, and visualize any desired quantity of the multivariate posterior such as means, variances, correlations, proportions above or below zero, and so on. <a href="#tbl-samples-1" class="quarto-xref">Table&nbsp;3</a> illustrates this, showing six random draws of the posteriors of <span class="math inline">\(\beta_1\)</span> and <span class="math inline">\(\tau_1\)</span> (rows). We then computed their ratio in the third column, which then represents (draws from) the ratio’s posterior distribution and can be summarized, visualized, etc.</p>
 <div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>post1 <span class="sc">|&gt;</span> </span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">head</span>() <span class="sc">|&gt;</span> </span>
 <span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">4</span>)) <span class="sc">|&gt;</span> </span>
 <span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">ratio =</span> sd_person__valence1 <span class="sc">/</span> b_valence1) <span class="sc">|&gt;</span> </span>
 <span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set_names</span>(m1_parnames[<span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">4</span>)], <span class="st">"$</span><span class="sc">\\</span><span class="st">frac{</span><span class="sc">\\</span><span class="st">tau_1}{</span><span class="sc">\\</span><span class="st">beta_1}$"</span>) <span class="sc">|&gt;</span> </span>
 <span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 <div id="tbl-samples-1" class="cell quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-samples-1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -1132,6 +1174,8 @@ Table&nbsp;3: Random draws from the posterior distributions of <span class="math
 <p>In practice, one obtains (for example) 4,000 samples from the posterior distribution using Markov Chain Monte Carlo algorithms <span class="citation" data-cites="standevelopmentteamStanModelingLanguage2023">(e.g. <a href="#ref-standevelopmentteamStanModelingLanguage2023" role="doc-biblioref">Stan Development Team, 2023</a>)</span> through accessible software <span class="citation" data-cites="burknerBrmsPackageBayesian2017">(e.g., <a href="#ref-burknerBrmsPackageBayesian2017" role="doc-biblioref">Bürkner, 2017</a>)</span>, and then summarizes them using familiar data processing techniques <span class="citation" data-cites="dplyr2023 rcoreteamLanguageEnvironmentStatistical2023">(<a href="#ref-rcoreteamLanguageEnvironmentStatistical2023" role="doc-biblioref">R Core Team, 2024</a>; e.g. <a href="#ref-dplyr2023" role="doc-biblioref">Wickham et al., 2023</a>)</span>. Here, we used the R package brms <span class="citation" data-cites="burknerBrmsPackageBayesian2017 burknerAdvancedBayesianMultilevel2018">(<a href="#ref-burknerBrmsPackageBayesian2017" role="doc-biblioref">Bürkner, 2017</a>, <a href="#ref-burknerAdvancedBayesianMultilevel2018" role="doc-biblioref">2018</a>)</span> to specify the model and then sample random draws from its posterior distribution. The MCMC estimation algorithm completed in about 5 seconds on a modern laptop. We then assessed the estimation algorithm convergence graphically and numerically, and model adequacy using a graphical posterior predictive check <span class="citation" data-cites="gelmanBayesianDataAnalysis2013">(<a href="#ref-gelmanBayesianDataAnalysis2013" role="doc-biblioref">Gelman et al., 2013</a>)</span>. (We present these and other details in our <a href="https://mvuorre.github.io/heterogeneity-uncertainty/">online supplement</a>.)</p>
 <p><a href="#tbl-fit-1" class="quarto-xref">Table&nbsp;4</a> shows summaries of Model 1’s population-level parameters’ (“fixed” parameters in the frequentist nomenclature) posterior distributions. The second and third columns show their means and standard deviations (which correspond to frequentist standard errors). Note that because we used brms’s default noninformative prior distributions, the posterior summaries are numerically very similar to the maximum likelihood estimates in <a href="#tbl-lmer" class="quarto-xref">Table&nbsp;2</a>.</p>
 <div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>fit_1 <span class="sc">|&gt;</span></span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">parameters</span>(<span class="at">effects =</span> <span class="st">"all"</span>, <span class="at">centrality =</span> <span class="st">"mean"</span>, <span class="at">dispersion =</span> <span class="cn">TRUE</span>) <span class="sc">|&gt;</span></span>
 <span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tibble</span>() <span class="sc">|&gt;</span></span>
@@ -1143,6 +1187,7 @@ Table&nbsp;3: Random draws from the posterior distributions of <span class="math
 <span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(Parameter, Mean, SD, <span class="st">`</span><span class="at">95% CI</span><span class="st">`</span> <span class="ot">=</span> CI) <span class="sc">|&gt;</span> </span>
 <span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Parameter =</span> m1_parnames) <span class="sc">|&gt;</span> </span>
 <span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 <div id="tbl-fit-1" class="cell quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-fit-1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -1208,6 +1253,8 @@ Table&nbsp;4: Parameter estimates from Model 1 (Bayes).
 <p>Armed with the joint Bayesian posterior distribution of all model parameters, we can now returned to the question of the distribution of valence effects in the population. We have 4,000 draws from the posterior distribution of the heterogeneity distribution. Within each draw from the posterior distribution, we can perform any calculation we did previously on only the point estimate of the heterogeneity distribution.</p>
 <p>We first recompute the expected heterogeneity distribution from <a href="#fig-1" class="quarto-xref">Figure&nbsp;1</a> using the posterior mean values of <span class="math inline">\(\beta_1\)</span> and <span class="math inline">\(\tau_1\)</span> in <a href="#fig-2" class="quarto-xref">Figure&nbsp;5</a> A (thick black curve). Superimposed on that normal density curve are heterogeneity distributions calculated from 100 random posterior draws of <span class="math inline">\(\beta_1\)</span> and <span class="math inline">\(\tau_1\)</span>. From these curves we can see that the true distribution of valence effects might well be less or more heterogeneous than is suggested by the expectation (point estimates). We then perform the same exercise on the CDF as well (<a href="#fig-2" class="quarto-xref">Figure&nbsp;5</a> B).</p>
 <div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">99</span>)</span>
 <span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">seq</span>(xmin, xmax, <span class="at">length =</span> <span class="dv">301</span>)</span>
 <span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -1238,8 +1285,11 @@ Table&nbsp;4: Parameter estimates from Model 1 (Bayes).
 <span id="cb16-28"><a href="#cb16-28" aria-hidden="true" tabindex="-1"></a>  <span class="fu">calculate_density</span>(b_valence1, sd_person__valence1) <span class="sc">|&gt;</span> </span>
 <span id="cb16-29"><a href="#cb16-29" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(x) <span class="sc">|&gt;</span></span>
 <span id="cb16-30"><a href="#cb16-30" aria-hidden="true" tabindex="-1"></a>  <span class="fu">curve_interval</span>(<span class="at">.width =</span> <span class="fl">0.9</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 </div>
 <div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Posterior samples of pdf and cdf curves</span></span>
 <span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>p_samples <span class="ot">&lt;-</span> post1_density_mean <span class="sc">|&gt;</span></span>
 <span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>() <span class="sc">+</span></span>
@@ -1283,6 +1333,7 @@ Table&nbsp;4: Parameter estimates from Model 1 (Bayes).
 <span id="cb17-41"><a href="#cb17-41" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb17-42"><a href="#cb17-42" aria-hidden="true" tabindex="-1"></a>(p_pdf_samples <span class="sc">+</span> p_cdf_samples) <span class="sc">+</span></span>
 <span id="cb17-43"><a href="#cb17-43" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot_annotation</span>(<span class="at">tag_levels =</span> <span class="st">"A"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 <div class="cell-output-display">
 <div id="fig-2" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
@@ -1303,6 +1354,8 @@ Figure&nbsp;5: Uncertainty in Bayesian estimates of the heterogeneity distributi
 <section id="interval-descriptors-1" class="level2">
 <h2 class="anchored" data-anchor-id="interval-descriptors-1">Interval descriptors</h2>
 <div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>p1n <span class="ot">&lt;-</span> post1 <span class="sc">|&gt;</span></span>
 <span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
 <span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">hi_low =</span> b_valence1 <span class="sc">+</span> <span class="fu">qnorm</span>(<span class="fl">0.05</span>) <span class="sc">*</span> sd_person__valence1,</span>
@@ -1315,9 +1368,12 @@ Figure&nbsp;5: Uncertainty in Bayesian estimates of the heterogeneity distributi
 <span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">l =</span> <span class="fu">str_glue</span>(<span class="st">"[{hi_low.lower}, {hi_low.upper}]"</span>),</span>
 <span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">u =</span> <span class="fu">str_glue</span>(<span class="st">"[{hi_high.lower}, {hi_high.upper}]"</span>)</span>
 <span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 </div>
 <p>Above, we described the heterogeneity interval as a range of values where a specific percentage of the population’s slopes are expected to fall (e.g.&nbsp;<span class="math inline">\(\textit{HI}_{90}\)</span> for a 90% heterogeneity interval). However, a single interval cannot accommodate the uncertainty with which the underlying parameters are estimated. To carry uncertainty forward from model parameters to the <span class="math inline">\(\textit{HI}_{90}\)</span>, we repeat the calculations from above, but instead of using only the mean’s and standard deviation’s point estimates, we redo the calculations for each of the 4,000 randomly sampled pairs of <span class="math inline">\(\beta_1\)</span> and <span class="math inline">\(\tau_1\)</span>. Consequently, we get 4,000 draws from the posterior distribution of <span class="math inline">\(\textit{HI}_{90}\)</span> (<a href="#fig-cdfs-intervals" class="quarto-xref">Figure&nbsp;6</a>).</p>
 <div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Add summaries of CDF &lt; 0 to CDF curves as inset plots</span></span>
 <span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>p_cdf_intervals <span class="ot">&lt;-</span> p_cdf_samples <span class="sc">+</span></span>
 <span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_segment</span>(</span>
@@ -1397,6 +1453,7 @@ Figure&nbsp;5: Uncertainty in Bayesian estimates of the heterogeneity distributi
 <span id="cb19-77"><a href="#cb19-77" aria-hidden="true" tabindex="-1"></a>  <span class="fu">coord_cartesian</span>(<span class="at">clip =</span> <span class="st">"off"</span>, <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>))</span>
 <span id="cb19-78"><a href="#cb19-78" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb19-79"><a href="#cb19-79" aria-hidden="true" tabindex="-1"></a>p_cdf_intervals</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 <div class="cell-output-display">
 <div id="fig-cdfs-intervals" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
@@ -1412,6 +1469,8 @@ Figure&nbsp;6: Uncertainty in the limits of the lower and upper limits of the he
 </div>
 <p>Summarizing a distribution of intervals entails some challenges, however, because an interval is defined by two quantities—the lower and upper bounds. The 95% most plausible lower bounds of <span class="math inline">\(\textit{HI}_{90}\)</span> range between [-0.46, -0.28], whereas the 95% most credible upper bounds range between [-0.04, 0.13] (marginal histograms in <a href="#fig-cdfs-intervals" class="quarto-xref">Figure&nbsp;6</a> and <a href="#fig-intervals" class="quarto-xref">Figure&nbsp;7</a> B). Thus, to adequately describe an estimated heterogeneity interval, researchers must communicate two separate uncertainty intervals: In words, we estimate that 90% of the population’s valence effects range from -0.36 [-0.46, -0.28] to 0.04 [-0.04, 0.13].</p>
 <div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>p1 <span class="ot">&lt;-</span> post1 <span class="sc">|&gt;</span></span>
 <span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
 <span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">hi_low =</span> b_valence1 <span class="sc">+</span> <span class="fu">qnorm</span>(<span class="fl">0.05</span>) <span class="sc">*</span> sd_person__valence1,</span>
@@ -1499,6 +1558,7 @@ Figure&nbsp;6: Uncertainty in the limits of the lower and upper limits of the he
 <span id="cb20-85"><a href="#cb20-85" aria-hidden="true" tabindex="-1"></a>p1 <span class="sc">+</span> </span>
 <span id="cb20-86"><a href="#cb20-86" aria-hidden="true" tabindex="-1"></a>  ((p2 <span class="sc">+</span> p3) <span class="sc">+</span> <span class="fu">plot_layout</span>(<span class="at">heights =</span> <span class="fu">c</span>(<span class="fl">0.3</span>, <span class="fl">0.7</span>))) <span class="sc">+</span></span>
 <span id="cb20-87"><a href="#cb20-87" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot_annotation</span>(<span class="at">tag_levels =</span> <span class="st">"A"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 <div class="cell-output-display">
 <div id="fig-intervals" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
@@ -1518,6 +1578,8 @@ Figure&nbsp;7: Correlation in Bayesian estimates of the 90% heterogeneity interv
 <h2 class="anchored" data-anchor-id="proportion-descriptors-1">Proportion descriptors</h2>
 <p>A complementary description of heterogeneity is the proportion of the population whose effects fall above or below some critical value. For example, we can calculate proportions with negative and positive effects by using zero as the critical value. In this example, we asked “What proportion of individuals in the population endorse positive words faster than negative words?”</p>
 <div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Add summaries of CDF &lt; 0 to CDF curves as inset plots</span></span>
 <span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>p_cdf_samples_with_p_neg <span class="ot">&lt;-</span> p_cdf_samples <span class="sc">+</span></span>
 <span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_segment</span>(</span>
@@ -1574,6 +1636,7 @@ Figure&nbsp;7: Correlation in Bayesian estimates of the 90% heterogeneity interv
 <span id="cb21-54"><a href="#cb21-54" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">plot.title.position =</span> <span class="st">"panel"</span>)</span>
 <span id="cb21-55"><a href="#cb21-55" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb21-56"><a href="#cb21-56" aria-hidden="true" tabindex="-1"></a>p_cdf_samples_with_p_neg</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 <div class="cell-output-display">
 <div id="fig-cdfs-pneg" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
@@ -1588,6 +1651,8 @@ Figure&nbsp;8: Uncertainty in the proportion of negative effects (compare to the
 </div>
 </div>
 <div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>tmp <span class="ot">&lt;-</span> post1 <span class="sc">|&gt;</span></span>
 <span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
 <span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">dist =</span> <span class="fu">dist_normal</span>(b_valence1, sd_person__valence1),</span>
@@ -1618,9 +1683,12 @@ Figure&nbsp;8: Uncertainty in the proportion of negative effects (compare to the
 <span id="cb22-28"><a href="#cb22-28" aria-hidden="true" tabindex="-1"></a>      <span class="st">"[{number(ratio.lower, .01)}, {number(ratio.upper, .01)}]"</span></span>
 <span id="cb22-29"><a href="#cb22-29" aria-hidden="true" tabindex="-1"></a>    )</span>
 <span id="cb22-30"><a href="#cb22-30" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 </div>
 <p>To answer, we calculate <span class="math inline">\(p^- = Pr(\textrm{Valence effect} \le 0) = \Phi(0; \beta_1, \tau_1)\)</span> for each posterior draw of <span class="math inline">\(\beta_1\)</span> and <span class="math inline">\(\tau_1\)</span>. <a href="#fig-cdfs-pneg" class="quarto-xref">Figure&nbsp;8</a> shows 100 posterior draws of the CDF with a vertical line superimposed at zero. The y-axis value where the CDF crosses zero on the x-axis indicates the population proportion of negative valence effects (<span class="math inline">\(p^-\)</span>). We also show a histogram of all 4,000 posterior draws of that proportion on the y-axis of <a href="#fig-cdfs-pneg" class="quarto-xref">Figure&nbsp;8</a>, with its associated 95%CI. The model predicts the proportion of individuals in the population with negative valence effects to be approximately 89.9% (posterior mean), but with 95% confidence this value could be as low as 79.6% or as high as 98.2%. Stated differently, the model predicts that 10.1% [1.8%, 20.4%] of individuals in the population would show reversals of the valence effect.</p>
 <div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>rope_n <span class="ot">&lt;-</span> <span class="dv">25</span></span>
 <span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>post1_samples_rope <span class="ot">&lt;-</span> post1_samples <span class="sc">|&gt;</span> </span>
@@ -1710,6 +1778,7 @@ Figure&nbsp;8: Uncertainty in the proportion of negative effects (compare to the
 <span id="cb23-87"><a href="#cb23-87" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb23-88"><a href="#cb23-88" aria-hidden="true" tabindex="-1"></a>(p_rope_densities <span class="sc">+</span> p_rope_props) <span class="sc">+</span></span>
 <span id="cb23-89"><a href="#cb23-89" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot_annotation</span>(<span class="at">tag_levels =</span> <span class="st">"A"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 <div class="cell-output-display">
 <div id="fig-pdfs-rope" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
@@ -1730,6 +1799,8 @@ Figure&nbsp;9: Uncertainty in the proportion of effects in the ROPE (compare to 
 <h2 class="anchored" data-anchor-id="ratio-descriptors-1">Ratio descriptors</h2>
 <p>Finally, we can assess heterogeneity in relative terms by comparing the magnitude of the heterogeneity in valence effects (the standard deviation <span class="math inline">\(\tau_1\)</span>) to the magnitude of the average effect (the mean <span class="math inline">\(\beta_1\)</span>) by calculating the ratio <span class="math inline">\(\frac{\tau_1}{\beta_1}\)</span> (see <a href="#tbl-samples-1" class="quarto-xref">Table&nbsp;3</a>). <a href="#fig-ratio" class="quarto-xref">Figure&nbsp;10</a> A shows 4,000 samples from the joint posterior distribution of the mean and standard deviation, from which we calculated 4,000 samples of the posterior distribution of <span class="math inline">\(\frac{\tau_1}{\beta_1}\)</span> (panel B). The ratio 0.79 [0.48, 1.21] suggests that the relative magnitude of heterogeneity is substantial, but might be as low as 0.48 or as great as 1.21, with 95% confidence. If we used the 1/4 rule of thumb suggested in <span class="citation" data-cites="bolgerCausalProcessesPsychology2019">Bolger et al. (<a href="#ref-bolgerCausalProcessesPsychology2019" role="doc-biblioref">2019</a>)</span>, with these results we could say <em>with confidence</em> that heterogeneity in valence effects is notable (the entire 95%CI exceeds 0.25).</p>
 <div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>p1 <span class="ot">&lt;-</span> post1 <span class="sc">|&gt;</span></span>
 <span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(b_valence1, sd_person__valence1)) <span class="sc">+</span></span>
 <span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_y_continuous</span>(</span>
@@ -1773,6 +1844,7 @@ Figure&nbsp;9: Uncertainty in the proportion of effects in the ROPE (compare to 
 <span id="cb24-41"><a href="#cb24-41" aria-hidden="true" tabindex="-1"></a>    <span class="at">aspect.ratio =</span> <span class="dv">1</span></span>
 <span id="cb24-42"><a href="#cb24-42" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">&amp;</span></span>
 <span id="cb24-43"><a href="#cb24-43" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot_annotation</span>(<span class="at">tag_levels =</span> <span class="st">"A"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 <div class="cell-output-display">
 <div id="fig-ratio" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
@@ -1793,6 +1865,8 @@ Figure&nbsp;10: Bivariate posterior of <span class="math inline">\(\beta_1\)</sp
 <h1>Comparing heterogeneity between populations</h1>
 <p>We now move beyond assessing heterogeneity in one population to comparing degrees of heterogeneity across multiple populations of two different study units: Persons and stimuli. To illustrate, we reanalyze a dataset from <span class="citation" data-cites="mahVariabilitySubjectsFree2024">Mah &amp; Lindsay (<a href="#ref-mahVariabilitySubjectsFree2024" role="doc-biblioref">2024</a>)</span> addressing differences in between-person variability (heterogeneity) in memory performance between a free recall memory task and a cued recall memory task. In <span class="citation" data-cites="mahVariabilitySubjectsFree2024">Mah &amp; Lindsay (<a href="#ref-mahVariabilitySubjectsFree2024" role="doc-biblioref">2024</a>)</span>’s Experiment 3, 260 individuals studied a list of twenty target words. After a short break, they then either freely recalled as many of the target words as they could (Free recall group, N = 123) or recalled as many target words as they could when prompted with related cue words (Cued recall group, N = 137). Thus, the Free and Cued recall tasks had different groups of participants but the same target words. The metric of memory performance in this study was the proportion correct. We show a sample of these data in <a href="#tbl-dat2" class="quarto-xref">Table&nbsp;5</a>.</p>
 <div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Experiment 3: task type is between-person</span></span>
 <span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>path <span class="ot">&lt;-</span> <span class="st">"data/mah-lindsay-experiment-3.zip"</span></span>
 <span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">file.exists</span>(path)) {</span>
@@ -1821,13 +1895,17 @@ Figure&nbsp;10: Bivariate posterior of <span class="math inline">\(\beta_1\)</sp
 <span id="cb25-26"><a href="#cb25-26" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Two observations were miscoded</span></span>
 <span id="cb25-27"><a href="#cb25-27" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">accuracy =</span> <span class="fu">if_else</span>(accuracy <span class="sc">==</span> <span class="dv">2</span>, <span class="dv">1</span>, accuracy)) <span class="sc">|&gt;</span> </span>
 <span id="cb25-28"><a href="#cb25-28" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(task, person, target)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 </div>
 <p>With a preregistered Pitman-Morgan test, <span class="citation" data-cites="mahVariabilitySubjectsFree2024">Mah &amp; Lindsay (<a href="#ref-mahVariabilitySubjectsFree2024" role="doc-biblioref">2024</a>)</span> found that participants who completed the cued recall task were more heterogeneous in their memory performance—the proportion of target words correctly recalled—than those in the free recall group: The Cued:Free recall between-person memory performance variance ratio was 1.33 (with a [1.14, 1.54] 95% bootstrap interval). <span class="citation" data-cites="mahVariabilitySubjectsFree2024">Mah &amp; Lindsay (<a href="#ref-mahVariabilitySubjectsFree2024" role="doc-biblioref">2024</a>)</span>, across three experiments, confirmed this result by comparing models that did and did not allow for distinct between-person variabilities in each group.</p>
 <div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>dat <span class="sc">|&gt;</span></span>
 <span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">slice</span>(<span class="dv">4</span><span class="sc">:</span><span class="dv">6</span>, <span class="at">.by =</span> task) <span class="sc">|&gt;</span> </span>
 <span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename_with</span>(<span class="sc">~</span><span class="fu">str_to_sentence</span>(.x)) <span class="sc">|&gt;</span> </span>
 <span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 <div id="tbl-dat2" class="cell quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-dat2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -1914,6 +1992,8 @@ Table&nbsp;5: Six rows of example dataset 2 (Mah &amp; Lindsay, 2023; Exp 3).
 <p>This Model 2 (<a href="#eq-m2-1" class="quarto-xref">Equation&nbsp;4</a>) of memory performance is similar to our Model 1 of valence effects above but contains two sources of heterogeneity: persons, whose parameters we represent with <span class="math inline">\(\gamma\)</span>, and target words, whose parameters we represent with <span class="math inline">\(\delta\)</span>. In addition, instead of coding the task type (free recall vs.&nbsp;cued recall) using predictor coding schemes such as contrast or dummy coding, we have index-coded task using subscripts <span class="math inline">\(_{m:F}\)</span> for Free recall parameters and <span class="math inline">\(_{m:C}\)</span> for Cued recall parameters. This parameterization allows us to quantify heterogeneity in memory performance separately for the two tasks.</p>
 <p>Note also that while we model <span class="math inline">\(\gamma\)</span> using independent normal distributions for each task, we model <span class="math inline">\(\delta\)</span> with correlated normal distributions. Because different persons participated in the two tasks, we cannot assess whether participant-specific abilities are correlated across the tasks. But we can assess this for target items, which were common across the tasks.</p>
 <div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>model <span class="ot">&lt;-</span> <span class="fu">bf</span>(</span>
 <span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>  accuracy <span class="sc">~</span> <span class="dv">0</span> <span class="sc">+</span> task <span class="sc">+</span> </span>
 <span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>    (<span class="dv">1</span> <span class="sc">|</span> <span class="fu">gr</span>(person, <span class="at">by =</span> task)) <span class="sc">+</span> </span>
@@ -1927,13 +2007,17 @@ Table&nbsp;5: Six rows of example dataset 2 (Mah &amp; Lindsay, 2023; Exp 3).
 <span id="cb27-11"><a href="#cb27-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">file =</span> <span class="st">"models/brm-fit-ml3-target"</span>,</span>
 <span id="cb27-12"><a href="#cb27-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">control =</span> <span class="fu">list</span>(<span class="at">adapt_delta =</span> .<span class="dv">95</span>)</span>
 <span id="cb27-13"><a href="#cb27-13" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 </div>
 <div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Quick model checking</span></span>
 <span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>pa <span class="ot">&lt;-</span> <span class="fu">mcmc_plot</span>(fit2, <span class="at">type =</span> <span class="st">"rhat_hist"</span>) <span class="sc">+</span></span>
 <span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_x_continuous</span>(<span class="at">labels =</span> <span class="sc">~</span><span class="fu">number</span>(., .<span class="dv">001</span>))</span>
 <span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>pb <span class="ot">&lt;-</span> <span class="fu">pp_check</span>(fit2, <span class="at">type =</span> <span class="st">"bars_grouped"</span>, <span class="at">group =</span> <span class="st">"task"</span>, <span class="at">ndraws =</span> <span class="dv">100</span>)</span>
 <span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a>pa <span class="sc">|</span> pb</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
@@ -1945,6 +2029,8 @@ Table&nbsp;5: Six rows of example dataset 2 (Mah &amp; Lindsay, 2023; Exp 3).
 </div>
 <p>We estimated Model 2 exactly as Model 1, by taking 4,000 random draws from its posterior distribution <span class="citation" data-cites="burknerBrmsPackageBayesian2017">(<a href="#ref-burknerBrmsPackageBayesian2017" role="doc-biblioref">Bürkner, 2017</a>)</span>. We then confirmed graphically and numerically that the estimation algorithm had converged, and that the model performed adequately using a graphical posterior predictive check <span class="citation" data-cites="gelmanBayesianDataAnalysis2013">(<a href="#ref-gelmanBayesianDataAnalysis2013" role="doc-biblioref">Gelman et al., 2013</a>)</span>. We summarise the model’s posterior distribution in <a href="#tbl-fit-2" class="quarto-xref">Table&nbsp;6</a>.</p>
 <div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>m2_parnames <span class="ot">&lt;-</span> <span class="fu">c</span>(</span>
 <span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>  <span class="st">"$</span><span class="sc">\\</span><span class="st">beta_{m:F}$"</span>, </span>
 <span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>  <span class="st">"$</span><span class="sc">\\</span><span class="st">beta_{m:C}$"</span>,</span>
@@ -1972,6 +2058,7 @@ Table&nbsp;5: Six rows of example dataset 2 (Mah &amp; Lindsay, 2023; Exp 3).
 <span id="cb29-25"><a href="#cb29-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(Parameter, Mean, SD, <span class="st">`</span><span class="at">95% CI</span><span class="st">`</span> <span class="ot">=</span> CI) <span class="sc">|&gt;</span> </span>
 <span id="cb29-26"><a href="#cb29-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Parameter =</span> m2_parnames) <span class="sc">|&gt;</span> </span>
 <span id="cb29-27"><a href="#cb29-27" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 <div id="tbl-fit-2" class="cell quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-fit-2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -2039,6 +2126,8 @@ Table&nbsp;6: Parameter estimates from Model 2.
 </div>
 </div>
 <div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Calculate all heterogeneity metrics and differences</span></span>
 <span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>post2 <span class="ot">&lt;-</span> post2 <span class="sc">|&gt;</span> </span>
 <span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
@@ -2093,6 +2182,7 @@ Table&nbsp;6: Parameter estimates from Model 2.
 <span id="cb30-52"><a href="#cb30-52" aria-hidden="true" tabindex="-1"></a>      <span class="st">"{number(mean, .01)} "</span>,</span>
 <span id="cb30-53"><a href="#cb30-53" aria-hidden="true" tabindex="-1"></a>      <span class="st">"[{number(q2.5, .01)}, {number(q97.5, .01)}]"</span>)</span>
 <span id="cb30-54"><a href="#cb30-54" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 </div>
 <section id="comparing-between-person-heterogeneity-across-tasks" class="level2">
 <h2 class="anchored" data-anchor-id="comparing-between-person-heterogeneity-across-tasks">Comparing between-person heterogeneity across tasks</h2>
@@ -2101,6 +2191,8 @@ Table&nbsp;6: Parameter estimates from Model 2.
 <p>More importantly, the second row in <a href="#fig-2-person" class="quarto-xref">Figure&nbsp;11</a> A describes the posterior distributions of the between-person standard deviations in memory ability in the free and cued recall tasks, and their difference (cued - free recall). The standard deviation was 0.30 [0.16, 0.43] probits greater in the cued recall task (ratio: 1.82 [1.38, 2.37]). Note that our estimate of the heterogeneity difference is greater, and associated with greater uncertainty, than what was originally reported by <span class="citation" data-cites="mahVariabilitySubjectsFree2024">Mah &amp; Lindsay (<a href="#ref-mahVariabilitySubjectsFree2024" role="doc-biblioref">2024</a>)</span>, potentially because our model also includes heterogeneity across target words.</p>
 <p>The third row of <a href="#fig-2-person" class="quarto-xref">Figure&nbsp;11</a> A shows the estimated proportions of individuals whose memory performance exceeded 50% (<span class="math inline">\(p^+\)</span>), and their difference between tasks. The model estimates the proportion of individuals who recall over 50% of items to be 0.31 [0.15, 0.46] greater in the cued than in the free recall task. Note that this quantity refers to population proportions and is not a z-score.</p>
 <div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="sc">-</span><span class="fl">2.2</span>, <span class="fl">2.2</span>, <span class="at">length =</span> <span class="dv">201</span>)</span>
 <span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>tmp_person <span class="ot">&lt;-</span> <span class="fu">bind_rows</span>(</span>
@@ -2125,8 +2217,11 @@ Table&nbsp;6: Parameter estimates from Model 2.
 <span id="cb31-22"><a href="#cb31-22" aria-hidden="true" tabindex="-1"></a>  <span class="at">.id =</span> <span class="st">"Task"</span></span>
 <span id="cb31-23"><a href="#cb31-23" aria-hidden="true" tabindex="-1"></a>) <span class="sc">|&gt;</span> </span>
 <span id="cb31-24"><a href="#cb31-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">dist_accuracy =</span> <span class="fu">dist_normal</span>(b, sd))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 </div>
 <div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>p2_pars_person <span class="ot">&lt;-</span> post2 <span class="sc">|&gt;</span> </span>
 <span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="fu">contains</span>(<span class="st">"b_"</span>) <span class="sc">|</span> <span class="fu">contains</span>(<span class="st">"person"</span>), <span class="sc">-</span>sd_person_ratio) <span class="sc">|&gt;</span> </span>
 <span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="fu">everything</span>()) <span class="sc">|&gt;</span> </span>
@@ -2267,6 +2362,7 @@ Table&nbsp;6: Parameter estimates from Model 2.
 <span id="cb32-138"><a href="#cb32-138" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb32-139"><a href="#cb32-139" aria-hidden="true" tabindex="-1"></a>(p2_pars_person <span class="sc">|</span> <span class="fu">wrap_elements</span>(<span class="at">full =</span> p2_pcdf_person)) <span class="sc">+</span></span>
 <span id="cb32-140"><a href="#cb32-140" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot_annotation</span>(<span class="at">tag_levels =</span> <span class="st">"A"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 <div class="cell-output-display">
 <div id="fig-2-person" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
@@ -2290,6 +2386,8 @@ Figure&nbsp;11: Estimated between-person heterogeneity in memory performance in 
 <h2 class="anchored" data-anchor-id="comparing-target-word-heterogeneity-across-tasks">Comparing target word heterogeneity across tasks</h2>
 <p>Between-person heterogeneity is typically the more theoretically important phenomenon for psychologists than differences in model parameters between other randomly sampled study units, such as stimuli. However, examining heterogeneity in other sampled units can be both theoretically and methodologically important <span class="citation" data-cites="juddTreatingStimuliRandom2012 juddExperimentsMoreOne2017">(<a href="#ref-juddTreatingStimuliRandom2012" role="doc-biblioref">Judd et al., 2012</a>, <a href="#ref-juddExperimentsMoreOne2017" role="doc-biblioref">2017</a>)</span>. We next turn to our second and third questions regarding potential differences and consistencies in between-target word heterogeneity.</p>
 <div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="sc">-</span><span class="fl">2.2</span>, <span class="fl">2.2</span>, <span class="at">length =</span> <span class="dv">201</span>)</span>
 <span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>tmp_target <span class="ot">&lt;-</span> <span class="fu">bind_rows</span>(</span>
@@ -2314,8 +2412,11 @@ Figure&nbsp;11: Estimated between-person heterogeneity in memory performance in 
 <span id="cb33-22"><a href="#cb33-22" aria-hidden="true" tabindex="-1"></a>  <span class="at">.id =</span> <span class="st">"Task"</span></span>
 <span id="cb33-23"><a href="#cb33-23" aria-hidden="true" tabindex="-1"></a>) <span class="sc">|&gt;</span> </span>
 <span id="cb33-24"><a href="#cb33-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">dist_accuracy =</span> <span class="fu">dist_normal</span>(b, sd))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 </div>
 <div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>p2_pars_target <span class="ot">&lt;-</span> post2 <span class="sc">|&gt;</span> </span>
 <span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="fu">contains</span>(<span class="st">"target"</span>), <span class="sc">-</span>sd_target_ratio) <span class="sc">|&gt;</span> </span>
 <span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename_with</span>(</span>
@@ -2578,6 +2679,7 @@ Figure&nbsp;11: Estimated between-person heterogeneity in memory performance in 
 <span id="cb34-260"><a href="#cb34-260" aria-hidden="true" tabindex="-1"></a>    p2_ellipse</span>
 <span id="cb34-261"><a href="#cb34-261" aria-hidden="true" tabindex="-1"></a>) <span class="sc">+</span></span>
 <span id="cb34-262"><a href="#cb34-262" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot_annotation</span>(<span class="at">tag_levels =</span> <span class="st">"A"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 <div class="cell-output-display">
 <div id="fig-2-target" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">

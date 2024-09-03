@@ -19,6 +19,7 @@ format:
     toc: true
     fontsize: 14pt
     mainfont: Fira Sans
+    code-fold: true
     other-links:
       - text: Preprint (PsyArXiv)
         href: https://osf.io/preprints/psyarxiv/mwg4f
