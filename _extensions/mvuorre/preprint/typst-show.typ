@@ -7,15 +7,17 @@ $if(running-head)$
 $endif$
 $if(by-author)$
   authors: (
-$for(by-author)$
-$if(it.name.literal)$
-    ( name: [$it.name.literal$],
-      affiliation: [$for(it.affiliations)$$it.id$$sep$, $endfor$],
-      $if(it.orcid)$orcid: "https://orcid.org/$it.orcid$",$endif$
-      $if(it.email)$email: [$it.email$]$endif$),
-$endif$
-$endfor$
-    ),
+  $for(by-author)$
+      ( 
+        name: [$it.name.literal$],
+        affiliation: [$for(it.affiliations)$$it.id$$sep$, $endfor$],
+        $if(it.attributes.corresponding)$corresponding: $it.attributes.corresponding$,$endif$
+        $if(it.attributes.equal-contributor)$equal-contributor: $it.attributes.equal-contributor$,$endif$
+        $if(it.orcid)$orcid: "https://orcid.org/$it.orcid$",$endif$
+        $if(it.email)$email: [$it.email$]$endif$
+      ),
+  $endfor$
+  ),
 $endif$
 $if(affiliations)$
   affiliations: (
@@ -65,6 +67,9 @@ $endif$
 $if(keywords)$
   keywords: [$for(keywords)$$it$$sep$, $endfor$],
 $endif$
+$if(wordcount)$
+  wordcount: [$wordcount$],
+$endif$
 $if(margin)$
   margin: ($for(margin/pairs)$$margin.key$: $margin.value$,$endfor$),
 $endif$
@@ -83,14 +88,14 @@ $endif$
 $if(toc)$
   toc: $toc$,
 $endif$
-$if(toc_depth)$
-  toc_depth: $toc_depth$,
+$if(toc-depth)$
+  toc-depth: $toc-depth$,
 $endif$
-$if(toc_title)$
-  toc_title: "$toc_title$",
+$if(toc-title)$
+  toc-title: "$toc-title$",
 $endif$
-$if(toc_indent)$
-  toc_indent: "$toc_indent$",
+$if(toc-indent)$
+  toc-indent: "$toc-indent$",
 $endif$
 $if(cols)$
   cols: $cols$,

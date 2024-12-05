@@ -1,14 +1,23 @@
 title: Preprint
-author: Matti Vuorre
-version: 0.9.2
-quarto-required: ">=1.5.47"
+authors:
+  - name: Matti Vuorre
+    orcid: 0000-0001-5052-066X
+version: 0.11.0
+quarto-required: ">=1.6.39"
 contributes:
+  shortcodes:
+    - "_extensions/andrewheiss/wordcount/words.lua"
   formats:
     typst:
       template-partials:
         - typst-template.typ
         - typst-show.typ
-      format-resources:
-        - '*.svg'
-    docx: 
+      citeproc: false
+      filters:
+        - at: pre-quarto
+          path: _extensions/andrewheiss/wordcount/citeproc.lua
+        - at: pre-quarto
+          path: _extensions/andrewheiss/wordcount/wordcount.lua
+      count-code-blocks: false
+    docx:
       reference-doc: preprint.docx
