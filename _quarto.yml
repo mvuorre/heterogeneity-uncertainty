@@ -15,6 +15,7 @@ format:
     fontsize: 11pt
     mainfont: Libertinus Serif
     section-numbering: "1."
+    suppress-bibliography: true
   html:
     toc: true
     fontsize: 14pt

@@ -1,12 +1,12 @@
 ---
 title: Communicating causal effect heterogeneity
 running-head: Communicating heterogeneity
-author: 
+author:
   - name: Matti Vuorre
     orcid: 0000-0001-5052-066X
     email: mjvuorre@uvt.nl
     corresponding: true
-    affiliation: 
+    affiliation:
       - ref: 1
   - name: Matthew Kay
     orcid: 0000-0001-9446-0419
@@ -29,10 +29,10 @@ affiliations:
 abstract: |
   Advances in experimental, data collection, and analysis methods have brought population variability in psychological phenomena to the fore. Yet, current practices for interpreting such heterogeneity do not appropriately treat the uncertainty inevitable in any statistical summary. Heterogeneity is best thought of as a distribution of features with a mean (average person’s effect) and variance (between-person differences). This expected heterogeneity distribution can be further summarized e.g. as a heterogeneity interval [@bolgerCausalProcessesPsychology2019]. However, because empirical studies estimate the underlying mean and variance parameters with uncertainty, the expected distribution and interval will underestimate the actual range of plausible effects in the population. Using Bayesian hierarchical models, and with the aid of empirical datasets from social and cognitive psychology, we provide a walk-through of effective heterogeneity reporting and display tools that appropriately convey measures of uncertainty. We cover interval, proportion, and ratio measures of heterogeneity and their estimation and interpretation. These tools can be a spur to theory building, allowing researchers to widen their focus from population averages to population heterogeneity in psychological phenomena.
 keywords: [heterogeneity, uncertainty, variation, multilevel model, statistics, visualization]
+wordcount: "{{< words-body >}}"
 authornote: |
   This manuscript is not yet peer-reviewed.
 bibliography: bibliography.bib
-citeproc: true
 csl: apa.csl
 ---
 
@@ -92,7 +92,7 @@ theme_set(
 # Model estimation options, customize in .Renviron
 dir.create("models", FALSE)
 options(
-  brms.backend = Sys.getenv("BRMS_BACKEND", "rstan"), 
+  brms.backend = Sys.getenv("BRMS_BACKEND", "rstan"),
   brms.threads = as.numeric(Sys.getenv("BRMS_THREADS"), 1),
   mc.cores = as.numeric(Sys.getenv("MAX_CORES"), 4)
 )
@@ -159,8 +159,8 @@ In this section, we replicate @bolgerCausalProcessesPsychology2019's analysis, u
 
 dat |>
   head() |>
-  rename(`log(Reaction time)` = rt) |> 
-  rename_with(~str_to_sentence(.x)) |> 
+  rename(`log(Reaction time)` = rt) |>
+  rename_with(~str_to_sentence(.x)) |>
   kable()
 ```
 
@@ -179,14 +179,14 @@ $$ {#eq-m1-2}
 This equation includes two sets of parameters: The first set contains $\beta_0$ (*beta*), the intercept, and $\beta_1$, the slope or effect of valence (V). Parameters in this set do not have subscripts: In the frequentist tradition, they are considered constants---not modelled on covariates---and typically referred to as "fixed" parameters [e.g. @raudenbushHierarchicalLinearModels2002]. The second set of parameters, $\gamma_{0j}$ (*gamma*) and $\gamma_{1j}$, have the subscript $j$ to indicate that they are person-specific deviations from the average intercept and slope, respectively. That is, $\beta_0 + \gamma_{01}$ is the intercept (average log reaction time) for person $j=1$. In frequentist texts, these are typically called "random" parameters because they are modeled as varying randomly according to a specified distribution. Following standard multilevel modeling assumptions, we model $\gamma_0$ and $\gamma_1$ as multivariate normal distributed:
 
 $$
-\begin{bmatrix} 
+\begin{bmatrix}
   \gamma_0 \\ \gamma_1
-\end{bmatrix} \sim 
+\end{bmatrix} \sim
 \operatorname{MVN}\left(
-  \begin{bmatrix} 0 \\ 0 \end{bmatrix}, 
-  \begin{pmatrix} 
-    \tau_0 & \\ 
-    \rho &\tau_1 
+  \begin{bmatrix} 0 \\ 0 \end{bmatrix},
+  \begin{pmatrix}
+    \tau_0 & \\
+    \rho &\tau_1
   \end{pmatrix}
 \right).
 $$ {#eq-m1-3}
@@ -230,8 +230,8 @@ if (!file.exists(path)) {
 tab_1[3:6, 3:4] <- boots[c(1, 3, 2, 4), ]
 
 # Get approx SEs
-tab_1 <- tab_1 |> 
-  mutate(SE = (CI_high - Coefficient) / 1.96) |> 
+tab_1 <- tab_1 |>
+  mutate(SE = (CI_high - Coefficient) / 1.96) |>
   select(Parameter, Coefficient, SE, CI_low, CI_high)
 
 m1_parnames <- c(
@@ -244,11 +244,11 @@ mu1n_low <- tab_1[2, "CI_low", TRUE]
 sd1n <- tab_1[4, 2, TRUE]
 sd1n_low <- tab_1[4, "CI_low", TRUE]
 mu1 <- number(
-  as.numeric(tab_1[2, c("Coefficient", "CI_low", "CI_high"), TRUE]), 
+  as.numeric(tab_1[2, c("Coefficient", "CI_low", "CI_high"), TRUE]),
   .01
 )
 sd1 <- number(
-  as.numeric(tab_1[4, c("Coefficient", "CI_low", "CI_high"), TRUE]), 
+  as.numeric(tab_1[4, c("Coefficient", "CI_low", "CI_high"), TRUE]),
   .01
 )
 
@@ -264,7 +264,7 @@ tab_1 |>
     mutate(across(where(is.numeric), ~number(.x, .01))),
     `95% CI` = str_glue("[{CI_low}, {CI_high}]"),
     Parameter = m1_parnames
-  ) |> 
+  ) |>
   select(
     Parameter, Coefficient, SE, `95% CI`
   ) |>
@@ -375,7 +375,7 @@ fig_1_params <- fig_1 +
 
 fig_1_descriptors <- fig_1 +
   scale_fill_manual(
-    values = c("grey90", alpha(desc_color, 0.45)), 
+    values = c("grey90", alpha(desc_color, 0.45)),
     na.value = "white"
   )
 
@@ -497,7 +497,7 @@ fig_ml_cdf_interval <- fig_ml_cdf +
   ) +
   geom_segment(
     aes(
-      x = quantile(dist_ml, 0.05), xend = quantile(dist_ml, 0.05), 
+      x = quantile(dist_ml, 0.05), xend = quantile(dist_ml, 0.05),
       y = 0.05, yend = 0
     ),
     color = desc_color
@@ -508,14 +508,14 @@ fig_ml_cdf_interval <- fig_ml_cdf +
   ) +
   geom_segment(
     aes(
-      x = quantile(dist_ml, 0.95), xend = quantile(dist_ml, 0.95), 
+      x = quantile(dist_ml, 0.95), xend = quantile(dist_ml, 0.95),
       y = 0.95, yend = 0
     ),
     color = desc_color
   ) +
   geom_segment(
     aes(
-      x = quantile(dist_ml, 0.05), xend = quantile(dist_ml, 0.95), 
+      x = quantile(dist_ml, 0.05), xend = quantile(dist_ml, 0.95),
       y = 0.025, yend = 0.025
     ),
     color = desc_color,
@@ -548,7 +548,7 @@ fig_ml_cdf_interval <- fig_ml_cdf +
   plot_annotation(tag_levels = "A")
 ```
 
-To calculate a heterogeneity interval, we first specify the desired probability limits: 
+To calculate a heterogeneity interval, we first specify the desired probability limits:
 for a $\pi\%$ interval, we use the limits $(1 \pm \pi)/2$. Thus, for a 90% interval, we use 0.05 and 0.95, which together define the central 90% of the distribution. Then, we pass those limits and the estimated mean and standard deviation to the normal quantile function $\Phi^{-1}$ (*phi*, `qnorm()` in R), to get the interval: $\textit{HI}_{90} = \Phi^{-1}((1 \pm \pi)/2; \beta_1, \tau_1) = \Phi^{-1}([.05, .95];$ `r mu1[1]`, `r sd1[1]`) = [`r hi90`]. In words, this function calculates the 0.05 and 0.95 quantiles of the normal distribution defined by the point estimates of the mean ($\beta_1$) and standard deviation ($\tau_1$): We expect 90% of valence effects in the population to fall in the [`r hi90`] interval. We illustrate this interval in @fig-ml-interval.
 
 ## Proportion descriptors
@@ -579,23 +579,23 @@ fig_ml_cdf_pneg <- fig_ml_cdf +
     aes(x = 0, xend = I(0), y = cdf(dist_ml, 0)),
     color = desc_color,
     arrow = arrowhead()
-  ) + 
+  ) +
   annotate(
-    "text", 
+    "text",
     x = 0, y = I(0),
-    label = "0", 
-    color = desc_color, 
-    vjust = 1.35, 
-    fontface = "bold", 
+    label = "0",
+    color = desc_color,
+    vjust = 1.35,
+    fontface = "bold",
     size = 3
   ) +
-  geom_text( 
+  geom_text(
     aes(x = I(0), y = cdf(dist_ml, 0)),
-    label = expression(bold(p ^ "−")), 
-    color = desc_color, 
+    label = expression(bold(p ^ "−")),
+    color = desc_color,
     hjust = 1.2,
     vjust = 0.6,
-    fontface = "bold", 
+    fontface = "bold",
     size = 3
   ) +
   scale_x_valence(breaks = c(-0.4, -0.2, 0.2)) +
@@ -606,7 +606,7 @@ fig_ml_cdf_pneg <- fig_ml_cdf +
   plot_annotation(tag_levels = "A")
 ```
 
-To answer, we pass zero (the critical value) and the estimated mean and standard deviation to the normal cumulative distribution function ($\Phi$; `pnorm()` in R): 
+To answer, we pass zero (the critical value) and the estimated mean and standard deviation to the normal cumulative distribution function ($\Phi$; `pnorm()` in R):
 $p^{-} = Pr(\textrm{Valence effect} \le 0) = \Phi(0; \beta_1, \tau_1) = \Phi(0;$ `r mu1[1]`, `r sd1[1]`) = `r p_less_zero`. This number is the probability that a random slope from this population would take a negative value, or, in other words, the proportion of individuals in the population who are expected to endorse positive words faster than negative words. We illustrate this probability and its construction using the CDF in @fig-ml-pneg.
 
 However, using zero as a critical value might not be sufficiently informative, especially when theory allows specifying a smallest effect size of interest, or what is known as a region of practical equivalence [ROPE, @anvariUsingAnchorbasedMethods2021; @lakensEquivalenceTestingPsychological2018; @kruschkeBayesianDataAnalysis2017; @kruschkeDoingBayesianData2014]. In common applications, ROPE is used to statistically infer whether an estimated parameter, such as the effect of valence on logRT for the average person, is practically significant. But we can equally well use a theory-informed region of effect sizes to describe and make inferences about the heterogeneity distribution of this effect in the population.
@@ -635,7 +635,7 @@ fig_ml_cdf_prope <- fig_ml_cdf +
     aes(x = -0.1, xend = I(0), y = cdf(dist_ml, -0.1)),
     color = desc_color,
     arrow = arrowhead()
-  ) + 
+  ) +
   geom_segment(
     aes(x = 0.1, xend = 0.1, y = 0, yend = cdf(dist_ml, 0.1)),
     color = desc_color
@@ -644,38 +644,38 @@ fig_ml_cdf_prope <- fig_ml_cdf +
     aes(x = 0.1, xend = I(0), y = cdf(dist_ml, 0.1)),
     color = desc_color,
     arrow = arrowhead()
-  ) + 
+  ) +
   geom_segment(
     aes(
-      x = I(0.09), xend = I(0.09), 
+      x = I(0.09), xend = I(0.09),
       y = cdf(dist_ml, -0.1), yend = cdf(dist_ml, 0.1)
     ),
     color = desc_color,
     arrow = arrowhead(ends = "both")
   ) +
-  annotate("text", 
+  annotate("text",
     x = -0.1, y = I(0),
     label = "−ε",
-    color = desc_color, 
-    vjust = 1.35, 
-    fontface = "bold", 
+    color = desc_color,
+    vjust = 1.35,
+    fontface = "bold",
     size = 3
   ) +
-  annotate("text", 
+  annotate("text",
     x = 0.1, y = I(0),
-    label = "+ε", 
-    color = desc_color, 
-    vjust = 1.35, 
-    fontface = "bold", 
+    label = "+ε",
+    color = desc_color,
+    vjust = 1.35,
+    fontface = "bold",
     size = 3
   ) +
-  geom_text( 
+  geom_text(
     aes(x = I(0.12), y = mean(cdf(dist_ml, c(-0.1, 0.1))[[1]])),
-    label = expression(bold(p ^ "ROPE")), 
-    color = desc_color, 
+    label = expression(bold(p ^ "ROPE")),
+    color = desc_color,
     hjust = 0,
     vjust = 0.6,
-    fontface = "bold", 
+    fontface = "bold",
     size = 3
   ) +
   scale_x_valence() +
@@ -712,8 +712,8 @@ fit_1 <- brm(
 )
 
 post1 <- as_draws_df(
-  fit_1, 
-  variable = c("b_", "sd_", "cor_", "sigma"), 
+  fit_1,
+  variable = c("b_", "sd_", "cor_", "sigma"),
   regex = TRUE
 ) |>
   mutate(dist_valence = dist_normal(b_valence1, sd_person__valence1))
@@ -725,18 +725,18 @@ post1 <- as_draws_df(
 #| fig-cap: "Graphical check of Model 1 performance and posterior predictive density."
 
 # Quick model checking
-pb <- mcmc_plot(fit_1, type = "rhat_hist") + 
+pb <- mcmc_plot(fit_1, type = "rhat_hist") +
   scale_x_continuous(labels = ~number(., .001))
 pc <- pp_check(fit_1)
 pb | pc
 ```
 
 ```{r include = is_html}
-post1 |> 
-  head() |> 
-  as_tibble() |> 
-  select(-contains(".")) |> 
-  select(2, 4, 7) |> 
+post1 |>
+  head() |>
+  as_tibble() |>
+  select(-contains(".")) |>
+  select(2, 4, 7) |>
   mutate(
     hi90 = str_glue(
       "[{number(quantile(dist_valence, .05), .01)}, ",
@@ -745,15 +745,15 @@ post1 |>
     pp = cdf(dist_valence, 0),
     prope = cdf(dist_valence, .1) - cdf(dist_valence, -.1),
     ratio = sd_person__valence1 / b_valence1
-  ) |> 
-  mutate(dist_valence = as.character(dist_valence)) |> 
-  # setNames(c(m1_parnames, "$p(\\beta_1)$")) |> 
+  ) |>
+  mutate(dist_valence = as.character(dist_valence)) |>
+  # setNames(c(m1_parnames, "$p(\\beta_1)$")) |>
   setNames(
     c(
-      m1_parnames[c(2, 4)], 
+      m1_parnames[c(2, 4)],
       "$p(\\beta_1)$", "$HI_{90}$", "$p^+$", "$p^{ROPE}$", "$\\frac{\\tau_1}{\\beta_1}$"
     )
-  ) |> 
+  ) |>
   kable(digits = 2)
 ```
 
@@ -763,11 +763,11 @@ The output of Bayesian computations is the multivariate posterior probability di
 #| label: tbl-samples-1
 #| tbl-cap: "Random draws from the posterior distributions of $\\beta_1$, $\\tau_1$, and their ratio."
 
-post1 |> 
-  head() |> 
-  select(c(2, 4)) |> 
-  mutate(ratio = sd_person__valence1 / b_valence1) |> 
-  set_names(m1_parnames[c(2, 4)], "$\\frac{\\tau_1}{\\beta_1}$") |> 
+post1 |>
+  head() |>
+  select(c(2, 4)) |>
+  mutate(ratio = sd_person__valence1 / b_valence1) |>
+  set_names(m1_parnames[c(2, 4)], "$\\frac{\\tau_1}{\\beta_1}$") |>
   kable()
 ```
 
@@ -787,14 +787,14 @@ fit_1 |>
     SD = number(SD, .01),
     CI = str_glue("[{number(CI_low, .01)}, {number(CI_high, .01)}]")
   ) |>
-  select(Parameter, Mean, SD, `95% CI` = CI) |> 
-  mutate(Parameter = m1_parnames) |> 
+  select(Parameter, Mean, SD, `95% CI` = CI) |>
+  mutate(Parameter = m1_parnames) |>
   kable()
 ```
 
 ## Heterogeneity distribution
 
-Armed with the joint Bayesian posterior distribution of all model parameters, we can now returned to the question of the distribution of valence effects in the population. We have 4,000 draws from the posterior distribution of the heterogeneity distribution. Within each draw from the posterior distribution, we can perform any calculation we did previously on only the point estimate of the heterogeneity distribution. 
+Armed with the joint Bayesian posterior distribution of all model parameters, we can now returned to the question of the distribution of valence effects in the population. We have 4,000 draws from the posterior distribution of the heterogeneity distribution. Within each draw from the posterior distribution, we can perform any calculation we did previously on only the point estimate of the heterogeneity distribution.
 
 We first recompute the expected heterogeneity distribution from @fig-1 using the posterior mean values of $\beta_1$ and $\tau_1$ in @fig-2 A (thick black curve). Superimposed on that normal density curve are heterogeneity distributions calculated from 100 random posterior draws of $\beta_1$ and $\tau_1$. From these curves we can see that the true distribution of valence effects might well be less or more heterogeneous than is suggested by the expectation (point estimates). We then perform the same exercise on the CDF as well (@fig-2 B).
 
@@ -828,7 +828,7 @@ post1_density_samples <- post1_samples |>
 
 post1_density_ribbon <- post1 |>
   select(b_valence1, sd_person__valence1) |>
-  calculate_density(b_valence1, sd_person__valence1) |> 
+  calculate_density(b_valence1, sd_person__valence1) |>
   group_by(x) |>
   curve_interval(.width = 0.9)
 ```
@@ -925,8 +925,8 @@ p_cdf_intervals <- p_cdf_samples +
   ) +
   geom_segment(
     aes(
-      x = quantile(dist_valence, 0.05), 
-      xend = quantile(dist_valence, 0.05), 
+      x = quantile(dist_valence, 0.05),
+      xend = quantile(dist_valence, 0.05),
       y = 0.05, yend = 0
     ),
     data = post1_samples,
@@ -935,7 +935,7 @@ p_cdf_intervals <- p_cdf_samples +
   ) +
   geom_segment(
     aes(
-      x = I(0), xend = quantile(dist_valence, 0.95), 
+      x = I(0), xend = quantile(dist_valence, 0.95),
       y = 0.95, yend = 0.95
     ),
     data = post1_samples,
@@ -944,8 +944,8 @@ p_cdf_intervals <- p_cdf_samples +
   ) +
   geom_segment(
     aes(
-      x = quantile(dist_valence, 0.95), 
-      xend = quantile(dist_valence, 0.95), 
+      x = quantile(dist_valence, 0.95),
+      xend = quantile(dist_valence, 0.95),
       y = 0.95, yend = 0
     ),
     data = post1_samples,
@@ -1049,10 +1049,10 @@ p2 <- post1 |>
   coord_cartesian(clip = "off") +
   xlab(NULL)
 
-p3 <- post1_density_samples |> 
+p3 <- post1_density_samples |>
   distinct(
-    .draw, 
-    b_valence1, 
+    .draw,
+    b_valence1,
     sd_person__valence1
   ) |>
   arrange(b_valence1) |>
@@ -1088,7 +1088,7 @@ p3 <- post1_density_samples |>
   ) +
   theme(plot.title.position = "plot", axis.ticks.y = element_blank())
 
-p1 + 
+p1 +
   ((p2 + p3) + plot_layout(heights = c(0.3, 0.7))) +
   plot_annotation(tag_levels = "A")
 ```
@@ -1110,7 +1110,7 @@ A complementary description of heterogeneity is the proportion of the population
 p_cdf_samples_with_p_neg <- p_cdf_samples +
   geom_segment(
     aes(
-      x = 0, xend = 0, 
+      x = 0, xend = 0,
       y = 0, yend = cdf(dist_valence, 0)
     ),
     data = post1_samples,
@@ -1119,7 +1119,7 @@ p_cdf_samples_with_p_neg <- p_cdf_samples +
   ) +
   geom_segment(
     aes(
-      x = 0, xend = I(0), 
+      x = 0, xend = I(0),
       y = cdf(dist_valence, 0), yend = cdf(dist_valence, 0)
     ),
     data = post1_samples,
@@ -1138,23 +1138,23 @@ p_cdf_samples_with_p_neg <- p_cdf_samples +
       .width = .95,
       scale = 1,
       width = 0.1
-  ) + 
+  ) +
   annotate(
-    "text", 
-    x = 0, y = I(0), 
-    label = "0", 
-    color = desc_color, 
-    vjust = 1.35, 
-    fontface = "bold", 
+    "text",
+    x = 0, y = I(0),
+    label = "0",
+    color = desc_color,
+    vjust = 1.35,
+    fontface = "bold",
     size = 3
   ) +
-  geom_text( 
+  geom_text(
     aes(x = I(0), y = cdf(dist_valence, 0)),
     data = post1_mean,
-    label = expression(bold(p ^ "−")), 
-    color = desc_color, 
-    hjust = 1.5, 
-    fontface = "bold", 
+    label = expression(bold(p ^ "−")),
+    color = desc_color,
+    hjust = 1.5,
+    fontface = "bold",
     size = 3
   ) +
   scale_x_valence(breaks = c(-0.4, -0.2, 0.2)) +
@@ -1207,46 +1207,46 @@ To answer, we calculate $p^- = Pr(\textrm{Valence effect} \le 0) = \Phi(0; \beta
 
 rope_n <- 25
 
-post1_samples_rope <- post1_samples |> 
-  slice_head(n = rope_n) 
+post1_samples_rope <- post1_samples |>
+  slice_head(n = rope_n)
 
-p_rope_densities <- post1_samples_rope |> 
-  ggplot() + 
+p_rope_densities <- post1_samples_rope |>
+  ggplot() +
   stat_slab(
     aes(
-      y = factor(.draw), 
-      xdist = dist_valence, 
+      y = factor(.draw),
+      xdist = dist_valence,
       fill = after_stat(-0.1 < x & x < 0.1)
     ),
     color = "gray90",
     scale = 2.5,
     linewidth = 0.25
   ) +
-  annotate("text", 
+  annotate("text",
     x = -0.1, y = I(0),
     label = "−ε",
-    color = desc_color, 
-    vjust = 1.15, 
-    fontface = "bold", 
+    color = desc_color,
+    vjust = 1.15,
+    fontface = "bold",
     size = 3
   ) +
-  annotate("text", 
+  annotate("text",
     x = 0.1, y = I(0),
-    label = "+ε", 
-    color = desc_color, 
-    vjust = 1.15, 
-    fontface = "bold", 
+    label = "+ε",
+    color = desc_color,
+    vjust = 1.15,
+    fontface = "bold",
     size = 3
   ) +
   geom_vline(
-    xintercept = c(-0.1, 0.1), 
-    color = zero_color, 
-    alpha = 0.1, 
+    xintercept = c(-0.1, 0.1),
+    color = zero_color,
+    alpha = 0.1,
     linetype = "22"
   ) +
   scale_fill_manual(
     values = c(
-      "TRUE" = colorspace::lighten(desc_color, 0.35, space = "HLS"), 
+      "TRUE" = colorspace::lighten(desc_color, 0.35, space = "HLS"),
       "FALSE" = "gray75"
     )
   ) +
@@ -1261,15 +1261,15 @@ p_rope_densities <- post1_samples_rope |>
   ylab("Posterior draw") +
   xlab("Valence effect")
 
-p_rope_props <- post1_samples_rope |> 
-  slice_head(n = 30) |> 
-  ggplot() + 
+p_rope_props <- post1_samples_rope |>
+  slice_head(n = 30) |>
+  ggplot() +
   aes(
-    y = factor(.draw), 
+    y = factor(.draw),
     x = cdf(dist_valence, 0.1) - cdf(dist_valence, -0.1)
-  ) + 
-  geom_segment(aes(xend = 0, yend = factor(.draw)), color = desc_color) + 
-  geom_point(color = desc_color, size = 0.75) + 
+  ) +
+  geom_segment(aes(xend = 0, yend = factor(.draw)), color = desc_color) +
+  geom_point(color = desc_color, size = 0.75) +
   scale_x_continuous(limits = c(0, 1), expand = expansion(0)) +
   scale_y_discrete(labels = NULL) +
   theme(
@@ -1382,15 +1382,15 @@ dat <- read_excel(
   mutate(
     person = factor(idnumber),
     task = factor(
-      test_type, 
-      levels = c("FR", "CR"), 
+      test_type,
+      levels = c("FR", "CR"),
       labels = c("Free", "Cued")
     ),
     accuracy
   ) |>
   select(person, task, target, accuracy) |>
   # Two observations were miscoded
-  mutate(accuracy = if_else(accuracy == 2, 1, accuracy)) |> 
+  mutate(accuracy = if_else(accuracy == 2, 1, accuracy)) |>
   arrange(task, person, target)
 ```
 
@@ -1401,8 +1401,8 @@ With a preregistered Pitman-Morgan test, @mahVariabilitySubjectsFree2024 found t
 #| tbl-cap: "Six rows of example dataset 2 (Mah \\& Lindsay, 2023; Exp 3)."
 
 dat |>
-  slice(4:6, .by = task) |> 
-  rename_with(~str_to_sentence(.x)) |> 
+  slice(4:6, .by = task) |>
+  rename_with(~str_to_sentence(.x)) |>
   kable()
 ```
 
@@ -1415,18 +1415,18 @@ $$
 \text{Accuracy}_{ijkm} &\sim \operatorname{Bernoulli}\left(\pi_{jkm}\right) \\
 \pi_{jkm} &= \Phi\left(\eta_{jkm}\right) \\
 \eta_{jkm} &= \beta_{m} + \gamma_{jm} + \delta_{km} \\
-\gamma_{[m:F]} &\sim 
+\gamma_{[m:F]} &\sim
   \operatorname{Normal}\left(0, \tau_{\gamma_{[m:F]}} \right) \\
-\gamma_{[m:C]} &\sim 
+\gamma_{[m:C]} &\sim
   \operatorname{Normal}\left(0, \tau_{\gamma_{[m:C]}} \right) \\
-\begin{bmatrix} 
+\begin{bmatrix}
   \delta_{[m:F]} \\ \delta_{[m:C]}
-\end{bmatrix} &\sim 
+\end{bmatrix} &\sim
   \operatorname{MVN}\left(
-  \begin{bmatrix} 0 \\ 0 \end{bmatrix}, 
-  \begin{pmatrix} 
-    \tau_{\delta_{[m:F]}} & \\ 
-    \rho_\delta &\tau_{\delta_{[m:C]}} 
+  \begin{bmatrix} 0 \\ 0 \end{bmatrix},
+  \begin{pmatrix}
+    \tau_{\delta_{[m:F]}} & \\
+    \rho_\delta &\tau_{\delta_{[m:C]}}
   \end{pmatrix}
 \right).
 \end{align*}
@@ -1441,9 +1441,9 @@ Note also that while we model $\gamma$ using independent normal distributions fo
 #| message: false
 
 model <- bf(
-  accuracy ~ 0 + task + 
-    (1 | gr(person, by = task)) + 
-    (0 + task | target) 
+  accuracy ~ 0 + task +
+    (1 | gr(person, by = task)) +
+    (0 + task | target)
 )
 fit2 <- brm(
   model,
@@ -1474,22 +1474,22 @@ We estimated Model 2 exactly as Model 1, by taking 4,000 random draws from its p
 #| tbl-cap: "Parameter estimates from Model 2."
 
 m2_parnames <- c(
-  "$\\beta_{m:F}$", 
+  "$\\beta_{m:F}$",
   "$\\beta_{m:C}$",
-  "$\\tau_{\\gamma_{m:F}}$", 
+  "$\\tau_{\\gamma_{m:F}}$",
   "$\\tau_{\\gamma_{m:C}}$",
-  "$\\tau_{\\delta_{m:F}}$", 
+  "$\\tau_{\\delta_{m:F}}$",
   "$\\tau_{\\delta_{m:C}}$",
   "$\\rho_\\delta$"
 )
 
 post2 <- as_draws_df(
-  fit2, 
-  variable = c("b_", "sd_", "cor_"), 
+  fit2,
+  variable = c("b_", "sd_", "cor_"),
   regex = TRUE
 )
 
-fit2 |> 
+fit2 |>
   parameters(effects = "all", centrality = "mean", dispersion = TRUE) |>
   tibble() |>
   mutate(
@@ -1497,8 +1497,8 @@ fit2 |>
     SD = number(SD, .001),
     CI = str_glue("[{number(CI_low, .01)}, {number(CI_high, .01)}]")
   ) |>
-  select(Parameter, Mean, SD, `95% CI` = CI) |> 
-  mutate(Parameter = m2_parnames) |> 
+  select(Parameter, Mean, SD, `95% CI` = CI) |>
+  mutate(Parameter = m2_parnames) |>
   kable()
 ```
 
@@ -1506,7 +1506,7 @@ fit2 |>
 #| label: calc-2-heterogeneity
 
 # Calculate all heterogeneity metrics and differences
-post2 <- post2 |> 
+post2 <- post2 |>
   mutate(
     # Persons
     dist_person_free = dist_normal(b_taskFree, `sd_person__Intercept:taskFree`),
@@ -1521,9 +1521,9 @@ post2 <- post2 |>
     hi_high_cued = b_taskCued + qnorm(0.95) * `sd_person__Intercept:taskCued`,
     # Differences
     b_difference = b_taskCued - b_taskFree,
-    sd_person_difference = 
+    sd_person_difference =
       `sd_person__Intercept:taskCued` - `sd_person__Intercept:taskFree`,
-    sd_person_ratio = 
+    sd_person_ratio =
       `sd_person__Intercept:taskCued` / `sd_person__Intercept:taskFree`,
     pd_person_difference = pd_person_cued - pd_person_free,
     ratio_person_difference = ratio_person_cued - ratio_person_free,
@@ -1537,23 +1537,23 @@ post2 <- post2 |>
     ratio_target_free = abs(`sd_target__taskFree` / b_taskFree),
     ratio_target_cued = abs(`sd_target__taskCued` / b_taskCued),
     # Differences
-    sd_target_difference = 
+    sd_target_difference =
       `sd_target__taskCued` - `sd_target__taskFree`,
-    sd_target_ratio = 
+    sd_target_ratio =
       `sd_target__taskCued` / `sd_target__taskFree`,
     pd_target_difference = pd_target_cued - pd_target_free,
     ratio_target_difference = ratio_target_cued - ratio_target_free,
     .before = starts_with("cor_")
-  ) |> 
+  ) |>
   select(-starts_with("dist_"))
 
-post2_sum <- post2 |> 
+post2_sum <- post2 |>
   mutate(
     across(b_taskFree:b_taskCued, list(p = ~pnorm(.x)))
-  ) |> 
+  ) |>
   summarize_draws(
     mean, ~quantile2(.x, probs = c(0.025, 0.975))
-  ) |> 
+  ) |>
   mutate(
     x = str_glue(
       "{number(mean, .01)} ",
@@ -1579,14 +1579,14 @@ x <- seq(-2.2, 2.2, length = 201)
 tmp_person <- bind_rows(
   "Free" = post2 |>
     select(b_taskFree, `sd_person__Intercept:taskFree`) |>
-    calculate_density(b_taskFree, `sd_person__Intercept:taskFree`) |> 
+    calculate_density(b_taskFree, `sd_person__Intercept:taskFree`) |>
     select(x, pdf, cdf),
   "Cued" = post2 |>
     select(b_taskCued, `sd_person__Intercept:taskCued`) |>
-    calculate_density(b_taskCued, `sd_person__Intercept:taskCued`) |> 
+    calculate_density(b_taskCued, `sd_person__Intercept:taskCued`) |>
     select(x, pdf, cdf),
   .id = "Task"
-)  |> 
+)  |>
   group_by(x, Task) |>
   curve_interval(.width = 0.9)
 
@@ -1596,7 +1596,7 @@ tmp_person_dist <- bind_rows(
   "Cued" = post2 |>
     select(b = b_taskCued, sd = `sd_person__Intercept:taskCued`),
   .id = "Task"
-) |> 
+) |>
   mutate(dist_accuracy = dist_normal(b, sd))
 ```
 
@@ -1605,19 +1605,19 @@ tmp_person_dist <- bind_rows(
 #| fig-height: 3.2
 #| fig-cap: "Estimated between-person heterogeneity in memory performance in Free recall and Cued recall tasks from Model 2. **A**. Histograms of 4,000 posterior draws from the model parameters and their transformations, with points and intervals showing posterior means and 95%CIs. Differences are calculated as Cued - Free recall. $p^+$ indicates the proportion of the population whose proportion correct is predicted to be above 50%. Heterogeneity ratio indicates standard deviations divided with their respective means (we truncated this axis at [-5, 5] for clarity). **B**. Probability density (top) and cumulative distribution functions (bottom) of the two groups' heterogeneity distributions (green: free recall, red: cued recall). The densities, points, and intervals on the left y-axis of the bottom panel indicate approximate posterior densities, with means and 95%CIs, of the proportions of the populations with memory performance above 0.5. Densities, points, and intervals on the x-axis of the bottom panel indicate approximate posterior densities, with means and 95%CIs, of the 90\\% heterogeneity interval's lower (left) and upper (right) bounds."
 
-p2_pars_person <- post2 |> 
-  select(contains("b_") | contains("person"), -sd_person_ratio) |> 
-  pivot_longer(everything()) |> 
+p2_pars_person <- post2 |>
+  select(contains("b_") | contains("person"), -sd_person_ratio) |>
+  pivot_longer(everything()) |>
   mutate(
-    name = str_to_lower(name) |> 
-      str_remove("_person") |> 
-      str_remove("_intercept:task") |> 
+    name = str_to_lower(name) |>
+      str_remove("_person") |>
+      str_remove("_intercept:task") |>
       str_remove("task")
-  ) |> 
-  separate(name, c("type", "group")) |> 
+  ) |>
+  separate(name, c("type", "group")) |>
   mutate(
     type = factor(
-      type, 
+      type,
       levels = c("b", "sd", "pd", "ratio"),
       labels = c("Mean", "SD", "p+", "Heterogeneity ratio")
     ),
@@ -1627,7 +1627,7 @@ p2_pars_person <- post2 |>
       labels = c("Free", "Cued", "Difference")
     ) |> fct_rev(),
     value = if_else(type == "Heterogeneity ratio" & abs(value) > 5, NaN, value)
-  ) |> 
+  ) |>
   ggplot(aes(value, group, col = group, fill = group)) +
   scale_color_brewer(
     "Recall task",
@@ -1658,7 +1658,7 @@ p2_pars_person <- post2 |>
     axis.title.y = element_blank()
   )
 
-p2_cdf_person <- tmp_person |> 
+p2_cdf_person <- tmp_person |>
   ggplot(aes(x = x)) +
   aes(y = cdf, col = Task, fill = Task, ymin = cdf.lower, ymax = cdf.upper) +
   geom_vline(
@@ -1676,7 +1676,7 @@ p2_cdf_person <- tmp_person |>
     breaks = extended_breaks(5),
     sec.axis = sec_axis(
       name = "Proportion correct",
-      trans = ~pnorm(.), 
+      trans = ~pnorm(.),
       breaks = c(0.05, .1, .3, .5, .7, .9, .95),
       labels = c(".05", ".1", ".3", ".5", ".7", ".9", ".95")
     )
@@ -1698,11 +1698,11 @@ p2_cdf_person <- tmp_person |>
     panel.border = element_rect(fill = NA)
   )
 
-p2_pdf_person <- p2_cdf_person %+% 
+p2_pdf_person <- p2_cdf_person %+%
   aes(y = pdf, ymin = pdf.lower, ymax = pdf.upper) +
   ylab("PDF")
 
-p2_cdf_person <- p2_cdf_person + 
+p2_cdf_person <- p2_cdf_person +
   stat_histinterval(
     aes(y = 1 - cdf(dist_accuracy, 0), ymin = NULL, ymax = NULL),
     x = I(0),
@@ -1769,14 +1769,14 @@ x <- seq(-2.2, 2.2, length = 201)
 tmp_target <- bind_rows(
   "Free" = post2 |>
     select(b_taskFree, sd_target__taskFree) |>
-    calculate_density(b_taskFree, `sd_target__taskFree`) |> 
+    calculate_density(b_taskFree, `sd_target__taskFree`) |>
     select(x, pdf, cdf),
   "Cued" = post2 |>
     select(b_taskCued, `sd_target__taskCued`) |>
-    calculate_density(b_taskCued, `sd_target__taskCued`) |> 
+    calculate_density(b_taskCued, `sd_target__taskCued`) |>
     select(x, pdf, cdf),
   .id = "Task"
-)  |> 
+)  |>
   group_by(x, Task) |>
   curve_interval(.width = 0.9)
 
@@ -1786,7 +1786,7 @@ tmp_target_dist <- bind_rows(
   "Cued" = post2 |>
     select(b = b_taskCued, sd = `sd_target__taskCued`),
   .id = "Task"
-) |> 
+) |>
   mutate(dist_accuracy = dist_normal(b, sd))
 ```
 
@@ -1796,18 +1796,18 @@ tmp_target_dist <- bind_rows(
 #| fig-width: 7.4
 #| fig-cap: "Heterogeneity between target words in memory performance in Free recall and Cued recall tasks from Model 2. **A**. Histograms of 4,000 posterior draws from the model parameters and their transformations, with points and intervals showing posterior means and 95\\%CIs. Differences calculated as Cued - Free recall. **B**. Probability density (top) and cumulative distribution functions (bottom) of the two tasks' heterogeneity distributions (green: free recall, red: cued recall). The densities, points, and intervals on the left y-axis of the bottom panel indicate approximate posterior densities, with means and 95\\%CIs, of the proportions of the populations with memory performance above chance. Densities, points, and intervals on the x-axis of the bottom panel indicate approximate posterior densities, with means and 95%CIs, of the 90\\% heterogeneity interval's lower (left) and upper (right) bounds. **C**. Posterior mean (dark), and 100 posterior draws (light) of the correlation between target words' proportions correct in the free (x-axis) and cued recall (y-axis) tasks. Ellipses indicate the 90th percentile of the bivariate normal distribution. Small black circles are estimated parameters for target words in the sample (posterior means of $\\gamma$)."
 
-p2_pars_target <- post2 |> 
-  select(contains("target"), -sd_target_ratio) |> 
+p2_pars_target <- post2 |>
+  select(contains("target"), -sd_target_ratio) |>
   rename_with(
-    ~str_to_lower(.) |> 
-      str_remove("target_") |> 
+    ~str_to_lower(.) |>
+      str_remove("target_") |>
       str_remove_all("_task")
-  ) |> 
-  pivot_longer(everything()) |> 
-  separate(name, c("type", "group"), extra = "merge") |> 
+  ) |>
+  pivot_longer(everything()) |>
+  separate(name, c("type", "group"), extra = "merge") |>
   mutate(
     type = factor(
-      type, 
+      type,
       levels = c("sd", "pd", "ratio", "cor"),
       labels = c("SD", "p+", "Heterogeneity ratio", "Cor(Free, Cued)")
     ),
@@ -1817,11 +1817,11 @@ p2_pars_target <- post2 |>
       labels = c("Free", "Cued", "Difference", "Correlation")
     ) |> fct_rev(),
     value = if_else(
-      type == "Heterogeneity ratio" & abs(value) > 5, 
-      NaN, 
+      type == "Heterogeneity ratio" & abs(value) > 5,
+      NaN,
       value
     )
-  ) |> 
+  ) |>
   ggplot(aes(value, group, color = group, fill = group)) +
   scale_color_manual(
     "Recall task",
@@ -1850,10 +1850,10 @@ p2_pars_target <- post2 |>
     axis.title.y = element_blank()
   )
 
-p2_cdf_target <- tmp_target |> 
+p2_cdf_target <- tmp_target |>
   ggplot(aes(x = x)) +
   aes(
-    y = cdf, ymin = cdf.lower, ymax = cdf.upper, 
+    y = cdf, ymin = cdf.lower, ymax = cdf.upper,
     col = Task, fill = Task
   ) +
   scale_color_brewer(
@@ -1868,7 +1868,7 @@ p2_cdf_target <- tmp_target |>
     breaks = extended_breaks(5),
     sec.axis = sec_axis(
       name = "Proportion correct",
-      trans = ~pnorm(.), 
+      trans = ~pnorm(.),
       breaks = c(0.05, .1, .3, .5, .7, .9, .95),
       labels = c(".05", ".1", ".3", ".5", ".7", ".9", ".95")
     )
@@ -1890,11 +1890,11 @@ p2_cdf_target <- tmp_target |>
     panel.border = element_rect(fill = NA)
   )
 
-p2_pdf_target <- p2_cdf_target %+% 
+p2_pdf_target <- p2_cdf_target %+%
   aes(y = pdf, ymin = pdf.lower, ymax = pdf.upper) +
   ylab("PDF")
 
-p2_cdf_target <- p2_cdf_target + 
+p2_cdf_target <- p2_cdf_target +
   stat_histinterval(
     aes(y = 1 - cdf(dist_accuracy, 0), ymin = NULL, ymax = NULL),
     x = I(0),
@@ -1980,20 +1980,20 @@ ellipse_median <- samples |>
 
 # Target word coefficients, data and model
 dat2_target_coefs <- left_join(
-  dat |> 
+  dat |>
     summarise(
       p = qnorm(mean(accuracy)),
       .by = c(task, target)
-    ) |> 
+    ) |>
     pivot_wider(
       names_from = task, values_from = p
     ),
-  coef(fit2)$target |> 
-    as.data.frame() |> 
-    rownames_to_column("target") |> 
-    tibble() |> 
+  coef(fit2)$target |>
+    as.data.frame() |>
+    rownames_to_column("target") |>
+    tibble() |>
     select(
-      target, 
+      target,
       .Free = Estimate.taskFree,
       .Cued = Estimate.taskCued
     )
@@ -2053,8 +2053,8 @@ p2_ellipse <- ellipse_median |>
   )
 
 (
-  wrap_elements(full = p2_pars_target) | 
-    wrap_elements(full = p2_pcdf_target) | 
+  wrap_elements(full = p2_pars_target) |
+    wrap_elements(full = p2_pcdf_target) |
     p2_ellipse
 ) +
   plot_annotation(tag_levels = "A")
@@ -2116,11 +2116,3 @@ Writing – Review & Editing: MV, NB, MK
 ## Competing interests
 
 The author(s) declare no competing interests.
-
-<!-- HTML format automatically adds "References" in an appendix. -->
-::: {.content-hidden when-format="html"}
-# References {.unnumbered}
-
-:::{.refs}
-:::
-:::
