@@ -12,10 +12,8 @@ preprint-url: https://osf.io/preprints/psyarxiv/mwg4f
 format:
   preprint-typst:
     output-file: ms.pdf
-    fontsize: 11pt
-    mainfont: Libertinus Serif
     section-numbering: "1."
-    suppress-bibliography: true
+    wordcount: '{{< words-body >}}'
   html:
     toc: true
     fontsize: 14pt
