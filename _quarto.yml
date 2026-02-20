@@ -6,34 +6,8 @@ project:
 
 site-url: https://mvuorre.github.io/heterogeneity-uncertainty
 repo-url: https://github.com/mvuorre/heterogeneity-uncertainty
-osf-url: https://osf.io/yp2gq/
+archive-url: https://
 preprint-url: https://osf.io/preprints/psyarxiv/mwg4f
-
-format:
-  preprint-typst:
-    output-file: ms.pdf
-    section-numbering: "1."
-    wordcount: '{{< words-body >}}'
-  html:
-    toc: true
-    fontsize: 14pt
-    mainfont: Fira Sans
-    code-fold: true
-    other-links:
-      - text: Preprint (PsyArXiv)
-        href: https://osf.io/preprints/psyarxiv/mwg4f
-        icon: file-pdf
-      - text: Online supplement
-        href: https://mvuorre.github.io/heterogeneity-uncertainty
-        icon: globe2
-      - text: GitHub Repository
-        href: https://github.com/mvuorre/heterogeneity-uncertainty
-        icon: github
-      - text: OSF Repository
-        href: https://osf.io/yp2gq/
-        icon: archive
-  preprint-docx:
-    output-file: ms.docx
 
 execute:
   freeze: auto

@@ -2,23 +2,16 @@ title: Preprint
 authors:
   - name: Matti Vuorre
     orcid: 0000-0001-5052-066X
-version: 0.15.0
+version: 1.4.3
 quarto-required: ">=1.7.29"
 contributes:
-  shortcodes:
-    - "_extensions/andrewheiss/wordcount/words.lua"
   formats:
     typst:
+      functions: [place]
+      template: template.typ
       template-partials:
-        - typst-template.typ
+        - typst/typst-template.typ
         - typst-show.typ
-      citeproc: false
-      suppress-bibliography: true
+        - definitions.typ
       filters:
-        - at: pre-quarto
-          path: _extensions/andrewheiss/wordcount/citeproc.lua
-        - at: pre-quarto
-          path: _extensions/andrewheiss/wordcount/wordcount.lua
-      count-code-blocks: false
-    docx:
-      reference-doc: preprint.docx
+        - _extensions/christopherkenny/typst-function/typst-function.lua

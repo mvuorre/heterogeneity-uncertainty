@@ -29,11 +29,35 @@ affiliations:
 abstract: |
   Advances in experimental, data collection, and analysis methods have brought population variability in psychological phenomena to the fore. Yet, current practices for interpreting such heterogeneity do not appropriately treat the uncertainty inevitable in any statistical summary. Heterogeneity is best thought of as a distribution of features with a mean (average person’s effect) and variance (between-person differences). This expected heterogeneity distribution can be further summarized e.g. as a heterogeneity interval [@bolgerCausalProcessesPsychology2019]. However, because empirical studies estimate the underlying mean and variance parameters with uncertainty, the expected distribution and interval will underestimate the actual range of plausible effects in the population. Using Bayesian hierarchical models, and with the aid of empirical datasets from social and cognitive psychology, we provide a walk-through of effective heterogeneity reporting and display tools that appropriately convey measures of uncertainty. We cover interval, proportion, and ratio measures of heterogeneity and their estimation and interpretation. These tools can be a spur to theory building, allowing researchers to widen their focus from population averages to population heterogeneity in psychological phenomena.
 keywords: [heterogeneity, uncertainty, variation, multilevel model, statistics, visualization]
-wordcount: "{{< words-body >}}"
 authornote: |
   This manuscript is not yet peer-reviewed.
 bibliography: bibliography.bib
 csl: apa.csl
+format:
+  preprint-typst:
+    output-file: ms.pdf
+    section-numbering: "1."
+    wordcount: true
+  html:
+    toc: true
+    fontsize: 14pt
+    mainfont: Fira Sans
+    code-fold: true
+    other-links:
+      - text: Preprint (PsyArXiv)
+        href: https://osf.io/preprints/psyarxiv/mwg4f
+        icon: file-pdf
+      - text: Online supplement
+        href: https://mvuorre.github.io/heterogeneity-uncertainty
+        icon: globe2
+      - text: GitHub Repository
+        href: https://github.com/mvuorre/heterogeneity-uncertainty
+        icon: github
+      - text: Zenodo Repository
+        href: https://
+        icon: archive
+  docx:
+    output-file: ms.docx
 ---
 
 ```{r}

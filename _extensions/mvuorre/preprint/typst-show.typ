@@ -14,7 +14,7 @@ $if(by-author)$
   $for(by-author)$
       (
         name: [$it.name.literal$],
-        affiliation: [$for(it.affiliations)$$it.id$$sep$, $endfor$],
+        affiliation: [$for(it.affiliations)$$it.id$$sep$,$endfor$],
         $if(it.attributes.corresponding)$corresponding: $it.attributes.corresponding$,$endif$
         $if(it.attributes.equal-contributor)$equal-contributor: $it.attributes.equal-contributor$,$endif$
         $if(it.orcid)$orcid: "https://orcid.org/$it.orcid$",$endif$
@@ -45,9 +45,6 @@ $endif$
 $if(abstract)$
   abstract: [$abstract$],
 $endif$
-$if(margin)$
-  margin: ($for(margin/pairs)$$margin.key$: $margin.value$,$endfor$),
-$endif$
 $if(papersize)$
   paper: "$papersize$",
 $endif$
@@ -56,10 +53,11 @@ $if(mainfont)$
 $elseif(brand.typography.base.family)$
   font: $brand.typography.base.family$,
 $endif$
-$if(fontsize)$
-  fontsize: $fontsize$,
-$elseif(brand.typography.base.size)$
-  fontsize: $brand.typography.base.size$,
+$if(monofont)$
+  monofont: "$monofont$",
+$endif$
+$if(number-sections)$
+  sectionnumbering: "1.1.1.1.",
 $endif$
 $if(section-numbering)$
   sectionnumbering: "$section-numbering$",
@@ -94,6 +92,21 @@ $endif$
 $if(linkcolor)$
   linkcolor: $linkcolor$,
 $endif$
+$if(fontcolor)$
+  fontcolor: $fontcolor$,
+$endif$
+$if(backgroundcolor)$
+  backgroundcolor: $backgroundcolor$,
+$endif$
+$if(monobackgroundcolor)$
+  monobackgroundcolor: $monobackgroundcolor$,
+$endif$
+$if(headingcolor)$
+  headingcolor: $headingcolor$,
+$endif$
+$if(strongcolor)$
+  strongcolor: $strongcolor$,
+$endif$
 $if(citation)$
   citation: (
     type: "$citation.type$",
@@ -105,6 +118,9 @@ $endif$
 $if(authornote)$
   authornote: [$authornote$],
 $endif$
+$if(corresponding-text)$
+  corresponding-text: [$corresponding-text$],
+$endif$
 // Use categories or keywords
 $if(categories)$
   categories: [$for(categories)$$it$$sep$, $endfor$],
@@ -112,17 +128,34 @@ $elseif(keywords)$
   categories: [$for(keywords)$$it$$sep$, $endfor$],
 $endif$
 $if(wordcount)$
-  wordcount: [$wordcount$],
+  wordcount: $wordcount$,
 $endif$
 $if(col-gutter)$
   col-gutter: $col-gutter$,
 $endif$
 $if(bibliographystyle)$
-  bibliographystyle: [$bibliographystyle$],
+  bibliographystyle: "$bibliographystyle$",
 $endif$
 $if(bibliography-title)$
   bibliography-title: [$bibliography-title$],
 $endif$
-  cols: $if(columns)$$columns$$else$1$endif$,
+// Theme system (unified for standalone and Quarto)
+$if(theme)$
+  theme: "$theme$",
+$elseif(theme-jou)$
+  theme: "jou",
+$endif$
+// Explicit overrides (optional)
+$if(margin)$
+  margin: ($for(margin/pairs)$$margin.key$: $margin.value$,$endfor$),
+$endif$
+$if(fontsize)$
+  fontsize: $fontsize$,
+$elseif(brand.typography.base.size)$
+  fontsize: $brand.typography.base.size$,
+$endif$
+$if(columns)$
+  cols: $columns$,
+$endif$
   doc,
 )
