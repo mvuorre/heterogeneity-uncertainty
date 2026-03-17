@@ -184,7 +184,7 @@ In this section, we replicate @bolgerCausalProcessesPsychology2019's analysis, u
 dat |>
   head() |>
   rename(`log(Reaction time)` = rt) |>
-  rename_with(~str_to_sentence(.x)) |>
+  rename_with(~ str_to_sentence(.x)) |>
   kable()
 ```
 
@@ -259,9 +259,12 @@ tab_1 <- tab_1 |>
   select(Parameter, Coefficient, SE, CI_low, CI_high)
 
 m1_parnames <- c(
-  "$\\beta_0$", "$\\beta_1$",
-  "$\\tau_0$", "$\\tau_1$",
-  "$\\rho$", "$\\sigma$"
+  "$\\beta_0$",
+  "$\\beta_1$",
+  "$\\tau_0$",
+  "$\\tau_1$",
+  "$\\rho$",
+  "$\\sigma$"
 )
 mu1n <- tab_1[2, 2, TRUE]
 mu1n_low <- tab_1[2, "CI_low", TRUE]
@@ -285,12 +288,15 @@ dist_ml <- dist_normal(mu1n, sd1n)
 
 tab_1 |>
   mutate(
-    mutate(across(where(is.numeric), ~number(.x, .01))),
+    mutate(across(where(is.numeric), ~ number(.x, .01))),
     `95% CI` = str_glue("[{CI_low}, {CI_high}]"),
     Parameter = m1_parnames
   ) |>
   select(
-    Parameter, Coefficient, SE, `95% CI`
+    Parameter,
+    Coefficient,
+    SE,
+    `95% CI`
   ) |>
   kable()
 ```
@@ -370,25 +376,33 @@ fig_1_params <- fig_1 +
   ) +
   geom_text(
     label = TeX("$\\tau_1$"),
-    x = mu1n + .05, y = .175,
+    x = mu1n + .05,
+    y = .175,
     size = 3,
     parse = TRUE
   ) +
   annotate(
     "segment",
-    x = mu1n, xend = mu1n + sd1n, y = .1, yend = .1,
+    x = mu1n,
+    xend = mu1n + sd1n,
+    y = .1,
+    yend = .1,
     linewidth = .35,
     arrow = arrowhead()
   ) +
   geom_text(
     label = TeX("$\\beta_1$"),
-    x = mu1n - .075, y = .075,
+    x = mu1n - .075,
+    y = .075,
     size = 3,
     parse = TRUE
   ) +
   annotate(
     "segment",
-    x = mu1n, xend = mu1n, y = .1, yend = 0,
+    x = mu1n,
+    xend = mu1n,
+    y = .1,
+    yend = 0,
     linewidth = .35,
     arrow = arrowhead()
   ) +
@@ -413,14 +427,18 @@ fig_1_interval <- fig_1_descriptors +
   ) +
   geom_text(
     label = TeX("$HI_{90}$"),
-    x = mu1n, y = .175,
+    x = mu1n,
+    y = .175,
     size = 3,
     parse = TRUE,
     color = desc_color_dark
   ) +
   annotate(
     "segment",
-    x = d1$.lower[2], xend = d1$.upper[2], y = .1, yend = .1,
+    x = d1$.lower[2],
+    xend = d1$.upper[2],
+    y = .1,
+    yend = .1,
     linewidth = .35,
     arrow = arrowhead(ends = "both"),
     color = desc_color_dark
@@ -436,7 +454,8 @@ fig_1_pneg <- fig_1_descriptors +
   ) +
   geom_text(
     label = TeX("$p^-$"),
-    x = mu1n, y = .175,
+    x = mu1n,
+    y = .175,
     size = 3,
     parse = TRUE,
     color = desc_color_dark
@@ -451,7 +470,9 @@ fig_1_prope <- fig_1_descriptors +
   ) +
   geom_text(
     label = TeX("$p^{ROPE}$"),
-    x = 0.0, y = 0.5, hjust = 0,
+    x = 0.0,
+    y = 0.5,
+    hjust = 0,
     size = 3.5,
     parse = TRUE,
     color = desc_color_dark
@@ -483,12 +504,14 @@ scale_y_01 <- scale_y_continuous(
 # shared x axis
 xmin <- -0.6
 xmax <- 0.3
-scale_x_valence <- \(..., breaks = extended_breaks()) scale_x_continuous(
-  ...,
-  limits = c(xmin, xmax),
-  expand = expansion(0),
-  breaks = breaks
-)
+scale_x_valence <- \(..., breaks = extended_breaks()) {
+  scale_x_continuous(
+    ...,
+    limits = c(xmin, xmax),
+    expand = expansion(0),
+    breaks = breaks
+  )
+}
 
 # ML estimate of CDF
 fig_ml_cdf <-
@@ -521,8 +544,10 @@ fig_ml_cdf_interval <- fig_ml_cdf +
   ) +
   geom_segment(
     aes(
-      x = quantile(dist_ml, 0.05), xend = quantile(dist_ml, 0.05),
-      y = 0.05, yend = 0
+      x = quantile(dist_ml, 0.05),
+      xend = quantile(dist_ml, 0.05),
+      y = 0.05,
+      yend = 0
     ),
     color = desc_color
   ) +
@@ -532,15 +557,19 @@ fig_ml_cdf_interval <- fig_ml_cdf +
   ) +
   geom_segment(
     aes(
-      x = quantile(dist_ml, 0.95), xend = quantile(dist_ml, 0.95),
-      y = 0.95, yend = 0
+      x = quantile(dist_ml, 0.95),
+      xend = quantile(dist_ml, 0.95),
+      y = 0.95,
+      yend = 0
     ),
     color = desc_color
   ) +
   geom_segment(
     aes(
-      x = quantile(dist_ml, 0.05), xend = quantile(dist_ml, 0.95),
-      y = 0.025, yend = 0.025
+      x = quantile(dist_ml, 0.05),
+      xend = quantile(dist_ml, 0.95),
+      y = 0.025,
+      yend = 0.025
     ),
     color = desc_color,
     arrow = arrowhead(ends = "both")
@@ -554,7 +583,8 @@ fig_ml_cdf_interval <- fig_ml_cdf +
     color = desc_color,
     vjust = 0
   ) +
-  annotate("text",
+  annotate(
+    "text",
     x = xmin,
     y = c(0.05, 0.95),
     vjust = c(0.3, 0.7),
@@ -606,7 +636,8 @@ fig_ml_cdf_pneg <- fig_ml_cdf +
   ) +
   annotate(
     "text",
-    x = 0, y = I(0),
+    x = 0,
+    y = I(0),
     label = "0",
     color = desc_color,
     vjust = 1.35,
@@ -615,7 +646,7 @@ fig_ml_cdf_pneg <- fig_ml_cdf +
   ) +
   geom_text(
     aes(x = I(0), y = cdf(dist_ml, 0)),
-    label = expression(bold(p ^ "−")),
+    label = expression(bold(p^"−")),
     color = desc_color,
     hjust = 1.2,
     vjust = 0.6,
@@ -671,22 +702,28 @@ fig_ml_cdf_prope <- fig_ml_cdf +
   ) +
   geom_segment(
     aes(
-      x = I(0.09), xend = I(0.09),
-      y = cdf(dist_ml, -0.1), yend = cdf(dist_ml, 0.1)
+      x = I(0.09),
+      xend = I(0.09),
+      y = cdf(dist_ml, -0.1),
+      yend = cdf(dist_ml, 0.1)
     ),
     color = desc_color,
     arrow = arrowhead(ends = "both")
   ) +
-  annotate("text",
-    x = -0.1, y = I(0),
+  annotate(
+    "text",
+    x = -0.1,
+    y = I(0),
     label = "−ε",
     color = desc_color,
     vjust = 1.35,
     fontface = "bold",
     size = 3
   ) +
-  annotate("text",
-    x = 0.1, y = I(0),
+  annotate(
+    "text",
+    x = 0.1,
+    y = I(0),
     label = "+ε",
     color = desc_color,
     vjust = 1.35,
@@ -695,7 +732,7 @@ fig_ml_cdf_prope <- fig_ml_cdf +
   ) +
   geom_text(
     aes(x = I(0.12), y = mean(cdf(dist_ml, c(-0.1, 0.1))[[1]])),
-    label = expression(bold(p ^ "ROPE")),
+    label = expression(bold(p^"ROPE")),
     color = desc_color,
     hjust = 0,
     vjust = 0.6,
@@ -750,7 +787,7 @@ post1 <- as_draws_df(
 
 # Quick model checking
 pb <- mcmc_plot(fit_1, type = "rhat_hist") +
-  scale_x_continuous(labels = ~number(., .001))
+  scale_x_continuous(labels = ~ number(., .001))
 pc <- pp_check(fit_1)
 pb | pc
 ```
@@ -765,7 +802,7 @@ post1 |>
     hi90 = str_glue(
       "[{number(quantile(dist_valence, .05), .01)}, ",
       "{number(quantile(dist_valence, .95), .01)}]"
-      ),
+    ),
     pp = cdf(dist_valence, 0),
     prope = cdf(dist_valence, .1) - cdf(dist_valence, -.1),
     ratio = sd_person__valence1 / b_valence1
@@ -775,7 +812,11 @@ post1 |>
   setNames(
     c(
       m1_parnames[c(2, 4)],
-      "$p(\\beta_1)$", "$HI_{90}$", "$p^+$", "$p^{ROPE}$", "$\\frac{\\tau_1}{\\beta_1}$"
+      "$p(\\beta_1)$",
+      "$HI_{90}$",
+      "$p^+$",
+      "$p^{ROPE}$",
+      "$\\frac{\\tau_1}{\\beta_1}$"
     )
   ) |>
   kable(digits = 2)
@@ -832,8 +873,8 @@ calculate_density <- function(posterior, b, sd) {
   posterior |>
     crossing(x) |>
     mutate(
-      pdf = dnorm(x, {{b}}, {{sd}}),
-      cdf = pnorm(x, {{b}}, {{sd}})
+      pdf = dnorm(x, {{ b }}, {{ sd }}),
+      cdf = pnorm(x, {{ b }}, {{ sd }})
     )
 }
 
@@ -892,9 +933,11 @@ p_pdf_samples <- p_samples +
     expand = expansion(c(0.005, 0.005)),
   ) +
   geom_rug(
-    data = as_tibble(coef(fit_1)$person[, , "valence1"]) |>
+    data = as_tibble(coef(fit_1)$person[,, "valence1"]) |>
       rownames_to_column("person"),
-    aes(x = Estimate, y = 0), length = unit(4, "pt"), linewidth = 0.25
+    aes(x = Estimate, y = 0),
+    length = unit(4, "pt"),
+    linewidth = 0.25
   ) +
   ylab("Probability density")
 
@@ -951,7 +994,8 @@ p_cdf_intervals <- p_cdf_samples +
     aes(
       x = quantile(dist_valence, 0.05),
       xend = quantile(dist_valence, 0.05),
-      y = 0.05, yend = 0
+      y = 0.05,
+      yend = 0
     ),
     data = post1_samples,
     color = desc_color,
@@ -959,8 +1003,10 @@ p_cdf_intervals <- p_cdf_samples +
   ) +
   geom_segment(
     aes(
-      x = I(0), xend = quantile(dist_valence, 0.95),
-      y = 0.95, yend = 0.95
+      x = I(0),
+      xend = quantile(dist_valence, 0.95),
+      y = 0.95,
+      yend = 0.95
     ),
     data = post1_samples,
     color = desc_color,
@@ -970,7 +1016,8 @@ p_cdf_intervals <- p_cdf_samples +
     aes(
       x = quantile(dist_valence, 0.95),
       xend = quantile(dist_valence, 0.95),
-      y = 0.95, yend = 0
+      y = 0.95,
+      yend = 0
     ),
     data = post1_samples,
     color = desc_color,
@@ -1000,7 +1047,8 @@ p_cdf_intervals <- p_cdf_samples +
     scale = 1,
     height = 0.1
   ) +
-  annotate("text",
+  annotate(
+    "text",
     x = min(x),
     y = c(0.05, 0.95),
     vjust = c(0.3, 0.7),
@@ -1129,13 +1177,14 @@ A complementary description of heterogeneity is the proportion of the population
 #| fig-height: 2.2
 #| fig-cap: "Uncertainty in the proportion of negative effects (compare to the point estimate in @fig-ml-pneg B). Thin gray lines show 100 CDFs of the heterogeneity distribution calculated from random draws of $\\beta_1$ and $\\tau_1$, as in @fig-2 B. Blue lines show the calculation of the posterior distribution of $p^-$, which is also depicted as a marginal histogram at the top left. The point estimate and interval represents the posterior mean and 95\\%CI."
 
-
 # Add summaries of CDF < 0 to CDF curves as inset plots
 p_cdf_samples_with_p_neg <- p_cdf_samples +
   geom_segment(
     aes(
-      x = 0, xend = 0,
-      y = 0, yend = cdf(dist_valence, 0)
+      x = 0,
+      xend = 0,
+      y = 0,
+      yend = cdf(dist_valence, 0)
     ),
     data = post1_samples,
     color = desc_color,
@@ -1143,8 +1192,10 @@ p_cdf_samples_with_p_neg <- p_cdf_samples +
   ) +
   geom_segment(
     aes(
-      x = 0, xend = I(0),
-      y = cdf(dist_valence, 0), yend = cdf(dist_valence, 0)
+      x = 0,
+      xend = I(0),
+      y = cdf(dist_valence, 0),
+      yend = cdf(dist_valence, 0)
     ),
     data = post1_samples,
     color = desc_color,
@@ -1152,20 +1203,22 @@ p_cdf_samples_with_p_neg <- p_cdf_samples +
   ) +
   stat_histinterval(
     aes(
-      y = cdf(dist_valence, 0)),
-      x = I(0),
-      data = post1,
-      breaks = 50,
-      fill = alpha(desc_color, 0.35),
-      color = desc_color_dark,
-      side = "left",
-      .width = .95,
-      scale = 1,
-      width = 0.1
+      y = cdf(dist_valence, 0)
+    ),
+    x = I(0),
+    data = post1,
+    breaks = 50,
+    fill = alpha(desc_color, 0.35),
+    color = desc_color_dark,
+    side = "left",
+    .width = .95,
+    scale = 1,
+    width = 0.1
   ) +
   annotate(
     "text",
-    x = 0, y = I(0),
+    x = 0,
+    y = I(0),
     label = "0",
     color = desc_color,
     vjust = 1.35,
@@ -1175,7 +1228,7 @@ p_cdf_samples_with_p_neg <- p_cdf_samples +
   geom_text(
     aes(x = I(0), y = cdf(dist_valence, 0)),
     data = post1_mean,
-    label = expression(bold(p ^ "−")),
+    label = expression(bold(p^"−")),
     color = desc_color,
     hjust = 1.5,
     fontface = "bold",
@@ -1246,16 +1299,20 @@ p_rope_densities <- post1_samples_rope |>
     scale = 2.5,
     linewidth = 0.25
   ) +
-  annotate("text",
-    x = -0.1, y = I(0),
+  annotate(
+    "text",
+    x = -0.1,
+    y = I(0),
     label = "−ε",
     color = desc_color,
     vjust = 1.15,
     fontface = "bold",
     size = 3
   ) +
-  annotate("text",
-    x = 0.1, y = I(0),
+  annotate(
+    "text",
+    x = 0.1,
+    y = I(0),
     label = "+ε",
     color = desc_color,
     vjust = 1.15,
@@ -1426,7 +1483,7 @@ With a preregistered Pitman-Morgan test, @mahVariabilitySubjectsFree2024 found t
 
 dat |>
   slice(4:6, .by = task) |>
-  rename_with(~str_to_sentence(.x)) |>
+  rename_with(~ str_to_sentence(.x)) |>
   kable()
 ```
 
@@ -1465,9 +1522,7 @@ Note also that while we model $\gamma$ using independent normal distributions fo
 #| message: false
 
 model <- bf(
-  accuracy ~ 0 + task +
-    (1 | gr(person, by = task)) +
-    (0 + task | target)
+  accuracy ~ 0 + task + (1 | gr(person, by = task)) + (0 + task | target)
 )
 fit2 <- brm(
   model,
@@ -1486,7 +1541,7 @@ fit2 <- brm(
 
 # Quick model checking
 pa <- mcmc_plot(fit2, type = "rhat_hist") +
-  scale_x_continuous(labels = ~number(., .001))
+  scale_x_continuous(labels = ~ number(., .001))
 pb <- pp_check(fit2, type = "bars_grouped", group = "task", ndraws = 100)
 pa | pb
 ```
@@ -1545,10 +1600,10 @@ post2 <- post2 |>
     hi_high_cued = b_taskCued + qnorm(0.95) * `sd_person__Intercept:taskCued`,
     # Differences
     b_difference = b_taskCued - b_taskFree,
-    sd_person_difference =
-      `sd_person__Intercept:taskCued` - `sd_person__Intercept:taskFree`,
-    sd_person_ratio =
-      `sd_person__Intercept:taskCued` / `sd_person__Intercept:taskFree`,
+    sd_person_difference = `sd_person__Intercept:taskCued` -
+      `sd_person__Intercept:taskFree`,
+    sd_person_ratio = `sd_person__Intercept:taskCued` /
+      `sd_person__Intercept:taskFree`,
     pd_person_difference = pd_person_cued - pd_person_free,
     ratio_person_difference = ratio_person_cued - ratio_person_free,
     hi_low_difference = hi_low_cued - hi_low_free,
@@ -1561,10 +1616,8 @@ post2 <- post2 |>
     ratio_target_free = abs(`sd_target__taskFree` / b_taskFree),
     ratio_target_cued = abs(`sd_target__taskCued` / b_taskCued),
     # Differences
-    sd_target_difference =
-      `sd_target__taskCued` - `sd_target__taskFree`,
-    sd_target_ratio =
-      `sd_target__taskCued` / `sd_target__taskFree`,
+    sd_target_difference = `sd_target__taskCued` - `sd_target__taskFree`,
+    sd_target_ratio = `sd_target__taskCued` / `sd_target__taskFree`,
     pd_target_difference = pd_target_cued - pd_target_free,
     ratio_target_difference = ratio_target_cued - ratio_target_free,
     .before = starts_with("cor_")
@@ -1573,15 +1626,17 @@ post2 <- post2 |>
 
 post2_sum <- post2 |>
   mutate(
-    across(b_taskFree:b_taskCued, list(p = ~pnorm(.x)))
+    across(b_taskFree:b_taskCued, list(p = ~ pnorm(.x)))
   ) |>
   summarize_draws(
-    mean, ~quantile2(.x, probs = c(0.025, 0.975))
+    mean,
+    ~ quantile2(.x, probs = c(0.025, 0.975))
   ) |>
   mutate(
     x = str_glue(
       "{number(mean, .01)} ",
-      "[{number(q2.5, .01)}, {number(q97.5, .01)}]")
+      "[{number(q2.5, .01)}, {number(q97.5, .01)}]"
+    )
   )
 ```
 
@@ -1610,7 +1665,7 @@ tmp_person <- bind_rows(
     calculate_density(b_taskCued, `sd_person__Intercept:taskCued`) |>
     select(x, pdf, cdf),
   .id = "Task"
-)  |>
+) |>
   group_by(x, Task) |>
   curve_interval(.width = 0.9)
 
@@ -1649,7 +1704,8 @@ p2_pars_person <- post2 |>
       group,
       levels = c("free", "cued", "difference"),
       labels = c("Free", "Cued", "Difference")
-    ) |> fct_rev(),
+    ) |>
+      fct_rev(),
     value = if_else(type == "Heterogeneity ratio" & abs(value) > 5, NaN, value)
   ) |>
   ggplot(aes(value, group, col = group, fill = group)) +
@@ -1686,7 +1742,9 @@ p2_cdf_person <- tmp_person |>
   ggplot(aes(x = x)) +
   aes(y = cdf, col = Task, fill = Task, ymin = cdf.lower, ymax = cdf.upper) +
   geom_vline(
-    xintercept = 0, linewidth = .2, alpha = .25
+    xintercept = 0,
+    linewidth = .2,
+    alpha = .25
   ) +
   scale_color_brewer(
     "Recall task",
@@ -1700,7 +1758,7 @@ p2_cdf_person <- tmp_person |>
     breaks = extended_breaks(5),
     sec.axis = sec_axis(
       name = "Proportion correct",
-      trans = ~pnorm(.),
+      trans = ~ pnorm(.),
       breaks = c(0.05, .1, .3, .5, .7, .9, .95),
       labels = c(".05", ".1", ".3", ".5", ".7", ".9", ".95")
     )
@@ -1711,7 +1769,8 @@ p2_cdf_person <- tmp_person |>
   ) +
   ylab("CDF") +
   geom_ribbon(
-    alpha = .2, col = NA
+    alpha = .2,
+    col = NA
   ) +
   geom_line(
     linewidth = .5
@@ -1751,7 +1810,7 @@ p2_cdf_person <- p2_cdf_person +
     scale = 0.8,
     height = 0.35
   ) +
-    stat_histinterval(
+  stat_histinterval(
     aes(x = quantile(dist_accuracy, 0.95), ymin = NULL, ymax = NULL),
     y = I(0),
     data = tmp_person_dist,
@@ -1800,7 +1859,7 @@ tmp_target <- bind_rows(
     calculate_density(b_taskCued, `sd_target__taskCued`) |>
     select(x, pdf, cdf),
   .id = "Task"
-)  |>
+) |>
   group_by(x, Task) |>
   curve_interval(.width = 0.9)
 
@@ -1823,7 +1882,7 @@ tmp_target_dist <- bind_rows(
 p2_pars_target <- post2 |>
   select(contains("target"), -sd_target_ratio) |>
   rename_with(
-    ~str_to_lower(.) |>
+    ~ str_to_lower(.) |>
       str_remove("target_") |>
       str_remove_all("_task")
   ) |>
@@ -1839,7 +1898,8 @@ p2_pars_target <- post2 |>
       group,
       levels = c("free", "cued", "difference", "free_cued"),
       labels = c("Free", "Cued", "Difference", "Correlation")
-    ) |> fct_rev(),
+    ) |>
+      fct_rev(),
     value = if_else(
       type == "Heterogeneity ratio" & abs(value) > 5,
       NaN,
@@ -1877,8 +1937,11 @@ p2_pars_target <- post2 |>
 p2_cdf_target <- tmp_target |>
   ggplot(aes(x = x)) +
   aes(
-    y = cdf, ymin = cdf.lower, ymax = cdf.upper,
-    col = Task, fill = Task
+    y = cdf,
+    ymin = cdf.lower,
+    ymax = cdf.upper,
+    col = Task,
+    fill = Task
   ) +
   scale_color_brewer(
     "Recall task",
@@ -1892,7 +1955,7 @@ p2_cdf_target <- tmp_target |>
     breaks = extended_breaks(5),
     sec.axis = sec_axis(
       name = "Proportion correct",
-      trans = ~pnorm(.),
+      trans = ~ pnorm(.),
       breaks = c(0.05, .1, .3, .5, .7, .9, .95),
       labels = c(".05", ".1", ".3", ".5", ".7", ".9", ".95")
     )
@@ -1903,7 +1966,8 @@ p2_cdf_target <- tmp_target |>
   ) +
   ylab("CDF") +
   geom_ribbon(
-    alpha = .2, col = NA
+    alpha = .2,
+    col = NA
   ) +
   geom_line(
     linewidth = .5
@@ -1943,7 +2007,7 @@ p2_cdf_target <- p2_cdf_target +
     scale = 0.8,
     height = 0.3
   ) +
-    stat_histinterval(
+  stat_histinterval(
     aes(x = quantile(dist_accuracy, 0.95), ymin = NULL, ymax = NULL),
     y = I(0),
     data = tmp_target_dist,
@@ -1957,7 +2021,7 @@ p2_cdf_target <- p2_cdf_target +
   ) +
   coord_cartesian(clip = "off", ylim = c(0, 1))
 
-p2_pcdf_target <-  p2_pdf_target / p2_cdf_target
+p2_pcdf_target <- p2_pdf_target / p2_cdf_target
 
 # Ellipses
 .ellipse <- function(data) {
@@ -2010,7 +2074,8 @@ dat2_target_coefs <- left_join(
       .by = c(task, target)
     ) |>
     pivot_wider(
-      names_from = task, values_from = p
+      names_from = task,
+      values_from = p
     ),
   coef(fit2)$target |>
     as.data.frame() |>
@@ -2030,13 +2095,18 @@ p2_ellipse <- ellipse_median |>
     ylim = c(-1.5, 1.8)
   ) +
   geom_vline(
-    xintercept = 0, linewidth = .1, linetype = "dashed"
+    xintercept = 0,
+    linewidth = .1,
+    linetype = "dashed"
   ) +
   geom_hline(
-    yintercept = 0, linewidth = .1, linetype = "dashed"
+    yintercept = 0,
+    linewidth = .1,
+    linetype = "dashed"
   ) +
   geom_abline(
-    linewidth = .1, linetype = "dashed"
+    linewidth = .1,
+    linetype = "dashed"
   ) +
   scale_x_continuous(
     TeX("$\\Phi(Pr(Correct))~Free~recall$"),
@@ -2067,7 +2137,8 @@ p2_ellipse <- ellipse_median |>
   geom_path(
     data = ellipse_samples,
     aes(group = .draw),
-    alpha = .075, color = "#7570B3"
+    alpha = .075,
+    color = "#7570B3"
   ) +
   geom_path(
     color = "#7570B3"
@@ -2076,11 +2147,9 @@ p2_ellipse <- ellipse_median |>
     aspect.ratio = 1
   )
 
-(
-  wrap_elements(full = p2_pars_target) |
-    wrap_elements(full = p2_pcdf_target) |
-    p2_ellipse
-) +
+(wrap_elements(full = p2_pars_target) |
+  wrap_elements(full = p2_pcdf_target) |
+  p2_ellipse) +
   plot_annotation(tag_levels = "A")
 ```
 
@@ -2122,7 +2191,7 @@ We hope that the conceptual, computational, and graphical tools that we have dis
 
 ## Data and code availability
 
-The online supplement is at {{<meta site-url>}}. Our materials are available on GitHub ({{<meta repo-url>}}) and the OSF ({{<meta osf-url>}}). We reused openly available datasets from @bolgerCausalProcessesPsychology2019 and @mahVariabilitySubjectsFree2024.
+The online supplement is at {{<meta site-url>}}. Our materials are available on GitHub ({{<meta repo-url>}}) and archived on Zenodo at ({{<meta archive-url>}}). We reused openly available datasets from @bolgerCausalProcessesPsychology2019 and @mahVariabilitySubjectsFree2024.
 
 ## Author contributions
 
