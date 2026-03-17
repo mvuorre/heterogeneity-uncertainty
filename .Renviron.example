@@ -1,0 +1,3 @@
+MAX_CORES = 8
+BRMS_BACKEND = "cmdstanr"
+BRMS_THREADS = 2
