@@ -16,3 +16,5 @@
 /models/
 
 /.quarto/
+
+**/*.quarto_ipynb
