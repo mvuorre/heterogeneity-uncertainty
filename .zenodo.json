@@ -1,0 +1,33 @@
+{
+  "title": "Communicating causal effect heterogeneity",
+  "description": "Manuscript on techniques for investigating and communicating causal effect heterogeneity in the psychological sciences",
+  "creators": [
+    {
+      "name": "Vuorre, Matti",
+      "orcid": "0000-0001-5052-066X",
+      "affiliation": "Tilburg University"
+    },
+    {
+      "name": "Kay, Matthew",
+      "orcid": "0000-0001-9446-0419",
+      "affiliation": "Northwestern University"
+    },
+    {
+      "name": "Bolger, Niall",
+      "orcid": "0000-0001-8698-8117",
+      "affiliation": "Columbia University"
+    }
+  ],
+  "keywords": [
+    "heterogeneity",
+    "uncertainty",
+    "variation",
+    "multilevel model",
+    "statistics",
+    "visualization"
+  ],
+  "license": "CC-BY",
+  "upload_type": "publication",
+  "publication_type": "preprint",
+  "access_right": "open"
+}
