@@ -84,7 +84,6 @@ library(brms)
 library(tidyverse)
 library(knitr)
 
-
 # Output options
 is_html <- knitr::is_html_output()
 opts_chunk$set(
