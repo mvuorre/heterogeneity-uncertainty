@@ -750,9 +750,11 @@ For example, let us imagine that a theory states that valence effects in the int
 
 ## Ratio descriptors
 
-Although the interval and proportion descriptors describe where the population's slopes are likely to fall, they do so in absolute terms such as logRT in the running example. A contrasting or *relative* way to describe heterogeneity is to express it as a ratio of the effect's standard deviation to its mean. Such relative metrics are concise and can be useful especially when the absolute units are difficult to interpret, or when comparing heterogeneity across different populations or experimental conditions (see below). This ratio, expressed simply as the fraction $\frac{\tau_1}{\beta_1}$ is `r ratio` in the current example.
+Although the interval and proportion descriptors describe where the population's slopes are likely to fall, they do so in absolute terms such as logRT in the running example. A contrasting or *relative* way to describe heterogeneity is to express it as a ratio of the effect's standard deviation to its mean. Such relative metrics are concise and can be useful especially when the absolute units are difficult to interpret, or when comparing heterogeneity across different populations or experimental conditions (see below). This ratio, expressed simply as the fraction $\frac{\tau_1}{\beta_1}$ is `r ratio` in the current example[^ratio].
 
-[@bolgerCausalProcessesPsychology2019, p.609] suggest as a rule of thumb that heterogeneity can be deemed noteworthy when the ratio of the standard deviation to the average effect is 0.25 or greater: A ratio greater than 1/4 implies a $\textit{HI}_{95}$ whose limits extend to effects one-half and one-and-a-half times that of the average effect. With these data and model, the ratio $\frac{\tau_1}{\beta_1}$ is `r ratio`, suggesting that the degree of heterogeneity in valence effects is noteworthy. While this heuristic can sometimes be useful, we urge users to apply domain-specific knowledge when considering critical values or thresholds whenever possible.
+[^ratio]: We refer to the absolute value of the ratio throughout to keep it strictly positive for easier interpretation, but omit from the equation for simplicity.
+
+@bolgerCausalProcessesPsychology2019 [p. 609] suggest as a rule of thumb that heterogeneity can be deemed noteworthy when the ratio of the standard deviation to the average effect is 0.25 or greater: A ratio greater than 1/4 implies a $\textit{HI}_{95}$ whose limits extend to effects one-half and one-and-a-half times that of the average effect. With these data and model, the ratio $\frac{\tau_1}{\beta_1}$ is `r ratio`, suggesting that the degree of heterogeneity in valence effects is noteworthy. While this heuristic can sometimes be useful, we urge users to apply domain-specific knowledge when considering critical values or thresholds whenever possible.
 
 ## Missing uncertainty
 
@@ -1246,6 +1248,8 @@ tmp <- post1 |>
     dist = dist_normal(b_valence1, sd_person__valence1),
     pd = cdf(dist, 0),
     rope = cdf(dist, 0.1) - cdf(dist, -0.1),
+    # We use the absolute value to make ratios strictly positive
+    # for ease of interpretation.
     ratio = abs(sd_person__valence1 / b_valence1)
   ) |>
   mean_qi(pd, rope, ratio) |>
