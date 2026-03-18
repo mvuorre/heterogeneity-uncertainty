@@ -4,7 +4,7 @@
 - Matthew Kay
 - Niall Bolger
 
-Source of *Communicating causal effect heterogeneity* (Vuorre, Kay, Bolger, in prep). Repo at <https://github.com/mvuorre/heterogeneity-uncertainty>. Archived at <https://doi.org/10.5281/zenodo.19070789>.
+Source of *Communicating causal effect heterogeneity* (Vuorre, Kay, Bolger, 2026; <https://osf.io/preprints/psyarxiv/mwg4f>). Repo at <https://github.com/mvuorre/heterogeneity-uncertainty>. Archived at <https://doi.org/10.5281/zenodo.19070789>.
 
 ## Reproduce / contribute
 
