@@ -193,7 +193,7 @@ $$
 \text{logRT}_{ij} \sim \operatorname{Normal}\left(\eta_{ij}, \sigma^2\right).
 $$ {#eq-m1-1}
 
-(We recognize that there are better alternatives to modeling the log-transformed RTs as normal, but those are outside the scope of this manuscript.) Then, we specified a model of the mean of the logRT distribution ($\eta_{ij}$) such that the regression coefficients captured our substantive questions:
+(We recognize that there are better alternatives to modeling the log-transformed RTs as normal, but those are outside the scope of this manuscript. Interested readers can consult existing literature on reaction time models [@luceResponseTimesTheir1991; @ratcliffDiffusionDecisionModel2008] and their hierarchical extensions [@vandekerckhoveHierarchicalDiffusionModels2011].) Then, we specified a model of the mean of the logRT distribution ($\eta_{ij}$) such that the regression coefficients captured our substantive questions:
 
 $$
 \eta_{ij} = \beta_0 + \gamma_{0j} + \left(\beta_1 + \gamma_{1j}\right)\text{V}_{ij}.
