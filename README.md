@@ -12,6 +12,6 @@ The source code is written in R as a Quarto document. Steps to reproduce the man
 
 - Clone the contents of this repository (e.g. bash: `git clone https://github.com/mvuorre/heterogeneity-uncertainty.git`)
 - (Optional) Customize environment variables (see `.Renviron.example`)
-- Run `make` in `/heterogeneity-uncertainty/` OR
-- Restore the R environment with {renv} (<https://cloud.r-project.org/web/packages/renv/index.html>), render `index.qmd` with Quarto
-- Read manuscript in `docs/`
+- Run `make` to reproduce locally OR
+- Run `make docker-check` to reproduce using Docker OR
+- Restore the R environment with {renv}, then render `index.qmd` with Quarto

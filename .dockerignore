@@ -1,0 +1,9 @@
+*_cache/
+*_files/
+_freeze/
+.quarto/
+models/
+data/
+docs/
+docs-docker/
+.Renviron

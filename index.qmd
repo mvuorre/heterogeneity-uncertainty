@@ -64,7 +64,9 @@ format:
 #| label: setup
 #| include: false
 
-# Packages
+# Packages (rmarkdown & knitr required by renv)
+library(rmarkdown)
+library(knitr)
 library(janitor)
 library(scales)
 library(ellipse)
@@ -115,9 +117,9 @@ theme_set(
 # Model estimation options, customize in .Renviron
 dir.create("models", FALSE)
 options(
-  brms.backend = Sys.getenv("BRMS_BACKEND", "rstan"),
-  brms.threads = as.numeric(Sys.getenv("BRMS_THREADS"), 1),
-  mc.cores = as.numeric(Sys.getenv("MAX_CORES"), 4)
+  brms.backend = Sys.getenv("BRMS_BACKEND", unset = "rstan"),
+  brms.threads = as.numeric(Sys.getenv("BRMS_THREADS", unset = 1)),
+  mc.cores = as.numeric(Sys.getenv("MAX_CORES", unset = 4))
 )
 ```
 
