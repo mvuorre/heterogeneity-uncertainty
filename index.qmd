@@ -764,7 +764,9 @@ The expected normal distribution of valence effects and its transformations igno
 
 # Incorporating inferential uncertainty to assessments of heterogeneity
 
-Assessments of heterogeneity involve combining information about fixed and random effects; to fully incorporate inferential uncertainty then requires accounting for their joint uncertainties. Bayesian computational methods are uniquely able to address this challenge. Modern Bayesian methods, by obtaining draws from the joint posterior distribution of all model parameters presumed to underlie the observed data, allow incorporating posterior uncertainty in combinations of parameters such as the ones highlighted above [@gelmanBayesianDataAnalysis2013; @kruschkeBayesianDataAnalysis2017; @kruschkeDoingBayesianData2014; @mcelreathStatisticalRethinkingBayesian2020]. For typical scenarios, Bayesian models are as easy to use as their maximum likelihood counterparts [@burknerBrmsPackageBayesian2017; @burknerAdvancedBayesianMultilevel2018].
+Assessments of heterogeneity involve combining information about fixed and random effects; to fully incorporate inferential uncertainty then requires accounting for their joint uncertainties. Bayesian computational methods are uniquely able to address this challenge. Modern Bayesian methods, by obtaining draws from the joint posterior distribution of all model parameters presumed to underlie the observed data, allow incorporating posterior uncertainty in combinations of parameters such as the ones highlighted above [@gelmanBayesianDataAnalysis2013].
+
+For researchers less familiar with Bayesian inference methods than their frequentist counterparts, we recommend readings such as @kruschkeDoingBayesianData2014, @kruschkeBayesianDataAnalysis2017, and @mcelreathStatisticalRethinkingBayesian2020. In addition, established software packages such as brms [@burknerBrmsPackageBayesian2017; @burknerAdvancedBayesianMultilevel2018] and Stan [@standevelopmentteamStanModelingLanguage2023] faciliate these methods' practical applications.
 
 ```{r}
 #| label: fit1-brms
