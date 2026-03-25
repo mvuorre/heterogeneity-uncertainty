@@ -2198,7 +2198,7 @@ We hope that the conceptual, computational, and graphical tools that we have dis
 
 ## Data and code availability
 
-The online supplement is at {{<meta site-url>}}. Our materials are available on GitHub ({{<meta repo-url>}}) and archived on Zenodo at ({{<meta archive-url>}}). We reused openly available datasets from @bolgerCausalProcessesPsychology2019 and @mahVariabilitySubjectsFree2024.
+The code and data underlying this work are archived on Zenodo at ({{<meta archive-url>}}). We reused openly available datasets from @bolgerCausalProcessesPsychology2019 and @mahVariabilitySubjectsFree2024.
 
 ## Author contributions
 

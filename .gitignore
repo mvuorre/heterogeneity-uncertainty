@@ -12,9 +12,13 @@
 !docs/*_files/
 !docs/*.pdf
 !docs/*.docx
-/data/
 /models/
-
 /.quarto/
-
 **/*.quarto_ipynb
+
+# Include only the data files we use
+/data/**/*
+!data/bolger-etal/
+!data/bolger-etal/heterogeneity_dataset1_traitvalence.csv
+!data/mah-lindsay-experiment-3/
+!data/mah-lindsay-experiment-3/CuedVsFree_DRM_2022_Item_Data.xlsx
