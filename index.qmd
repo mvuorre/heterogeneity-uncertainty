@@ -864,7 +864,7 @@ fit_1 |>
 
 ## Heterogeneity distribution
 
-Armed with the joint Bayesian posterior distribution of all model parameters, we can now returned to the question of the distribution of valence effects in the population. We have 4,000 draws from the posterior distribution of the heterogeneity distribution. Within each draw from the posterior distribution, we can perform any calculation we did previously on only the point estimate of the heterogeneity distribution.
+Armed with the joint Bayesian posterior distribution of all model parameters, we can now return to the question of the distribution of valence effects in the population. We have 4,000 draws from the posterior distribution of the heterogeneity distribution. Within each draw from the posterior distribution, we can perform any calculation we did previously on only the point estimate of the heterogeneity distribution.
 
 We first recompute the expected heterogeneity distribution from @fig-1 using the posterior mean values of $\beta_1$ and $\tau_1$ in @fig-2 A (thick black curve). Superimposed on that normal density curve are heterogeneity distributions calculated from 100 random posterior draws of $\beta_1$ and $\tau_1$. From these curves we can see that the true distribution of valence effects might well be less or more heterogeneous than is suggested by the expectation (point estimates). We then perform the same exercise on the CDF as well (@fig-2 B).
 
