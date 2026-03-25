@@ -27,10 +27,10 @@ affiliations:
     name: Columbia University
     department: Department of Psychology
 abstract: |
-  Advances in experimental, data collection, and analysis methods have brought population variability in psychological phenomena to the fore. Yet, current practices for interpreting such heterogeneity do not appropriately treat the uncertainty inevitable in any statistical summary. Heterogeneity is best thought of as a distribution of features with a mean (average person’s effect) and variance (between-person differences). This expected heterogeneity distribution can be further summarized e.g. as a heterogeneity interval [@bolgerCausalProcessesPsychology2019]. However, because empirical studies estimate the underlying mean and variance parameters with uncertainty, the expected distribution and interval will underestimate the actual range of plausible effects in the population. Using Bayesian hierarchical models, and with the aid of empirical datasets from social and cognitive psychology, we provide a walk-through of effective heterogeneity reporting and display tools that appropriately convey measures of uncertainty. We cover interval, proportion, and ratio measures of heterogeneity and their estimation and interpretation. These tools can be a spur to theory building, allowing researchers to widen their focus from population averages to population heterogeneity in psychological phenomena.
+  Advances in experimental, data collection, and analysis methods have brought population variability in psychological phenomena to the fore. Yet, current practices for interpreting such heterogeneity do not appropriately treat the uncertainty inevitable in any statistical summary. Heterogeneity is best thought of as a distribution of features with a mean (average person’s effect) and variance (between-person differences). This expected heterogeneity distribution can be further summarized e.g. as a heterogeneity interval [@bolgerCausalProcessesPsychology2019]. However, because empirical studies estimate the underlying mean and variance parameters with uncertainty, the expected distribution and interval will underestimate the actual range of plausible effects in the population. Using Bayesian hierarchical models, and with the aid of empirical datasets from social and cognitive psychology, we provide a walk-through of effective heterogeneity reporting and display tools that appropriately convey measures of uncertainty. We cover interval, proportion, and ratio measures of heterogeneity and their estimation and interpretation. These tools can be a spur to theory building, allowing researchers to widen their focus from population averages to population heterogeneity in psychological phenomena. (Full text available at <https://doi.org/10.31234/osf.io/mwg4f>.)
 keywords: [heterogeneity, uncertainty, variation, multilevel model, statistics, visualization]
 authornote: |
-  This work is available under a CC-BY license at <https://osf.io/preprints/psyarxiv/mwg4f>. Datasets discussed here are from Bolger et al., 2019 and Mah & Lindsay, 2024.
+  This work is available under a CC-BY license at <https://doi.org/10.31234/osf.io/mwg4f>. The code and data underlying this work are available at <https://doi.org/10.5281/zenodo.19070789>. Datasets discussed here are from Bolger et al., 2019 and Mah & Lindsay, 2024.
 bibliography: bibliography.bib
 csl: apa.csl
 format:
@@ -45,17 +45,17 @@ format:
     code-fold: true
     other-links:
       - text: Preprint (PsyArXiv)
-        href: https://osf.io/preprints/psyarxiv/mwg4f
+        href: https://doi.org/10.31234/osf.io/mwg4f
         icon: file-pdf
+      - text: Zenodo Repository
+        href: https://doi.org/10.5281/zenodo.19070789
+        icon: archive
       - text: Online supplement
         href: https://mvuorre.github.io/heterogeneity-uncertainty
         icon: globe2
       - text: GitHub Repository
         href: https://github.com/mvuorre/heterogeneity-uncertainty
         icon: github
-      - text: Zenodo Repository
-        href: https://
-        icon: archive
   docx:
     output-file: ms.docx
 ---
@@ -176,7 +176,7 @@ contrasts(dat$valence) <- c(-0.5, 0.5)
 
 ## Model 1
 
-In this section, we replicate @bolgerCausalProcessesPsychology2019's analysis, using their openly available data. We first wrangled the data as in @bolgerCausalProcessesPsychology2019, which led to a sample of `r number(nrow(dat), big.mark = ",")` trials from `r length(unique(dat$person))` participants that were endorsed as self-descriptive. Our online analysis supplement (<https://osf.io/yp2gq>) includes the complete code to reproduce this manuscript and computations therein. We show a sample of these data in @tbl-dat1.
+In this section, we replicate @bolgerCausalProcessesPsychology2019's analysis, using their openly available data. We first wrangled the data as in @bolgerCausalProcessesPsychology2019, which led to a sample of `r number(nrow(dat), big.mark = ",")` trials from `r length(unique(dat$person))` participants that were endorsed as self-descriptive. Our online analysis supplement (<https://doi.org/10.5281/zenodo.19070789>) includes the complete code to reproduce this manuscript and computations therein. We show a sample of these data in @tbl-dat1.
 
 ```{r}
 #| label: tbl-dat1
@@ -2202,7 +2202,7 @@ We hope that the conceptual, computational, and graphical tools that we have dis
 
 ## Data and code availability
 
-The code and data underlying this work are archived on Zenodo at ({{<meta archive-url>}}). We reused openly available datasets from @bolgerCausalProcessesPsychology2019 and @mahVariabilitySubjectsFree2024.
+The code and data underlying this work are available at <https://doi.org/10.5281/zenodo.19070789>. We reused openly available datasets from @bolgerCausalProcessesPsychology2019 and @mahVariabilitySubjectsFree2024.
 
 ## Author contributions
 

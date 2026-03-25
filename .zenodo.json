@@ -18,6 +18,14 @@
       "affiliation": "Columbia University"
     }
   ],
+  "related_identifiers": [
+    {
+      "identifier": "doi.org/10.31234/osf.io/mwg4f",
+      "relation": "isSupplementTo",
+      "scheme": "doi",
+      "resource_type": "publication-preprint"
+    }
+  ],
   "keywords": [
     "heterogeneity",
     "uncertainty",
