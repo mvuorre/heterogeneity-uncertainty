@@ -25,12 +25,13 @@ $if(by-author)$
 $endif$
 $if(affiliations)$
   affiliations: (
-    $for(affiliations)$(
+$for(affiliations)$
+    (
       id: "$it.id$",
       name: "$it.name$",
-      $if(it.department)$department: "$it.department$"$endif$
+      $if(it.department)$department: "$it.department$",$endif$
     ),
-    $endfor$
+$endfor$
   ),
 $endif$
 $if(date)$
@@ -44,6 +45,7 @@ $if(region)$
 $endif$
 $if(abstract)$
   abstract: [$abstract$],
+  abstract-title: "$labels.abstract$",
 $endif$
 $if(papersize)$
   paper: "$papersize$",
@@ -53,8 +55,29 @@ $if(mainfont)$
 $elseif(brand.typography.base.family)$
   font: $brand.typography.base.family$,
 $endif$
-$if(monofont)$
-  monofont: "$monofont$",
+$if(fontsize)$
+  fontsize: $fontsize$,
+$elseif(brand.typography.base.size)$
+  fontsize: $brand.typography.base.size$,
+$endif$
+$if(title)$
+$if(brand.typography.headings.family)$
+  heading-family: $brand.typography.headings.family$,
+$elseif(mainfont)$
+  heading-family: ("$mainfont$",),
+$endif$
+$if(brand.typography.headings.weight)$
+  heading-weight: $brand.typography.headings.weight$,
+$endif$
+$if(brand.typography.headings.style)$
+  heading-style: "$brand.typography.headings.style$",
+$endif$
+$if(brand.typography.headings.color)$
+  heading-color: $brand.typography.headings.color$,
+$endif$
+$if(brand.typography.headings.line-height)$
+  heading-line-height: $brand.typography.headings.line-height$,
+$endif$
 $endif$
 $if(number-sections)$
   sectionnumbering: "1.1.1.1.",
@@ -62,8 +85,31 @@ $endif$
 $if(section-numbering)$
   sectionnumbering: "$section-numbering$",
 $endif$
+$if(mathfont)$
+  mathfont: ($for(mathfont)$"$mathfont$",$endfor$),
+$endif$
+$if(codefont)$
+  codefont: ($for(codefont)$"$codefont$",$endfor$),
+$elseif(brand.typography.monospace.family)$
+  codefont: $brand.typography.monospace.family$,
+$endif$
+$if(linestretch)$
+  linestretch: $linestretch$,
+$endif$
+$if(thanks)$
+  thanks: [$thanks$],
+$endif$
   pagenumbering: $if(page-numbering)$"$page-numbering$"$else$none$endif$,
   linenumbering: $if(line-number)$"1"$else$none$endif$,
+$if(linkcolor)$
+  linkcolor: $linkcolor$,
+$endif$
+$if(citecolor)$
+  citecolor: $citecolor$,
+$endif$
+$if(filecolor)$
+  filecolor: $filecolor$,
+$endif$
 $if(toc)$
   toc: $toc$,
 $endif$
@@ -77,9 +123,6 @@ $if(toc-depth)$
   toc_depth: $toc-depth$,
 $endif$
 // Additional Typst variables
-$if(leading)$
-  leading: $leading$,
-$endif$
 $if(spacing)$
   spacing: $spacing$,
 $endif$
@@ -88,9 +131,6 @@ $if(first-line-indent)$
 $endif$
 $if(all)$
   all: $all$,
-$endif$
-$if(linkcolor)$
-  linkcolor: $linkcolor$,
 $endif$
 $if(fontcolor)$
   fontcolor: $fontcolor$,
@@ -148,11 +188,6 @@ $endif$
 // Explicit overrides (optional)
 $if(margin)$
   margin: ($for(margin/pairs)$$margin.key$: $margin.value$,$endfor$),
-$endif$
-$if(fontsize)$
-  fontsize: $fontsize$,
-$elseif(brand.typography.base.size)$
-  fontsize: $brand.typography.base.size$,
 $endif$
 $if(columns)$
   cols: $columns$,

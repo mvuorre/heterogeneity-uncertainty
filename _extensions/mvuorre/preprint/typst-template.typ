@@ -64,19 +64,22 @@
   subtitle: none,
   authors: (),
   affiliations: none,
+  abstract-title: none,
   abstract: none,
+  thanks: none,
   categories: none,
   wordcount: none,
   authornote: none,
   citation: none, // Not used currently
-  date: none, // Not used currently
+  date: none,
   corresponding-text: "Send correspondence to:",
   // Layout settings (can override theme defaults)
-  leading: 0.5em,
   spacing: 0.6em,
   first-line-indent: 1.8em,
   all: false,
   linkcolor: blue,
+  citecolor: none,
+  filecolor: none,
   fontcolor: black,
   backgroundcolor: white,
   monobackgroundcolor: none,
@@ -88,10 +91,17 @@
   lang: "en",
   region: "US",
   font: "libertinus serif",
-  monofont: "Dejavu Sans Mono",
+  codefont: none,
   fontsize: 11pt,
   title-size: 1.5em,
   subtitle-size: 1.25em,
+  heading-family: none,
+  heading-weight: "bold",
+  heading-style: "normal",
+  heading-color: none,
+  heading-line-height: none,
+  mathfont: none,
+  linestretch: 10 / 13,
   // Structure settings
   sectionnumbering: none,
   pagenumbering: "1",
@@ -138,17 +148,28 @@
   /* Document settings */
   set document(
     title: title,
-    author: if authors != none { authors.map(a => str(a.name.text)) } else { () },
     description: abstract,
     keywords: if categories != none { categories.text } else { "" },
   )
+  set document(
+    author: authors.map(author => content-to-string(author.name)).join(", ", last: " & "),
+  ) if authors != none and authors != ()
   // Link and cite colors
   show link: set text(fill: linkcolor)
-  show cite: set text(fill: linkcolor) // No effect when `citeproc: true`
+  // citecolor has no effect if `citeproc: true`
+  show cite: set text(fill: if citecolor != none { citecolor } else { linkcolor })
+  show ref: set text(fill: citecolor) if citecolor != none
+  show link: this => {
+    if filecolor != none and type(this.dest) == label {
+      text(this, fill: filecolor)
+    } else {
+      text(this)
+    }
+  }
 
   // Customize Typst bibliography (no effect if using citeproc)
   set bibliography(title: bibliography-title, style: bibliographystyle)
-  show bibliography: set par(spacing: spacing, leading: leading)
+  show bibliography: set par(spacing: spacing, leading: linestretch * 0.65em)
 
   // List spacing
   show list: it => {
@@ -174,7 +195,7 @@
 
   /* Improved figure display */
   // Add space above and below
-  show figure: f => { [#v(leading) #f #v(leading) ] }
+  show figure: f => { [#v(linestretch * 0.65em) #f #v(linestretch * 0.65em) ] }
   // Set block width to align caption to page/column
   // Target figure only as could otherwise mess with table formatting
   show figure.where(kind: "quarto-float-fig"): set block(width: 100%)
@@ -209,17 +230,16 @@
   /* Typography settings */
 
   // Paragraph settings
-  set par(justify: true, leading: leading, spacing: spacing, first-line-indent: (amount: first-line-indent, all: all))
+  set par(justify: true, leading: linestretch * 0.65em, spacing: spacing, first-line-indent: (
+    amount: first-line-indent,
+    all: all,
+  ))
   set par.line(numbering: linenumbering)
 
   // Text settings
-  set text(
-    lang: lang,
-    region: region,
-    font: font,
-    size: fontsize,
-    fill: fontcolor,
-  )
+  set text(lang: lang, region: region, size: fontsize, fill: fontcolor)
+  set text(font: font) if font != none
+  show math.equation: set text(font: mathfont) if mathfont != none
   // Strong/bold text
   show strong: it => {
     if strongcolor != none {
@@ -229,14 +249,7 @@
     }
   }
   // Code font
-  show raw: set text(font: monofont)
-  show raw.where(block: true): it => {
-    if monobackgroundcolor != none {
-      block(fill: monobackgroundcolor, width: 100%, inset: 8pt, radius: 2pt, it)
-    } else {
-      block(fill: luma(230), width: 100%, inset: 8pt, radius: 2pt, it)
-    }
-  }
+  show raw: set text(font: codefont) if codefont != none
 
   // Headers
   set heading(numbering: sectionnumbering)
@@ -295,6 +308,14 @@
     authors.position(a => equal_authors.contains(a))
   } else { none }
 
+  let combined_authornote = if authornote != none and thanks != none {
+    [#authornote #h(0.5em) #thanks]
+  } else if authornote != none {
+    authornote
+  } else {
+    thanks
+  }
+
   // Construct author display with inline footnotes
   let author_display = if authors != none {
     let result = authors
@@ -328,9 +349,9 @@
       })
       .join(", ", last: " & ")
 
-    // Add author note as unnumbered footnote (if provided)
-    if authornote != none {
-      result + footnote_non_numbered(authornote)
+    // Keep all note-like metadata on the same brittle footnote path.
+    if combined_authornote != none {
+      result + footnote_non_numbered(combined_authornote)
     } else {
       result
     }
@@ -343,72 +364,104 @@
     v(-2.4em)
   }
 
-  // Place title, author, abstract always in one column
-  place(top, scope: "parent", float: true, {
-    if title != none {
-      align(center)[
-        #block(width: 100%, above: 0em, below: 0em)[
-          #text(weight: "bold", size: title-size)[#title]
-        ]
-      ]
-    }
-    if subtitle != none {
-      align(center)[
-        #block(width: 100%, above: 1em, below: 0em)[
-          #text(weight: "bold", size: subtitle-size)[#subtitle]
-        ]
-      ]
-    }
+  let has-front-matter = (
+    title != none
+      or subtitle != none
+      or author_display != none
+      or affiliations != none
+      or date != none
+      or abstract != none
+      or categories != none
+      or wordcount == true
+      or toc
+  )
+  if has-front-matter {
+    // Place title, author, abstract always in one column.
+    place(top, scope: "parent", float: true, {
+      if title != none {
+        align(center, block(width: 100%, above: 0em, below: 0em)[
+          #set par(leading: heading-line-height) if heading-line-height != none
+          #set text(font: heading-family) if heading-family != none
+          #set text(weight: heading-weight)
+          #set text(style: heading-style) if heading-style != "normal"
+          #set text(fill: heading-color) if heading-color != none
 
-    if author_display != none {
-      align(center)[
-        #block(width: 100%, above: 2em, below: 0em)[
-          #text(weight: "regular", size: subtitle-size)[#author_display]
+          #text(size: title-size)[#title]
+          #(
+            if subtitle != none {
+              parbreak()
+              text(size: subtitle-size)[#subtitle]
+            }
+          )
+        ])
+      } else if subtitle != none {
+        align(center)[
+          #block(width: 100%, above: 1em, below: 0em)[
+            #text(weight: heading-weight, size: subtitle-size)[#subtitle]
+          ]
         ]
-      ]
-    }
+      }
 
-    if affiliations != none {
-      align(center)[
-        #block(width: 100%, above: 1em, below: 2em)[
-          #text(weight: "regular", size: 1.1em)[
-            #for a in affiliations [
-              #if authors.len() > 1 [#super[#a.id]]#a.name#if a.keys().contains("department") [, #a.department] \
+      if author_display != none {
+        align(center)[
+          #block(width: 100%, above: 2em, below: 0em)[
+            #text(weight: "regular", size: subtitle-size)[#author_display]
+          ]
+        ]
+      }
+
+      if affiliations != none {
+        align(center)[
+          #block(width: 100%, above: 1em, below: if date != none { 1em } else { 2em })[
+            #text(weight: "regular", size: 1.1em)[
+              #for a in affiliations [
+                #if authors.len() > 1 [#super[#a.id]]#a.name#if a.keys().contains("department") [, #a.department] \
+              ]
             ]
           ]
         ]
+      }
+
+      if date != none {
+        align(center)[#block(inset: 1em)[
+          #date
+        ]]
+      }
+
+      /* Abstract and metadata section */
+      block(inset: (bottom: if toc { 0em } else { 2em }, left: 2.4em, right: 2.4em))[
+        #set text(size: 0.92em)
+        #set par(first-line-indent: 0em)
+        #if abstract != none {
+          if abstract-title != none {
+            block()[#text(weight: "semibold")[#abstract-title] #h(1em) #abstract]
+          } else {
+            abstract
+          }
+        }
+        #if categories != none {
+          block()[#v(0.4em)#text(style: "italic")[Keywords:] #categories]
+        }
+        #if wordcount == true {
+          block()[#text(style: "italic")[Words:] #total-words]
+        }
       ]
-    }
 
-    /* Abstract and metadata section */
-    block(inset: (bottom: if toc { 0em } else { 2em }, left: 2.4em, right: 2.4em))[
-      #set text(size: 0.92em)
-      #set par(first-line-indent: 0em)
-      #if abstract != none {
-        abstract
-      }
-      #if categories != none {
-        block()[#v(0.4em)#text(style: "italic")[Keywords:] #categories]
-      }
-      #if wordcount == true {
-        block()[#text(style: "italic")[Words:] #total-words]
-      }
-    ]
+      // Reset footnote counter for the main document
+      counter(footnote).update(0)
 
-    // Reset footnote counter for the main document
-    counter(footnote).update(0)
-
-    // Table of contents
-    if toc {
-      block(inset: (top: 1em, bottom: 2em, left: 2.4em, right: 2.4em))[
-        #outline(
-          title: toc_title,
-          depth: toc_depth,
-          indent: toc_indent,
-        )
-      ]
-    }
-  })
+      // Table of contents
+      if toc {
+        block(inset: (top: 1em, bottom: 2em, left: 2.4em, right: 2.4em))[
+          #outline(
+            title: toc_title,
+            depth: toc_depth,
+            indent: toc_indent,
+          )
+        ]
+      }
+    })
+  }
 
   // Word count with wordometer package
   show: word-count.with(exclude: (<refs>))
