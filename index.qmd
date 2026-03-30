@@ -293,19 +293,21 @@ dist_ml <- dist_normal(mu1n, sd1n)
 tab_1 |>
   mutate(
     mutate(across(where(is.numeric), ~ number(.x, .01))),
-    `95% CI` = str_glue("[{CI_low}, {CI_high}]"),
+    `95% CoI` = str_glue("[{CI_low}, {CI_high}]"),
     Parameter = m1_parnames
   ) |>
   select(
     Parameter,
     Coefficient,
     SE,
-    `95% CI`
+    `95% CoI`
   ) |>
   kable()
 ```
 
-We show a conventional summary of this model's estimated parameters in @tbl-lmer. For the average person, the estimated effect of positive valence on logRT is `r mu1[1]` log seconds, with a 95% confidence interval (CI) extending from `r mu1[2]` to `r mu1[3]`. The estimated standard deviation of valence effects in the population is `r sd1[1]` log seconds. The lme4 software package does not report a standard error or CI for (co)variance parameters by default, and we therefore calculated it by bootstrapping, using lme4's `confint(..., method = "boot")` method. The resulting 95% bootstrap CI of the valence effect's standard deviation was [`r sd1[2]`, `r sd1[3]`].
+For the average person, the estimated effect of positive valence on logRT is `r mu1[1]` log seconds, with a 95% confidence interval (CoI[^coi]) extending from `r mu1[2]` to `r mu1[3]`. The estimated standard deviation of valence effects in the population is `r sd1[1]` log seconds. The lme4 software package does not report a standard error or CoI for (co)variance parameters by default, and we therefore calculated it by bootstrapping, using lme4's `confint(..., method = "boot")` method. The resulting 95% bootstrap CoI of the valence effect's standard deviation was [`r sd1[2]`, `r sd1[3]`].
+
+[^coi]: We refer to frequentist confidence intervals as "CoI" throughout to clearly delineate them from Credibility Intervals ("CI") to which we turn below.
 
 ## Heterogeneity distribution at maximum likelihood estimate of $\beta_1$ and $\tau_1$
 
