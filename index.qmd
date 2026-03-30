@@ -38,6 +38,9 @@ format:
     output-file: ms.pdf
     section-numbering: "1."
     wordcount: true
+    include-before-body:
+      - text: |
+          #set table(inset: 4pt, stroke: none)
   html:
     toc: true
     fontsize: 14pt
