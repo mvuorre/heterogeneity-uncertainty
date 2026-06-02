@@ -8,8 +8,8 @@ renv:
 docs: $(SOURCE) _quarto.yml
 	quarto render
 
-render-pdf: $(SOURCE) _quarto.yml
-	quarto render index.qmd --to preprint-typst
+render-docx: $(SOURCE) _quarto.yml
+	quarto render index.qmd --to docx --output ms.docx --output-dir .
 
 clean:
 	rm -rf *_cache *_files _freeze *.pdf *.docx docs/ docs-docker/
@@ -29,4 +29,4 @@ docker-check: docker-build
 docker-clean:
 	docker rmi heterogeneity-uncertainty || true
 
-.PHONY: renv docs render-pdf clean docker-build docker-check docker-clean
+.PHONY: renv docs render-docx clean docker-build docker-check docker-clean

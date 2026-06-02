@@ -59,8 +59,6 @@ format:
       - text: GitHub Repository
         href: https://github.com/mvuorre/heterogeneity-uncertainty
         icon: github
-  docx:
-    output-file: ms.docx
 ---
 
 ```{r}
