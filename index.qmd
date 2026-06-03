@@ -81,7 +81,6 @@ library(rmarkdown)
 library(knitr)
 library(yaml)
 # Used packages
-library(janitor)
 library(scales)
 library(ellipse)
 library(cmdstanr)
@@ -97,7 +96,7 @@ library(brms)
 library(tidyverse)
 
 # Output options
-is_html <- knitr::is_html_output()
+is_html <- is_html_output()
 opts_chunk$set(
   eval = TRUE,
   cache = TRUE,
@@ -106,8 +105,6 @@ opts_chunk$set(
   message = FALSE,
   echo = is_html
 )
-options(digits = 2)
-options(tinytable_tt_digits = 3)
 
 # Plotting options
 plot_font <- ifelse(is_html, "Fira Sans", "Libertinus Serif")
@@ -127,6 +124,7 @@ theme_set(
 # Model estimation options, customize in .Renviron
 dir.create("models", FALSE)
 options(
+  digits = 2,
   brms.backend = Sys.getenv("BRMS_BACKEND", unset = "rstan"),
   brms.threads = as.numeric(Sys.getenv("BRMS_THREADS", unset = 1)),
   mc.cores = as.numeric(Sys.getenv("MAX_CORES", unset = 4))
@@ -163,7 +161,7 @@ dat <- read_csv("data/bolger-etal/heterogeneity_dataset1_traitvalence.csv") |>
   # Cleaning as in Bolger et al 2019
   filter(
     response.keys == "up",
-    scale(rt) < 3,
+    as.numeric(scale(rt)) < 3,
     !(id %in% c(250, 257, 272))
   ) |>
   # Some more cleaning
@@ -179,8 +177,6 @@ dat <- read_csv("data/bolger-etal/heterogeneity_dataset1_traitvalence.csv") |>
   ) |>
   select(person, trial, valence, rt) |>
   arrange(person, trial)
-
-contrasts(dat$valence) <- c(-0.5, 0.5)
 ```
 
 We first wrangled the data as in @bolgerCausalProcessesPsychology2019, which led to a sample of `r number(nrow(dat), big.mark = ",")` trials from `r length(unique(dat$person))` participants where stimuli were endorsed as self-descriptive. We show a sample of these data in @tbl-dat1.
@@ -188,6 +184,7 @@ We first wrangled the data as in @bolgerCausalProcessesPsychology2019, which led
 ```{r}
 #| label: tbl-dat1
 #| tbl-cap: "Six sample rows of example dataset 1 [@bolgerCausalProcessesPsychology2019]."
+# Display table with nice names
 dat |>
   head() |>
   rename(`log(Reaction time)` = rt) |>
@@ -208,6 +205,13 @@ Then, we specified a model of the mean of the logRT distribution ($\eta_{ij}$) s
 $$
 \eta_{ij} = \beta_0 + \gamma_{0j} + \left(\beta_1 + \gamma_{1j}\right)\text{V}_{ij}.
 $$ {#eq-m1-2}
+
+```{r}
+#| label: contrast-code
+#| code-fold: show
+# Contrast-code `valence` factor
+contrasts(dat$valence) <- c(-0.5, 0.5)
+```
 
 This equation includes two sets of parameters: The first set contains $\beta_0$ (*beta*), the intercept, and $\beta_1$, the slope or effect of valence, V (V is coded as -0.5 for negatively valenced words, and 0.5 for positively valenced words). Parameters in this set do not have further subscripts: In the frequentist tradition, they are considered unknown population constants---not modelled on covariates and having a single true value---and are typically referred to as "fixed" parameters [e.g. @raudenbushHierarchicalLinearModels2002]. The second set of parameters, $\gamma_{0j}$ (*gamma*) and $\gamma_{1j}$, have the subscript $j$ to indicate that they are person-specific deviations from the average intercept and slope, respectively. That is, $\beta_0 + \gamma_{01}$ is the intercept (average log reaction time across negative and positive stimuli, i.e., when V = 0) for person $j = 1$. In frequentist terminology, these are typically called "random" parameters because they are modeled as varying randomly according to a specified distribution. Following standard multilevel modeling assumptions, we model $\gamma_0$ and $\gamma_1$ as a multivariate normal distribution:
 
@@ -232,6 +236,8 @@ With the dataset illustrated in @tbl-dat1, we can estimate this model using stan
 
 ```{r}
 #| label: fit1-lmer
+#| code-fold: show
+# Fit Model 1 with lmer, explicitly include intercepts (`1`) for clarity
 fit_lmer <- lmer(
   rt ~ 1 + valence + (1 + valence | person),
   data = dat
@@ -239,9 +245,10 @@ fit_lmer <- lmer(
 ```
 
 ```{r}
-#| label: tbl-lmer-calc
-# Create a table of coefficients
-tab_1 <- model_parameters(fit_lmer, effects = "all") |>
+#| label: tbl-lmer
+#| tbl-cap: "Parameter estimates from Model 1 (ML)."
+# Calculate parameters & summaries, display table with clean names
+tab_1 <- parameters(fit_lmer, effects = "all") |>
   tibble() |>
   select(Parameter, Coefficient, starts_with("CI_"))
 
@@ -287,11 +294,7 @@ sd1 <- number(
 )
 
 dist_ml <- dist_normal(mu1n, sd1n)
-```
 
-```{r}
-#| label: tbl-lmer
-#| tbl-cap: "Parameter estimates from Model 1 (ML)."
 tab_1 |>
   mutate(
     mutate(across(where(is.numeric), ~ number(.x, .01))),
@@ -340,7 +343,7 @@ ratio_low <- number(abs(sd1n_low / mu1n_low), .01)
 #| label: fig-1
 #| fig-height: 2
 #| fig-width: 7
-#| fig-cap: "Heterogeneity distribution of valence effects and various descriptions of their expected heterogeneity as estimated with Model 1. **A.** The normal density curve defined by the point estimates of the valence effect distribution's mean ($\\beta_1$) and standard deviation ($\\tau_1$). Shaded areas represent areas under the normal curve within one (dark) and two (light) standard deviations of the mean. **B.** The 90\\% Heterogeneity Interval as represented by a line segment with arrows, and the blue shaded area. **C.** Proportion of negative valence effects in the population (blue). **D.** Proportion of valence effects in the population that are within the region of practical equivalence to zero (ROPE; blue)."
+#| fig-cap: "Heterogeneity distribution of valence effects and various descriptions of their expected heterogeneity as estimated with Model 1. **A.** The normal density curve defined by the point estimates of the valence effect distribution's mean ($\\beta_1$) and standard deviation ($\\tau_1$). Shaded areas represent areas under the normal curve within one (dark) and two (light) standard deviations of the mean. **B.** The 90% Heterogeneity Interval as represented by a line segment with arrows, and the blue shaded area. **C.** Proportion of negative valence effects in the population (blue). **D.** Proportion of valence effects in the population that are within the region of practical equivalence to zero (ROPE; blue)."
 # annotation definitions
 valence_dist_color <- "gray25"
 valence_dist_samples_color <- "gray65"
@@ -755,6 +758,8 @@ So far, we have combined model parameters' point estimates to create heterogenei
 
 ```{r}
 #| label: fit1-brms
+#| code-fold: show
+# Fit Model 1 with brms, write object to file, create table of draws
 fit_1 <- brm(
   rt ~ 1 + valence + (1 + valence | person),
   data = dat,
@@ -1372,7 +1377,7 @@ Finally, we saw above that a heterogeneity distribution can be expressed in rela
 #| label: fig-ratio
 #| fig-height: 2.8
 #| fig-width: 4.4
-#| fig-cap: "Bivariate posterior of $\\beta_1$, $\\tau_1$, and their ratio. **A**. 4,000 random draws from the posterior distribution of the valence effect mean ($\\beta_1$) and standard deviation ($\\tau_1$). **B**. Histogram of 4,000 draws from the posterior distribution of $\\frac{\\tau_1}{\\beta_1}$. The posterior mean and 95\\%CI are shown in dark blue."
+#| fig-cap: "Bivariate posterior of $\\beta_1$, $\\tau_1$, and their ratio. **A**. 4,000 random draws from the posterior distribution of the valence effect mean ($\\beta_1$) and standard deviation ($\\tau_1$). **B**. Histogram of 4,000 draws from the posterior distribution of $\\frac{\\tau_1}{\\beta_1}$. The posterior mean and 95%CI are shown in dark blue."
 p1 <- post1 |>
   ggplot(aes(b_valence1, sd_person__valence1)) +
   scale_y_continuous(
@@ -1543,12 +1548,6 @@ m2_parnames <- c(
   "$\\rho_\\delta$"
 )
 
-post2 <- as_draws_df(
-  fit2,
-  variable = c("b_", "sd_", "cor_"),
-  regex = TRUE
-)
-
 fit2 |>
   parameters(effects = "all", centrality = "mean", dispersion = TRUE) |>
   tibble() |>
@@ -1564,6 +1563,11 @@ fit2 |>
 
 ```{r}
 #| label: calc-2-heterogeneity
+post2 <- as_draws_df(
+  fit2,
+  variable = c("b_", "sd_", "cor_"),
+  regex = TRUE
+)
 # Calculate all heterogeneity metrics and differences
 post2 <- post2 |>
   mutate(
@@ -1661,7 +1665,7 @@ tmp_person_dist <- bind_rows(
 ```{r}
 #| label: fig-2-person
 #| fig-height: 3.2
-#| fig-cap: "Estimated between-person heterogeneity in memory performance in free recall and cued recall tasks from Model 2. **A**. Histograms of 4,000 posterior draws from the model parameters and their transformations, with points and intervals showing posterior means and 95%CIs. Differences are calculated as cued - free recall. $p^+$ indicates the proportion of the population whose proportion correct is predicted to be above 50%. Heterogeneity ratio indicates standard deviations divided with their respective means (we truncated this axis at [-5, 5] for clarity). **B**. Probability density (top) and cumulative distribution functions (bottom) of the two groups' heterogeneity distributions (green: free recall, vivid orange: cued recall). The histograms, points, and intervals on the left y-axis of the bottom panel indicate approximate posterior densities, with means and 95%CIs, of the proportions of the populations with memory performance above 0.5. Histograms, points, and intervals on the x-axis of the bottom panel indicate approximate posterior densities, with means and 95%CIs, of the 90\\% heterogeneity interval's lower (left) and upper (right) bounds."
+#| fig-cap: "Estimated between-person heterogeneity in memory performance in free recall and cued recall tasks from Model 2. **A**. Histograms of 4,000 posterior draws from the model parameters and their transformations, with points and intervals showing posterior means and 95%CIs. Differences are calculated as cued - free recall. $p^+$ indicates the proportion of the population whose proportion correct is predicted to be above 50%. Heterogeneity ratio indicates standard deviations divided with their respective means (we truncated this axis at [-5, 5] for clarity). **B**. Probability density (top) and cumulative distribution functions (bottom) of the two groups' heterogeneity distributions (green: free recall, vivid orange: cued recall). The histograms, points, and intervals on the left y-axis of the bottom panel indicate approximate posterior densities, with means and 95%CIs, of the proportions of the populations with memory performance above 0.5. Histograms, points, and intervals on the x-axis of the bottom panel indicate approximate posterior densities, with means and 95%CIs, of the 90% heterogeneity interval's lower (left) and upper (right) bounds."
 p2_pars_person <- post2 |>
   select(contains("b_") | contains("person"), -sd_person_ratio) |>
   pivot_longer(everything()) |>
@@ -1854,7 +1858,7 @@ tmp_target_dist <- bind_rows(
 #| label: fig-2-target
 #| fig-height: 3.6
 #| fig-width: 7.4
-#| fig-cap: "Heterogeneity between target words' probability of being correctly recalled in free recall and cued recall tasks from Model 2. **A**. Histograms of 4,000 posterior draws from the model parameters and their transformations, with points and intervals showing posterior means and 95\\%CIs. Differences calculated as cued - free recall. **B**. Probability density (top) and cumulative distribution functions (bottom) of the two tasks' between-word heterogeneity distributions (green: free recall, orange: cued recall). The densities, points, and intervals on the left y-axis of the bottom panel indicate approximate posterior densities, with means and 95\\%CIs, of the proportions of the target word populations whose probability of being correctly recalled is greater than chance (50%). Densities, points, and intervals on the x-axis of the bottom panel indicate approximate posterior densities, with means and 95%CIs, of the 90\\% heterogeneity interval's lower (left) and upper (right) bounds. **C**. Posterior mean (dark purple), and 100 posterior draws (light purple) of the correlation between target words' proportions correct in the free (x-axis) and cued recall (y-axis) tasks. Ellipses indicate the 90th percentile of the bivariate normal distribution. Small black circles are estimates for target words in the sample (posterior means of $\\gamma$)."
+#| fig-cap: "Heterogeneity between target words' probability of being correctly recalled in free recall and cued recall tasks from Model 2. **A**. Histograms of 4,000 posterior draws from the model parameters and their transformations, with points and intervals showing posterior means and 95%CIs. Differences calculated as cued - free recall. **B**. Probability density (top) and cumulative distribution functions (bottom) of the two tasks' between-word heterogeneity distributions (green: free recall, orange: cued recall). The densities, points, and intervals on the left y-axis of the bottom panel indicate approximate posterior densities, with means and 95%CIs, of the proportions of the target word populations whose probability of being correctly recalled is greater than chance (50%). Densities, points, and intervals on the x-axis of the bottom panel indicate approximate posterior densities, with means and 95%CIs, of the 90% heterogeneity interval's lower (left) and upper (right) bounds. **C**. Posterior mean (dark purple), and 100 posterior draws (light purple) of the correlation between target words' proportions correct in the free (x-axis) and cued recall (y-axis) tasks. Ellipses indicate the 90th percentile of the bivariate normal distribution. Small black circles are estimates for target words in the sample (posterior means of $\\gamma$)."
 p2_pars_target <- post2 |>
   select(contains("target"), -sd_target_ratio) |>
   rename_with(
