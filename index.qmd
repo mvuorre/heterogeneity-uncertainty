@@ -40,6 +40,10 @@ authornote: |
   This work is available under a CC-BY license at <https://doi.org/10.31234/osf.io/mwg4f>. The code and data underlying this work are available at <https://doi.org/10.5281/zenodo.19070789>. Datasets discussed here are from Bolger et al., 2019 and Mah & Lindsay, 2024.
 bibliography: bibliography.bib
 csl: apa.csl
+citation:
+  type: article
+  container-title: PsyArXiv
+  doi: "10.31234/osf.io/mwg4f"
 format:
   preprint-typst:
     output-file: ms.pdf
@@ -50,7 +54,7 @@ format:
           #set table(inset: 4pt, stroke: none)
   html:
     toc: true
-    fontsize: 14pt
+    date: last-modified
     mainfont: Fira Sans
     code-fold: true
     other-links:
