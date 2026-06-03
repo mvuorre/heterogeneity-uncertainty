@@ -110,7 +110,7 @@ options(digits = 2)
 options(tinytable_tt_digits = 3)
 
 # Plotting options
-plot_font <- ifelse(is_html, "Fira Sans", "Libertinus Sans")
+plot_font <- ifelse(is_html, "Fira Sans", "Libertinus Serif")
 update_geom_defaults("text", list(family = plot_font))
 theme_set(
   theme_classic(base_size = 10, base_family = plot_font) +
