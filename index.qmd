@@ -84,7 +84,6 @@ library(cmdstanr)
 library(readxl)
 library(lme4)
 library(patchwork)
-library(latex2exp)
 library(ggdist)
 library(tidybayes)
 library(distributional)
@@ -380,7 +379,7 @@ fig_1_params <- fig_1 +
     slab_linewidth = .4
   ) +
   geom_text(
-    label = TeX("$\\tau_1$"),
+    label = expression(tau[1]),
     x = mu1n + .05,
     y = .175,
     size = 3,
@@ -396,7 +395,7 @@ fig_1_params <- fig_1 +
     arrow = arrowhead()
   ) +
   geom_text(
-    label = TeX("$\\beta_1$"),
+    label = expression(beta[1]),
     x = mu1n - .075,
     y = .075,
     size = 3,
@@ -431,7 +430,7 @@ fig_1_interval <- fig_1_descriptors +
     slab_linewidth = .4
   ) +
   geom_text(
-    label = TeX("$HI_{90}$"),
+    label = expression(HI[90]),
     x = mu1n,
     y = .175,
     size = 3,
@@ -458,7 +457,7 @@ fig_1_pneg <- fig_1_descriptors +
     slab_linewidth = .4
   ) +
   geom_text(
-    label = TeX("$p^-$"),
+    label = expression(p^"-"),
     x = mu1n,
     y = .175,
     size = 3,
@@ -474,7 +473,7 @@ fig_1_prope <- fig_1_descriptors +
     slab_linewidth = .4
   ) +
   geom_text(
-    label = TeX("$p^{ROPE}$"),
+    label = expression(p^"ROPE"),
     x = 0.0,
     y = 0.5,
     hjust = 0,
@@ -1064,7 +1063,10 @@ p1 <- post1 |>
     hi_high = b_valence1 + qnorm(0.95) * sd_person__valence1
   ) |>
   ggplot(aes(hi_low, hi_high)) +
-  labs(x = TeX("$HI_{90}$ lower limit"), y = TeX("$HI_{90}$ upper limit")) +
+  labs(
+    x = expression(HI[90] ~ "lower limit"),
+    y = expression(HI[90] ~ "upper limit")
+  ) +
   geom_point(
     alpha = .25,
     shape = 1,
@@ -1335,7 +1337,7 @@ p_rope_props <- post1_samples_rope |>
     plot.title.position = "plot"
   ) +
   ylab(NULL) +
-  xlab(TeX("$p^{ROPE}$")) +
+  xlab(expression(p^"ROPE")) +
   stat_histinterval(
     aes(x = cdf(dist_valence, 0.1) - cdf(dist_valence, -0.1)),
     y = 0.1,
@@ -1370,10 +1372,10 @@ Finally, we saw above that a heterogeneity distribution can be expressed in rela
 p1 <- post1 |>
   ggplot(aes(b_valence1, sd_person__valence1)) +
   scale_y_continuous(
-    TeX("$\\tau_1$")
+    expression(tau[1])
   ) +
   scale_x_continuous(
-    TeX("$\\beta_1$")
+    expression(beta[1])
   ) +
   geom_point(
     shape = 1,
@@ -1389,7 +1391,7 @@ p2 <- post1 |>
     expand = expansion(0)
   ) +
   scale_x_continuous(
-    TeX("$\\frac{\\tau_1}{\\beta_1}$"),
+    expression(frac(tau[1], beta[1])),
     breaks = extended_breaks()
   ) +
   stat_histinterval(
@@ -1725,7 +1727,7 @@ p2_cdf_person <- tmp_person |>
     direction = -1
   ) +
   scale_x_continuous(
-    TeX("$\\Phi(Pr(Correct))$"),
+    expression(Phi(Pr(Correct))),
     expand = expansion(0.01),
     breaks = extended_breaks(5),
     sec.axis = sec_axis(
@@ -1920,7 +1922,7 @@ p2_cdf_target <- tmp_target |>
     direction = -1
   ) +
   scale_x_continuous(
-    TeX("$\\Phi(Pr(Correct))$"),
+    expression(Phi(Pr(Correct))),
     expand = expansion(0.01),
     breaks = extended_breaks(5),
     sec.axis = sec_axis(
@@ -2079,7 +2081,7 @@ p2_ellipse <- ellipse_median |>
     linetype = "dashed"
   ) +
   scale_x_continuous(
-    TeX("$\\Phi(Pr(Correct))~Free~recall$"),
+    expression(Phi(Pr(Correct)) ~ "Free recall"),
     breaks = seq(-1.5, 1.5, by = .5),
     sec.axis = sec_axis(
       trans = ~ pnorm(.),
@@ -2089,7 +2091,7 @@ p2_ellipse <- ellipse_median |>
     )
   ) +
   scale_y_continuous(
-    TeX("$\\Phi(Pr(Correct))~Cued~recall$"),
+    expression(Phi(Pr(Correct)) ~ "Cued recall"),
     breaks = seq(-1.5, 1.5, by = .5),
     sec.axis = sec_axis(
       trans = ~ pnorm(.),
