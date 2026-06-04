@@ -75,6 +75,7 @@ format:
 ```{r}
 #| label: setup
 #| include: false
+#| output: false
 # Packages
 # renv requirements
 library(rmarkdown)
@@ -124,10 +125,11 @@ theme_set(
 # Model estimation options, customize in .Renviron
 dir.create("models", FALSE)
 options(
-  digits = 2,
   brms.backend = Sys.getenv("BRMS_BACKEND", unset = "rstan"),
   brms.threads = as.numeric(Sys.getenv("BRMS_THREADS", unset = 1)),
-  mc.cores = as.numeric(Sys.getenv("MAX_CORES", unset = 4))
+  mc.cores = as.numeric(Sys.getenv("MAX_CORES", unset = 4)),
+  digits = 2,
+  readr.show_col_types = FALSE
 )
 ```
 
@@ -783,38 +785,6 @@ pb <- mcmc_plot(fit_1, type = "rhat_hist") +
   scale_x_continuous(labels = ~ number(., .001))
 pc <- pp_check(fit_1)
 pb | pc
-```
-
-```{r, include=is_html}
-#| label: tbl-samples-1-full
-#| tbl-cap: "Random draws from Model 1's posterior distribution."
-post1 |>
-  head() |>
-  as_tibble() |>
-  select(-contains(".")) |>
-  select(2, 4, 7) |>
-  mutate(
-    hi90 = str_glue(
-      "[{number(quantile(dist_valence, .05), .01)}, ",
-      "{number(quantile(dist_valence, .95), .01)}]"
-    ),
-    pp = cdf(dist_valence, 0),
-    prope = cdf(dist_valence, .1) - cdf(dist_valence, -.1),
-    ratio = sd_person__valence1 / b_valence1
-  ) |>
-  mutate(dist_valence = as.character(dist_valence)) |>
-  # setNames(c(m1_parnames, "$p(\\beta_1)$")) |>
-  setNames(
-    c(
-      m1_parnames[c(2, 4)],
-      "$p(\\beta_1)$",
-      "$HI_{90}$",
-      "$p^+$",
-      "$p^{ROPE}$",
-      "$\\frac{\\tau_1}{\\beta_1}$"
-    )
-  ) |>
-  kable(digits = 2)
 ```
 
 The output of Bayesian computations is the posterior probability distribution of the model's parameters. Because closed-form solutions are unavailable for the posterior distributions of many important types of statistical models, modern Bayesian methods rely on algorithms that produce many random draws from the posterior distribution [@gelmanBayesianDataAnalysis2013; @ravenzwaaijSimpleIntroductionMarkov2016]. These draws can then be used to calculate, summarize, and visualize any desired quantity of the posterior such as means, variances, correlations, and proportions above or below zero. @tbl-samples-1 illustrates this by showing six draws from the posteriors of $\beta_1$ and $\tau_1$ (rows). We display their ratio in the third column, which represents (draws from) the ratio's posterior distribution, a new quantity that can be summarized, visualized, etc.
@@ -1508,6 +1478,7 @@ We model the person effects, $\gamma$, using independent normal distributions fo
 
 ```{r}
 #| label: fit-brms-ml3
+#| code-fold: show
 #| message: false
 model <- bf(
   accuracy ~ 0 + task + (1 | gr(person, by = task)) + (0 + task | target)
