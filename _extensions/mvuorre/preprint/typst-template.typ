@@ -1,8 +1,21 @@
 // Standalone Typst preprint template
 
 // Imports
-#import "@preview/fontawesome:0.5.0": *
 #import "@preview/wordometer:0.1.5": total-words, word-count
+
+// ORCID logo
+#let fa-orcid(size: 0.8em) = box(
+  height: size,
+  width: size,
+  image(
+    bytes(
+      "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 256 256\"><path fill=\"#A6CE39\" d=\"M256,128c0,70.7-57.3,128-128,128C57.3,256,0,198.7,0,128C0,57.3,57.3,0,128,0C198.7,0,256,57.3,256,128z\"/><path fill=\"#FFFFFF\" d=\"M86.3,186.2H70.9V79.1h15.4v48.4V186.2z\"/><path fill=\"#FFFFFF\" d=\"M108.9,79.1h41.6c39.6,0,57,28.3,57,53.6c0,27.5-21.5,53.6-56.8,53.6h-41.8V79.1z M124.3,172.4h24.5c34.9,0,42.9-26.5,42.9-39.7c0-21.5-13.7-39.7-43.7-39.7h-23.7V172.4z\"/><path fill=\"#FFFFFF\" d=\"M88.7,56.8c0,5.5-4.5,10.1-10.1,10.1c-5.6,0-10.1-4.6-10.1-10.1c0-5.6,4.5-10.1,10.1-10.1C84.2,46.7,88.7,51.3,88.7,56.8z\"/></svg>",
+    ),
+    format: "svg",
+    width: 100%,
+    height: 100%,
+  ),
+)
 
 // Appendix function. To use, include in .typ before appendix header
 // #show: appendix.with(prefix: "A")
@@ -222,7 +235,7 @@
   set heading(numbering: sectionnumbering)
   show heading.where(level: 1): it => block(width: 100%, below: 0.8em, above: 1em)[
     #set align(center)
-    #set text(size: fontsize * 1.1, weight: "bold")
+    #set text(size: fontsize * 1.1, weight: heading-weight)
     #it
   ]
   show heading.where(level: 2): it => block(width: 100%, below: 0.8em, above: 1em)[
@@ -236,12 +249,12 @@
   // Level 4 & 5 headers are in paragraph
   show heading.where(level: 4): it => box(inset: (top: 0em, bottom: 0em, left: 0em, right: 0.1em), text(
     size: 1em,
-    weight: "bold",
+    weight: heading-weight,
     it.body + [.],
   ))
   show heading.where(level: 5): it => box(inset: (top: 0em, bottom: 0em, left: 0em, right: 0.1em), text(
     size: 1em,
-    weight: "bold",
+    weight: heading-weight,
     style: "italic",
     it.body + [.],
   ))
@@ -280,8 +293,18 @@
     thanks
   }
 
-  // Construct author display with inline footnotes
-  let author_display = if authors != none {
+  // Construct author display with inline footnotes.
+  //
+  // Typst cannot render footnotes inside a floating placement: the note body
+  // is laid out in isolation and silently dropped (typst/typst#5765), and if
+  // it contains a citation, compilation fails with "cannot format citation in
+  // isolation". The title block below lives in place(scope: "parent",
+  // float: true), so the author line is built in two variants:
+  //   - real_footnotes: true — real footnote elements; emitted hidden in
+  //     normal document flow so the note text actually renders
+  //   - real_footnotes: false — superscript markers only; shown inside the
+  //     floating title block
+  let make_author_display(real_footnotes) = if authors != none {
     let result = authors
       .enumerate()
       .map(((idx, a)) => {
@@ -289,43 +312,53 @@
         if authors.len() > 1 { parts.push(super(a.affiliation)) }
 
         // Add correspondence footnote to first corresponding author
-        if corresponding_authors.contains(a) and idx == first_corresponding_idx {
-          parts.push(footnote(numbering: _ => "*")[
-            #corresponding-text #corresponding_authors.map(a => [#a.name, #a.email]).join(", ", last: " & ").
-          ])
-        } else if corresponding_authors.contains(a) {
-          parts.push(super("*"))
+        if corresponding_authors.contains(a) {
+          if real_footnotes and idx == first_corresponding_idx {
+            parts.push(footnote(numbering: _ => "*")[
+              #corresponding-text #corresponding_authors.map(a => [#a.name, #a.email]).join(", ", last: " & ").
+            ])
+          } else {
+            parts.push(super("*"))
+          }
         }
 
         // Add equal contributor footnote to first equal contributor
-        if equal_authors.len() > 1 and equal_authors.contains(a) and idx == first_equal_idx {
-          parts.push(footnote(numbering: _ => "†")[
-            #equal_authors.map(a => a.name).join(", ", last: " & ") contributed equally to this work.
-          ])
-        } else if equal_authors.len() > 1 and equal_authors.contains(a) {
-          parts.push(super("†"))
+        if equal_authors.len() > 1 and equal_authors.contains(a) {
+          if real_footnotes and idx == first_equal_idx {
+            parts.push(footnote(numbering: _ => "†")[
+              #equal_authors.map(a => a.name).join(", ", last: " & ") contributed equally to this work.
+            ])
+          } else {
+            parts.push(super("†"))
+          }
         }
 
         if a.keys().contains("orcid") {
-          parts.push(link(a.orcid, fa-orcid(fill: rgb("a6ce39"), size: 0.8em)))
+          parts.push(link(a.orcid, fa-orcid()))
         }
         parts.join()
       })
       .join(", ", last: " & ")
 
     // Keep all note-like metadata on the same brittle footnote path.
-    if combined_authornote != none {
+    // The author note has no visible marker, so the marker-only variant
+    // omits it entirely.
+    if real_footnotes and combined_authornote != none {
       result + footnote_non_numbered(combined_authornote)
     } else {
       result
     }
   } else { none }
 
-  // Hack: Include authors outside of "scope: parent" to ensure footnotes show
+  let author_display = make_author_display(false)
+
+  // Hack: Include authors outside of "scope: parent" to ensure footnotes show.
+  // Wrapped in a non-floating place() so it occupies no space in the flow and,
+  // unlike bare inline content, does not form a paragraph: otherwise the first
+  // body paragraph would count as "consecutive" and get a first-line indent.
   if author_display != none {
-    hide(author_display)
+    place(hide(make_author_display(true)))
     counter(footnote).update(n => if n > 0 { n - 1 } else { 0 })
-    v(-2.4em)
   }
 
   let has-front-matter = (
